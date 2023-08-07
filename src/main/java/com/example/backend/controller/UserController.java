@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.api.SmsService;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.dto.UserDTO;
 import com.example.backend.entity.User;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +27,9 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
 
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final SmsService smsService;
+
     @PostMapping("/join")
     public ResponseEntity<?> join(@RequestBody UserDTO userDTO) {
         ResponseDTO<UserDTO> responseDTO = new ResponseDTO<>();
@@ -82,6 +87,35 @@ public class UserController {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(responseDTO);
         }
+    }
+
+    @PostMapping("/checkphone")
+    public ResponseEntity<?> checkPhone(@RequestBody String tel){
+        Random rand = new Random();
+        ResponseDTO responseDTO = new ResponseDTO();
+        String phoneNum = tel.substring(0, 11);
+
+        String numStr = "";
+        for (int i = 0; i < 6; i++) {
+            String ran = Integer.toString(rand.nextInt(10));
+            numStr += ran;
+        }
+        System.out.println("회원가입 문자 인증 => " + numStr);
+
+        try {
+            System.out.println(phoneNum);
+            smsService.sendMsg(phoneNum, numStr);
+            responseDTO.setItem("전송 성공");
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            System.out.println(responseDTO);
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+
     }
 
 }
