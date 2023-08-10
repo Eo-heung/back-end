@@ -11,11 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -77,6 +75,24 @@ public class UserController {
                 responseDTO.setErrorMessage("login failed");
                 return ResponseEntity.badRequest().body(responseDTO);
             }
+        } catch(Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> autoLogin(@RequestBody String token) {
+        ResponseDTO<String> responseDTO = new ResponseDTO<>();
+        System.out.println(token);
+        try {
+            
+            String userName = jwtTokenProvider.validateAndGetUsername(token);
+            System.out.println(userName);
+            responseDTO.setItem(userName);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
         } catch(Exception e) {
             responseDTO.setErrorMessage(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
