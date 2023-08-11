@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.UserDTO;
 import com.example.backend.entity.User;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,15 @@ public class UserService {
     public User join(User user) {
 
         return userRepository.save(user);
+    }
+
+    public UserDTO getUserInfo(String userId) {
+        Optional<User> optionalUser = userRepository.findByUserId(userId);
+        if (optionalUser.isPresent()) {
+            return optionalUser.get().EntityToDTO();
+        } else {
+            return null;
+        }
     }
 
 }

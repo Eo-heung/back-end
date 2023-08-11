@@ -16,6 +16,7 @@ public class MoimDTO {
 
     private int moimId;
     private String userId;
+    private String moimCategory;
     private LocalDateTime moimRegdate;
     private String moimTitle;
     private String moimContent;
@@ -39,6 +40,7 @@ public class MoimDTO {
                                 .userId(this.userId)
                                 .build()
                 )
+                .moimCategory(this.moimCategory)
                 .moimRegdate(LocalDateTime.now())
                 .moimTitle(this.moimTitle)
                 .moimContent(this.moimContent)

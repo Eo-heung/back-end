@@ -29,6 +29,9 @@ public class Moim {
     @JoinColumn(name = "user_id")
     private User userId; //모임장Id
 
+    @Column(name = "moim_category")
+    private String moimCategory;
+
     @Column(name = "moim_regdate")
     private LocalDateTime moimRegdate = LocalDateTime.now(); //작성일시
 
@@ -69,6 +72,7 @@ public class Moim {
         return MoimDTO.builder()
                 .moimId(this.moimId)
                 .userId(this.userId.getUserId())
+                .moimCategory(this.moimCategory)
                 .moimRegdate(this.moimRegdate)
                 .moimTitle(this.moimTitle)
                 .moimContent(this.moimContent)
