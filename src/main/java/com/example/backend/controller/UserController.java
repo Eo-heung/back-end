@@ -141,4 +141,56 @@ public class UserController {
 
     }
 
+    @PostMapping("/resetpassword")
+    public ResponseEntity<?> resetPassword(@RequestBody UserDTO userDTO) {
+        ResponseDTO<String> responseDTO = new ResponseDTO<>();
+
+        try {
+            if (userService.userExistsByUserId(userDTO.getUserId())) {
+                userService.updatePassword(userDTO); // UserDTO 객체를 전달합니다.
+                responseDTO.setStatusCode(HttpStatus.OK.value());
+                responseDTO.setItem("Password Updated");
+            } else {
+                responseDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+                responseDTO.setItem("User Not Found");
+            }
+
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+
+    @PostMapping("/idcheck")
+    public ResponseEntity<?> findPW(@RequestBody UserDTO userDTO) {
+        ResponseDTO<String> responseDTO = new ResponseDTO<>();
+        try {
+            // userTel을 userId로 사용하기 때문에, userTel 값을 가져와서 확인
+            String userTel = userDTO.getUserId();
+
+            if (userService.userExistsByUserId(userTel)) {
+                // 비번 재설정 페이지로 이동하는 로직
+                responseDTO.setStatusCode(HttpStatus.OK.value());
+                responseDTO.setItem("vaildId");
+            } else {
+                // alert 창 띄우고 navi.signUp 페이지로 이동하는 로직
+                responseDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+                responseDTO.setItem("InvaildId");
+            }
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+
+
+
 }
