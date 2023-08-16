@@ -9,9 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.HashMap;
 
 @RestController
 @RequiredArgsConstructor
@@ -85,10 +86,9 @@ public class UserController {
         ResponseDTO<String> responseDTO = new ResponseDTO<>();
         System.out.println(token);
         try {
-            
-            String userName = jwtTokenProvider.validateAndGetUsername(token);
-            System.out.println(userName);
-            responseDTO.setItem(userName);
+            String userId= jwtTokenProvider.validateAndGetUsername(token);
+            System.out.println(userId);
+            responseDTO.setItem(userId);
             responseDTO.setStatusCode(HttpStatus.OK.value());
             return ResponseEntity.ok().body(responseDTO);
         } catch(Exception e) {
@@ -97,5 +97,47 @@ public class UserController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+
+    @PostMapping("/kakaoLogin")
+    public ResponseEntity<?> kakaoLogin(@RequestBody UserDTO userDTO) {
+        ResponseDTO<UserDTO> responseDTO = new ResponseDTO<>();
+        System.out.println(userDTO);
+        try {
+            User user = userDTO.DTOToEntity();
+            System.out.println(userService.newKaKao(userDTO.getUserId()));
+            if(userService.newKaKao(userDTO.getUserId()) == null)
+            {
+                user.setUserPw(
+                        passwordEncoder.encode(userDTO.getUserId())
+                );
+                userService.join(user);
+                String token = jwtTokenProvider.create(user);
+
+                UserDTO loginUserDTO = user.EntityToDTO();
+                loginUserDTO.setUserPw("");
+                loginUserDTO.setToken(token);
+                responseDTO.setItem(loginUserDTO);
+            }
+            else {
+                String token = jwtTokenProvider.create(user);
+
+
+                UserDTO loginUserDTO = user.EntityToDTO();
+                loginUserDTO.setUserPw("");
+                loginUserDTO.setToken(token);
+                responseDTO.setItem(loginUserDTO);
+            }
+
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch(Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
 
 }

@@ -37,4 +37,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User newKaKao(String userId)
+    {
+        if(userRepository.findByUserId(userId).isPresent())
+                return userRepository.findByUserId(userId).get();
+        else
+            return null;
+    }
+
 }
