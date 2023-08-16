@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface MoimRepository extends JpaRepository<Moim, Integer> {
 
 
@@ -20,4 +22,6 @@ public interface MoimRepository extends JpaRepository<Moim, Integer> {
     Page<Moim> findByMoimContentContaining(String searchKeyword, Pageable pageable);
 
     Page<Moim> findByUserIdContaining(User user, Pageable pageable);
+
+    List<Moim> findByUserId (User userId);
 }
