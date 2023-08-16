@@ -59,6 +59,37 @@ public class MyPageController {
         }
     }
 
+    @PostMapping("/changephone")
+    public ResponseEntity<?> changeNum(@RequestHeader("Authorization") String token, @RequestBody UserDTO userDTO) {
+        ResponseDTO<UserDTO> responseDTO = new ResponseDTO<>();
+
+        try {
+            String userId = jwtTokenProvider.validateAndGetUsername(token);
+            User user = userRepository.findByUserId(userId).get();
+
+            System.out.println(userDTO);
+
+            user.setUserTel(userDTO.getUserTel());
+            user.setUserEmail(userDTO.getUserEmail());
+            user.setUserUpdate(LocalDateTime.now());
+
+
+            //전화번호수정(화면에서 보내준 내용을 디비에 저장)
+            User editUser = myPageService.editInfo(user);
+            UserDTO editUserDTO = editUser.EntityToDTO();
+            editUserDTO.setUserPw("");
+
+            responseDTO.setItem(editUserDTO);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
     @PostMapping("/checkpassword")
     public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token, @RequestBody UserDTO userDTO) {
         ResponseDTO<String> responseDTO = new ResponseDTO<>();
