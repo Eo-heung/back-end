@@ -16,6 +16,7 @@ public class MoimDTO {
 
     private int moimId;
     private String userId;
+    private String moimNickname;
     private String moimCategory;
     private LocalDateTime moimRegdate;
     private String moimTitle;
@@ -23,16 +24,17 @@ public class MoimDTO {
     private String onOff;
     private String moimAddr1;
     private String moimAddr2;
-    private String moimAddr3;
+    private MoimPictureDTO moimAddr3;
     private String limitAge;
     private String maxMoimUser;
     private String cost;
     private String isDelete;
     private String isEnd;
+    private String picPath;
+    private String moimPic;
 
 
-
-    public Moim DTOToEntity() {
+    public Moim DTOToEntity(LocalDateTime moimRegdate) {
         return Moim.builder()
                 .moimId(this.moimId)
                 .userId(
@@ -40,8 +42,9 @@ public class MoimDTO {
                                 .userId(this.userId)
                                 .build()
                 )
+                .moimNickname(this.moimNickname)
                 .moimCategory(this.moimCategory)
-                .moimRegdate(LocalDateTime.now())
+                .moimRegdate(moimRegdate)
                 .moimTitle(this.moimTitle)
                 .moimContent(this.moimContent)
                 .onOff(this.onOff)
@@ -53,6 +56,8 @@ public class MoimDTO {
                 .cost(this.cost)
                 .isDelete(this.isDelete)
                 .isEnd(this.isEnd)
+                .picPath(this.picPath)
+                .moimPic(this.moimPic)
                 .build();
     }
 }
