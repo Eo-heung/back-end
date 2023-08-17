@@ -53,12 +53,17 @@ public class JwtTokenProvider {
         //받아온 토큰 값을 파싱해서 유효성 검사
         //토큰에 있는 시그니쳐와 서버에서 가지고있는 시그니쳐값 비교
         //시그니쳐 비교해서 일치하면 Claims 객체를 리턴
+        //userId 반환
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
         Claims claims = Jwts.parserBuilder()
                             .setSigningKey(SECRET_KEY.getBytes())
                             .build()
                             .parseClaimsJws(token)
                             .getBody();
-        //subject에 담겨있는 username을 리턴
+        //subject에 담겨있는 userId를 리턴
         return claims.getSubject();
     }
 
