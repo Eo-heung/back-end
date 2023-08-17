@@ -17,7 +17,7 @@ public class UserDTO {
 
     private String userId;
 
-    private String userPw; star
+    private String userPw;
 
     private String userName;
 
