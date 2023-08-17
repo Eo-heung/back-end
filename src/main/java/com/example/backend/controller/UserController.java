@@ -92,6 +92,23 @@ public class UserController {
         }
     }
 
+    @PostMapping("/verify")
+    public ResponseEntity<?> autoLogin(@RequestBody String token) {
+        ResponseDTO<String> responseDTO = new ResponseDTO<>();
+        System.out.println(token);
+        try {
+            String userName = jwtTokenProvider.validateAndGetUsername(token);
+            System.out.println(userName);
+            responseDTO.setItem(userName);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
+        } catch(Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
     @PostMapping("/checkphone")
     public ResponseEntity<?> checkPhone(@RequestBody String tel){
         Random rand = new Random();
@@ -137,8 +154,6 @@ public class UserController {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(responseDTO);
         }
-
-
     }
 
     @PostMapping("/resetpassword")
@@ -191,6 +206,33 @@ public class UserController {
     }
 
 
+    @PostMapping("/getUserInfo")
+    public ResponseEntity<ResponseDTO<UserDTO>> getUserInfo(@RequestHeader("Authorization") String token) {
+        ResponseDTO<UserDTO> responseDTO = new ResponseDTO<>();
+
+        try {
+            String userId = jwtTokenProvider.validateAndGetUsername(token);
+            System.out.println(jwtTokenProvider.validateAndGetUsername(token));
+            UserDTO userDTO = userService.getUserInfo(userId);
+
+            if (userDTO != null) {
+                responseDTO.setItem(userDTO);
+                responseDTO.setStatusCode(HttpStatus.OK.value());
+                System.out.println(responseDTO);
+                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+            } else {
+                responseDTO.setErrorMessage("User not Found");
+                responseDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+                System.out.println(responseDTO);
+                return new ResponseEntity<>(responseDTO, HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            System.out.println(responseDTO);
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
 
 
 }

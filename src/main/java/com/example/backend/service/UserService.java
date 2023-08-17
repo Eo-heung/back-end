@@ -71,4 +71,13 @@ public class UserService {
             throw new RuntimeException("User with the given ID not found");
         }
     }
+    public UserDTO getUserInfo(String userId) {
+        Optional<User> optionalUser = userRepository.findByUserId(userId);
+        if (optionalUser.isPresent()) {
+            return optionalUser.get().EntityToDTO();
+        } else {
+            return null;
+        }
+    }
+
 }
