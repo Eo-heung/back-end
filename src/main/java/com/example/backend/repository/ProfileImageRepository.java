@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Transactional
 public interface ProfileImageRepository extends JpaRepository<ProfileImage, String> {
 
+    ProfileImage findByUserId(User user);
+
 }

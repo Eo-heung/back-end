@@ -27,7 +27,7 @@ public class ProfileImage {
     private User userId;
 
     @Lob
-    @Column(name = "profile")
+    @Column(name = "profile", columnDefinition="MEDIUMBLOB")
     private byte[] fileData;
 
     @Column(name = "create_datetime")

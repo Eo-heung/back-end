@@ -36,7 +36,7 @@ public class ProfileImageDTO {
                                 .build()
                 )
                 .fileData(this.fileData)
-                .createDatetime(LocalDateTime.now())
+                .createDatetime(this.createDatetime)
                 .updateDatetime(this.updateDatetime)
                 .build();
     }

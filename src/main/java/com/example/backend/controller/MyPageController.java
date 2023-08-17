@@ -14,12 +14,14 @@ import com.example.backend.service.ProfileImageService;
 import com.example.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -213,17 +215,11 @@ public class MyPageController {
 
         try {
             String userId = jwtTokenProvider.validateAndGetUsername(token);
-            User user = userRepository.findByUserId(userId).get();
 
             ProfileImageDTO profileImageDTO = ProfileImageDTO.builder()
                     .userId(userId)
                     .fileData(file.getBytes())
-                    .updateDatetime(LocalDateTime.now())
                     .build();
-
-            System.out.println("----------------------------------------------");
-            System.out.println(file.getBytes());
-
 
             ProfileImage profileImage = profileImageService.update(profileImageDTO.DTOToEntity());
             ProfileImageDTO editProfileImage = profileImage.EntityToDTO();
@@ -239,6 +235,28 @@ public class MyPageController {
         }
     }
 
+    @PostMapping("/getprofileimage")
+    public ResponseEntity<?> getProfileImage(@RequestHeader("Authorization") String token) {
+        ResponseDTO<String> responseDTO = new ResponseDTO<>();
+
+        try {
+            String userId = jwtTokenProvider.validateAndGetUsername(token);
+            User user = userRepository.findByUserId(userId).get();
+
+            ProfileImage profileImage = profileImageService.getImage(user);
+
+            String base64Encoded = Base64.getEncoder().encodeToString(profileImage.getFileData());
+            responseDTO.setItem(base64Encoded);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
 
 
 }
