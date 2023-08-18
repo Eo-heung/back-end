@@ -41,8 +41,10 @@ public class MoimController {
 
     private final MoimService moimService;
     private final MoimPictureService moimPictureService;
+    private final UserRepository userRepository;
     private final MoimRepository moimRepository;
     private final MoimPictureRepository moimPictureRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/create-moim")
     public ResponseEntity<?> createMoim(@RequestBody MoimDTO moimDTO) {
@@ -54,7 +56,6 @@ public class MoimController {
             Moim moim = moimService.createMoim(moimDTO.DTOToEntity());
 
             responseDTO.setItem(moim.EntityToDTO());
-            responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok().body(responseDTO);
 
@@ -95,7 +96,6 @@ public class MoimController {
             MoimPictureDTO moimPictureDTO = updatePic.EntityToDTO();
 
             responseDTO.setItem(moimPictureDTO);
-            responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok().body(responseDTO);
 
@@ -211,73 +211,103 @@ public class MoimController {
     }
 
 
+//    @PutMapping(value = "/modify-moim-pic/{moimId}")
+//    public ResponseEntity<?> modifyMoim(@PathVariable int moimId,
+//                                        MoimPictureDTO moimPictureDTO,
+//                                        @RequestParam(required = false, value = "moimPic") MultipartFile moimPic)
+//            throws Exception {
+//        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+//        try {
+//
+////            User user = userRepository.findByUserId(moimDTO.getUserId()).get();
+//
+//            moimService.modifyMoim(writeMoim);
+//
+//            Moim modifyMoim = moimService.viewMoim(moimId);
+//            MoimDTO returnMoimDTO = modifyMoim.EntityToDTO();
+//
+//
+//            byte[] picBytes = moimPic.getBytes();
+//
+//            MoimPicture modifyPic = moimPictureRepository.findById(moimId).get();
+//            modifyPic.setMoimPic(picBytes);
+//            moimPictureService.modifyPic(modifyPic);
+//
+//            MoimPicture returnMoimPicDTO = moi
+//
+//
+//            moimPictureService.modifyPic(writePicture);
+//
+//
+//
+//
+//            Map<String, Object> returnMap = new HashMap<>();
+//            returnMap.put("moim", returnMoimDTO);
+//
+//            returnMap.put("msg", "수정 완료되었습니다.");
+//
+//            responseDTO.setItem(returnMap);
+//
+//            return ResponseEntity.ok().body(responseDTO);
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+//            responseDTO.setErrorMessage(e.getMessage());
+//            return ResponseEntity.badRequest().body(responseDTO);
+//        }
+//    }
+//
+//
+//    @PutMapping(value = "/modify-moim/{moimId}")
+//    public ResponseEntity<?> modifyMoim(@PathVariable int moimId,
+//                                        MoimDTO moimDTO) {
+//        User user = moimRe.getMyInfo(userDetails.getUsername());
+//
+//        try {
+//
+////            User user = userRepository.findByUserId(moimDTO.getUserId()).get();
+//
+//            moimService.modifyMoim(writeMoim);
+//
+//            Moim modifyMoim = moimService.viewMoim(moimId);
+//            MoimDTO returnMoimDTO = modifyMoim.EntityToDTO();
+//
+//
+//            byte[] picBytes = moimPic.getBytes();
+//
+//            MoimPicture modifyPic = moimPictureRepository.findById(moimId).get();
+//            modifyPic.setMoimPic(picBytes);
+//            moimPictureService.modifyPic(modifyPic);
+//
+//            MoimPicture returnMoimPicDTO = moi
+//
+//
+//            moimPictureService.modifyPic(writePicture);
+//
+//
+//
+//
+//            Map<String, Object> returnMap = new HashMap<>();
+//            returnMap.put("moim", returnMoimDTO);
+//
+//            returnMap.put("msg", "수정 완료되었습니다.");
+//
+//            responseDTO.setItem(returnMap);
+//
+//            return ResponseEntity.ok().body(responseDTO);
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+//            responseDTO.setErrorMessage(e.getMessage());
+//            return ResponseEntity.badRequest().body(responseDTO);
+//        }
+//    }
 
 
-    @PostMapping(value = "/modify-moim/{moimId}")
-    public ResponseEntity<?> modifyMoim(@PathVariable int moimId, @RequestBody MoimDTO moimDTO) {
-        ResponseDTO<Moim> responseDTO = new ResponseDTO<>();
-
-        try {
-            Moim moim = moimService.viewMoim(moimId);
-
-//            카테고리, 소모임 이름, 모임 주소, 현재 가입한 회원 수, 최대 인원, 모임 소개, 그림
-            moim.setMoimTitle(moimDTO.getMoimTitle());
-            moim.setMoimCategory(moimDTO.getMoimCategory());
-            moim.setMaxMoimUser(moimDTO.getMaxMoimUser());
-            moim.setMoimContent(moimDTO.getMoimContent());
-            moim.setMoimAddr(moimDTO.getMoimAddr());
-
-            Moim editMoim = moimService.modifyMoim(moim);
-
-            responseDTO.setItem(editMoim);
-            responseDTO.setStatusCode(HttpStatus.OK.value());
-
-            return ResponseEntity.ok().body(responseDTO);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            responseDTO.setErrorMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(responseDTO);
-        }
-    }
-
-
-    @PostMapping(value = "/modify-moim-pic/{moimId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> modifyMoim(@PathVariable int moimId,
-                                        @RequestParam(required = false, value = "moimPic") MultipartFile moimPic) {
-        ResponseDTO<MoimPicture> responseDTO = new ResponseDTO<>();
-        System.out.println(moimId);
-        System.out.println(moimPic);
-        try {
-
-            MoimPicture moimPicture = moimPictureService.getPic(
-                    Moim.builder()
-                            .moimId(moimId)
-                            .build()
-            );
-
-            moimPicture.setMoimPic(moimPic.getBytes());
-            moimPicture.setUpdatePic(LocalDateTime.now());
-
-            MoimPicture moimPicture1 = moimPictureService.createMoim(moimPicture);
-
-            responseDTO.setItem(moimPicture1);
-            responseDTO.setStatusCode(HttpStatus.OK.value());
-
-            return ResponseEntity.ok().body(responseDTO);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            responseDTO.setErrorMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(responseDTO);
-        }
-    }
-
-
-
-    @DeleteMapping("/delete-moim/{moimId}")
-    public ResponseEntity<?> deleteMoim(@PathVariable int moimId) {
-        ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
+    @DeleteMapping("/delete-moim")
+    public ResponseEntity<?> deleteMoim(@RequestParam("moimId") int moimId) {
+        ResponseDTO<Map<String, String>> responseDTO =
+                new ResponseDTO<Map<String, String>>();
 
         try {
             Moim moim = moimRepository.findById(moimId)
@@ -289,10 +319,9 @@ public class MoimController {
 
             moimRepository.delete(moim);
 
-            Map<String, String> returnMap = new HashMap<>();
+            Map<String, String> returnMap = new HashMap<String, String>();
             returnMap.put("msg", "정상적으로 삭제되었습니다.");
             responseDTO.setItem(returnMap);
-            responseDTO.setStatusCode(HttpStatus.OK.value());
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());

@@ -15,7 +15,9 @@ public interface MoimService {
 
     Moim createMoim(Moim moim);
 
-    Moim modifyMoim(Moim moim);
+    void modifyMoim(Moim moim);
+
+    void deleteMoim(int moimId);
 
     List<Moim> getMoimList();
 

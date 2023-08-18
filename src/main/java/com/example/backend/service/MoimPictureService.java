@@ -10,6 +10,8 @@ public interface MoimPictureService {
 
     MoimPicture createMoim(MoimPicture moimPicture);
 
+//    void modifyPic(MoimPicture moimPicture);
+
     MoimPicture getPic(Moim moim);
 
     List<MoimPicture> getPictureList();
