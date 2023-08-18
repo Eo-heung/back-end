@@ -29,38 +29,29 @@ public class Moim {
     @JoinColumn(name = "user_id")
     private User userId; //모임장Id
 
+    @Column(name = "moim_nickname")
+    private String moimNickname; //모임장닉네임
+
     @Column(name = "moim_category")
     private String moimCategory;
 
-    @Column(name = "moim_regdate")
-    private LocalDateTime moimRegdate = LocalDateTime.now(); //작성일시
+    @Column(name = "moim_regdate",updatable = false)
+    private LocalDateTime moimRegdate; //작성일
 
     @Column(name = "moim_title")
     private String moimTitle; //모임명
 
     @Column(name = "moim_content")
-    private String moimContent; //모임소개 ////ㅇㅇㅇㅇ
+    private String moimContent; //모임소개
 
     @Column(name = "on_off") // 고침
     private String onOff; //온오프라인
 
-    @Column(name = "moim_addr1")
-    private String moimAddr1; //모임 우편주소
-
-    @Column(name = "moim_addr2")
-    private String moimAddr2; //모임 기본주소
-
-    @Column(name = "moim_addr3")
-    private String moimAddr3; //모임 상세 입력주소
-
-    @Column(name = "limit_age") // 고침
-    private String limitAge; //나이제한
+    @Column(name = "moim_addr")
+    private String moimAddr; //모임 상세 입력주소
 
     @Column(name = "max_moim_user")
-    private String maxMoimUser; //정원 ////ㅇㅇㅇㅇ 최대 50명
-
-    @Column(name = "cost")
-    private String cost; //참가비
+    private String maxMoimUser; //정원(최대 50명)
 
     @Column(name = "is_delete")
     private String isDelete; //삭제여부
@@ -72,17 +63,14 @@ public class Moim {
         return MoimDTO.builder()
                 .moimId(this.moimId)
                 .userId(this.userId.getUserId())
+                .moimNickname(this.moimNickname)
                 .moimCategory(this.moimCategory)
                 .moimRegdate(this.moimRegdate)
                 .moimTitle(this.moimTitle)
                 .moimContent(this.moimContent)
                 .onOff(this.onOff)
-                .moimAddr1(this.moimAddr1)
-                .moimAddr2(this.moimAddr2)
-                .moimAddr3(this.moimAddr3)
-                .limitAge(this.limitAge)
+                .moimAddr(this.moimAddr)
                 .maxMoimUser(this.maxMoimUser)
-                .cost(this.cost)
                 .isDelete(this.isDelete)
                 .isEnd(this.isEnd)
                 .build();

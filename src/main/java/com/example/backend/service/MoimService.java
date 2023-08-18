@@ -4,10 +4,22 @@ import com.example.backend.entity.Moim;
 import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import java.util.List;
 
 public interface MoimService {
 
-    void createMoim(Moim moim);
+    Moim viewMoim(int moimId);
 
-    Page<Moim> listMoim(Pageable pageable, String searchCondition, User user, String searchKeyword);
+    Moim createMoim(Moim moim);
+
+    void modifyMoim(Moim moim);
+
+    void deleteMoim(int moimId);
+
+    List<Moim> getMoimList();
+
+
 }
