@@ -1,10 +1,14 @@
 package com.example.backend.jwt;
 
+import com.example.backend.entity.TokenBlacklist;
 import com.example.backend.entity.User;
+import com.example.backend.exception.InvalidTokenException;
+import com.example.backend.repository.TokenBlacklistRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -12,6 +16,10 @@ import java.security.Key;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import com.example.backend.exception.InvalidTokenException;
 
 @Component
 public class JwtTokenProvider {
@@ -64,6 +72,31 @@ public class JwtTokenProvider {
                             .parseClaimsJws(token)
                             .getBody();
         //subject에 담겨있는 userId를 리턴
+        return claims.getSubject();
+    }
+
+    @Autowired
+    private TokenBlacklistRepository tokenBlacklistRepository; // 인스턴스 주입
+
+    public String validateAndGetUsername(String token, HttpServletRequest request) { // HttpServletRequest 추가
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY.getBytes())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        // 여기에 위에서 쓰였던 로직 추가
+        String headerToken = request.getHeader("Authorization").split(" ")[1];
+        Optional<TokenBlacklist> blacklistedToken = tokenBlacklistRepository.findByToken(headerToken); // 수정된 부분
+        if (blacklistedToken.isPresent()) {
+            throw new InvalidTokenException("Token has been invalidated");
+        }
+
+        // subject에 담겨있는 userId를 리턴
         return claims.getSubject();
     }
 

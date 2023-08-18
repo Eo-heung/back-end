@@ -7,8 +7,11 @@ import com.example.backend.dto.ResponseDTO;
 import com.example.backend.dto.UserDTO;
 import com.example.backend.entity.User;
 import com.example.backend.jwt.JwtTokenProvider;
+import com.example.backend.service.AuthService;
 import com.example.backend.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -91,6 +94,16 @@ public class UserController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+
+//    @Autowired
+//    private AuthService authService;
+//
+//    @PostMapping("/logout")
+//    public ResponseEntity<?> logout(HttpServletRequest request) {
+//        String token = request.getHeader("Authorization").split(" ")[1];
+//        authService.invalidateToken(token);
+//        return ResponseEntity.ok().body("Logged out successfully");
+//    }
 
     @PostMapping("/verify")
     public ResponseEntity<?> autoLogin(@RequestBody String token) {
