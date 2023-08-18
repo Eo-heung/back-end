@@ -7,10 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface MoimRepository extends JpaRepository<Moim, Integer> {
-    Optional<Moim> findByUserId(User user);
+    List<Moim> findByUserId(User user);
 
     Page<Moim> findByMoimTitleContainingOrMoimContentContainingOrMoimNicknameContaining(String searchKeyword,
             String searchKeyword1,

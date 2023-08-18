@@ -29,19 +29,6 @@ public class MoimPictureServiceImpl implements MoimPictureService {
         return moimPictureRepository.save(moimPicture);
     }
 
-//    @Transactional
-//    @Override
-//    public void modifyPic(MoimPicture moimpicture) {
-//
-//        MoimPicture modifyPic = getPic(moimpicture.getMoimId());
-//
-//        modifyPic.setMoimPic((moimpicture.getMoimPic()));
-//        modifyPic.setUpdatePic(LocalDateTime.now());
-//
-////        moimPictureRepository.save(moimpicture);
-////        moimPictureRepository.flush();
-//    }
-
     @Override
     public MoimPicture getPic(Moim moim) {
         return moimPictureRepository.findByMoimId(moim).get();
