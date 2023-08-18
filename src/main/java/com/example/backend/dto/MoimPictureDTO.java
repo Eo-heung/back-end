@@ -19,6 +19,7 @@ public class MoimPictureDTO {
     private int picId;
     private String userId;
     private int moimId;
+    private byte[] moimPic;
     private LocalDateTime createPic;
     private LocalDateTime updatePic;
 
@@ -37,6 +38,7 @@ public class MoimPictureDTO {
                                 .moimId(this.moimId)
                                 .build()
                 )
+                .moimPic(this.moimPic)
                 .createPic(this.createPic)
                 .updatePic(this.updatePic)
                 .build();
