@@ -52,6 +52,7 @@ public class MyPageController {
             UserDTO userDTO = userService.getUserInfo(userId);
 
             if (userDTO != null) {
+                userDTO.setUserPw("");
                 responseDTO.setItem(userDTO);
                 responseDTO.setStatusCode(HttpStatus.OK.value());
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
@@ -137,6 +138,7 @@ public class MyPageController {
 
             user.setUserTel(userDTO.getUserTel());
             user.setUserEmail(userDTO.getUserEmail());
+            user.setUserGender(userDTO.getUserGender());
             user.setUserUpdate(LocalDateTime.now());
 
 
