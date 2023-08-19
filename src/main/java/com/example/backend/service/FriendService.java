@@ -18,7 +18,7 @@ public class FriendService {
         return friendRepository.findFriendsByFromUserOrToUserAndStatusTrue(name);
     }
     public List<Friend> requestFriends(String name) {
-        return friendRepository.findFriendsByFromUserOrToUserAndStatusFalse(name);
+        return friendRepository.findFriendsByToUserAndStatusFalse(name);
     }
 
     public Friend deleteRequest(String fromName, String toName){

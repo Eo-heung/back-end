@@ -27,12 +27,39 @@ public class FriendController {
     private final UserRepository userRepository;
 
     @PostMapping("/friendList")
-    public ResponseEntity<?> getfriendList() {
+    public ResponseEntity<?> getfriendList(@RequestHeader("Authorization") String token) {
         ResponseDTO<Friend> responseDTO = new ResponseDTO<>();
 
         try {
-            responseDTO.setItems(friendService.getFriends("재민"));
+            // userId를 가지고 옴.
+            String toUser = jwtTokenProvider.validateAndGetUsername(token);
+            User user = userRepository.findByUserId(toUser).get();
+            String toUserNickName = user.getUserName();
+
+            responseDTO.setItems(friendService.getFriends(toUserNickName));
             System.out.println(responseDTO);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+    @PostMapping("/requestFriendList")
+    public ResponseEntity<?> getRequestfriendList(@RequestHeader("Authorization") String token) {
+        ResponseDTO<Friend> responseDTO = new ResponseDTO<>();
+        try {
+            // userId를 가지고 옴.
+            String toUser = jwtTokenProvider.validateAndGetUsername(token);
+            User user = userRepository.findByUserId(toUser).get();
+            // 닉네임 가져오기.
+            String toUserNickName = user.getUserName();
+
+            responseDTO.setItems(friendService.requestFriends(toUserNickName));
             responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok().body(responseDTO);
