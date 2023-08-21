@@ -18,11 +18,11 @@ public class FriendService {
 
 
     @Transactional
-    public List<Map<String, String>> getFriends(String name) {
+    public List<Map<String, Object>> getFriends(String name) {
         return friendRepository.findFriendsByFromUserOrToUserAndStatusTrue(name);
     }
     @Transactional
-    public List<Map<String, String>> requestFriends(String name) {
+    public List<Map<String, Object>> requestFriends(String name) {
         return friendRepository.findFriendsByToUserAndStatusFalse(name);
     }
     @Transactional

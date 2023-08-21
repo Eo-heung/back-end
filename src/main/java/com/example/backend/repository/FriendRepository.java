@@ -23,10 +23,10 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
             "           LEFT JOIN User u " +
             "                 on ff.friendsId = u.userId " +
             "       WHERE (f.toUser = :name) AND f.status = true ", nativeQuery = true)
-    List<Map<String, String>> findFriendsByFromUserOrToUserAndStatusTrue(@Param("name") String name);
+    List<Map<String, Object>> findFriendsByFromUserOrToUserAndStatusTrue(@Param("name") String name);
 
     @Query(value =
-            "SELECT ff.friendsId, u.user_name " +
+            "SELECT ff.friendsId, p.profile, u.user_name, u.user_addr3, u.user_status_message  " +
                     "FROM ( " +
                     "    SELECT CASE " +
                     "           WHEN f.to_friend_user = :name THEN f.from_friend_user " +
@@ -36,9 +36,10 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
                     "    FROM FRIEND f " +
                     "    WHERE f.to_friend_user = :name AND f.status = false " +
                     ") AS ff " +
-                    "LEFT JOIN USER u ON ff.friendsId = u.user_id",
+                    "LEFT JOIN USER u ON ff.friendsId = u.user_id " +
+                    "LEFT JOIN PICTURE p ON u.user_id = p.user_id",
             nativeQuery = true)
-    List<Map<String, String>> findFriendsByToUserAndStatusFalse(@Param("name") String name);
+    List<Map<String, Object>> findFriendsByToUserAndStatusFalse(@Param("name") String name);
 
 
 

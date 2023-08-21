@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,7 +31,7 @@ public class FriendController {
 
     @PostMapping("/friendList")
     public ResponseEntity<?> getfriendList(@RequestHeader("Authorization") String token) {
-        ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
 
         try {
             // userId를 가지고 옴.
@@ -55,18 +54,19 @@ public class FriendController {
 
     @PostMapping("/requestFriendList")
     public ResponseEntity<?> getRequestfriendList(@RequestHeader("Authorization") String token) {
-        ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
         try {
             // userId를 가지고 옴.
             String toUser = jwtTokenProvider.validateAndGetUsername(token);
-            User user = userRepository.findByUserId(toUser).get();
-            // 닉네임 가져오기
+            User user = userRepository.findByUserId(toUser).orElseThrow(() -> new RuntimeException("User not found"));
 
-            List<Map<String, String>> friendsList = new ArrayList<>();
+            List<Map<String, Object>> friendsList = friendService.requestFriends(user.getUserId());
 
-            friendsList = friendService.requestFriends(user.getUserId());
+            List<Map<String, Object>> friendsList1 = friendsList.stream()
+                    .map(this::convertProfileToBase64)
+                    .collect(Collectors.toList());
 
-            responseDTO.setItems(friendsList);
+            responseDTO.setItems(friendsList1);
             responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok().body(responseDTO);
@@ -78,6 +78,16 @@ public class FriendController {
         }
     }
 
+    public Map<String, Object> convertProfileToBase64(Map<String, Object> friendMap) {
+        Map<String, Object> newMap = new HashMap<>(friendMap); // 새로운 Map 생성
+        byte[] profileData = (byte[]) newMap.get("profile");
+        if (profileData != null) {
+            String base64Encoded = Base64.getEncoder().encodeToString(profileData);
+            newMap.put("profile", base64Encoded);
+        }
+        return newMap; // 수정된 새로운 Map 반환
+    }
+
     @PostMapping("/requestFriend")
     public ResponseEntity<?> requestFriend(
 //            @RequestHeader("Authorization") String token,
@@ -85,7 +95,7 @@ public class FriendController {
 //            String fromUser, long req
     ) {
         System.out.println("@@@@@@@@@@@@");
-        ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
         /* fromUser먼저*/
 
         String toUser = "11";
