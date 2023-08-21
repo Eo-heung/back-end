@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,6 +28,8 @@ public class MoimRegistrationController {
     @PostMapping("/apply-moim/{moimId}")
     public ResponseEntity<?> applyToMoim(@PathVariable int moimId,
                                          @AuthenticationPrincipal UserDetails userDetails,
+                                         @RequestParam(value = "applicantUserNickname") MultipartFile applicantUserNickname,
+                                         @RequestParam(value = "applicantUserAddr") MultipartFile applicantUserAddr,
                                          @RequestParam(value = "moimProfile") MultipartFile moimProfile) {
         ResponseDTO<MoimRegistrationDTO> responseDTO = new ResponseDTO<>();
 
@@ -46,17 +49,38 @@ public class MoimRegistrationController {
     }
 
     //신청자 리스트
-    @GetMapping("get-applicant/{moimId}")
-    public ResponseEntity<?> getApplicant() {
+    @GetMapping("get-applicant-list/{moimId}")
+    public ResponseEntity<?> getApplicantList(@PathVariable int moimId,
+                                              @AuthenticationPrincipal UserDetails userDetails) {
+        ResponseDTO<List<MoimRegistration>> responseDTO = new ResponseDTO<>();
 
-        return null;
+        String organizerUserId = userDetails.getUsername();  //userId
+
+        try {
+            List<MoimRegistration> MoimRegList = moimRegistrationService.getApplicantList(moimId, organizerUserId);
+            return ResponseEntity.ok().body(MoimRegList);
+        } catch (Exception e) {
+            return handleException(e);
+        }
     }
 
     //신청자 상세페이지
     @GetMapping("get-applicant/{moimRegId}")
-    public ResponseEntity<?> getApplicantReg() {
+    public ResponseEntity<?> getApplicant(@PathVariable int moimRegId,
+                                          @AuthenticationPrincipal UserDetails userDetails) {
+        ResponseDTO<MoimRegistration> responseDTO = new ResponseDTO<>();
 
-        return null;
+        String organizerUserId = userDetails.getUsername();  //userId
+
+        try {
+            MoimRegistration moimRegistration = moimRegistrationService.getApplicant(moimRegId, organizerUserId);
+            responseDTO.setItem(moimRegistration);
+
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch (Exception e) {
+            return handleException(e);
+        }
     }
 
     @PostMapping("/cancel-moim/{moimId}")
@@ -84,7 +108,7 @@ public class MoimRegistrationController {
                                                     @AuthenticationPrincipal UserDetails userDetails) {  // Principal: 로그인한 사용자의 정보
         ResponseDTO<String> responseDTO = new ResponseDTO<>();
         System.out.println("여긴 찍히나");
-        String applicantUserId = body.get("applicantUserId");
+        String applicantUserId = body.get("applicantUserId"); //신청자 정보는 앞단에서 전달받기
         String organizerUserId = userDetails.getUsername();;  // userId
         System.out.println("모임장" + organizerUserId);
         System.out.println("신청자" + applicantUserId);
@@ -127,6 +151,25 @@ public class MoimRegistrationController {
             return handleException(e);
         }
     }
+
+    @PostMapping("/quit-moim/{moimRegId}")
+    public ResponseEntity<?> quiteMoim(@PathVariable int moimRegId,
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        ResponseDTO<String> responseDTO = new ResponseDTO<>();
+
+        String applicantUserId = userDetails.getUsername();  //userId
+
+        try {
+            moimRegistrationService.quitMoim(moimRegId, applicantUserId);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
 
 
 

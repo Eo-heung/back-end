@@ -3,6 +3,8 @@ package com.example.backend.service;
 import com.example.backend.entity.MoimRegistration;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 public interface MoimRegistrationService {
     MoimRegistration applyToMoim(int moimId, String userId, MultipartFile moimProfile);
 
@@ -12,5 +14,9 @@ public interface MoimRegistrationService {
 
     MoimRegistration rejectMoim(int moimId, String applicantUserId, String organizerUserId);
 
+    MoimRegistration quitMoim(int moimId, String applicantUserId);
+
+    List<MoimRegistration> getApplicantList(int moimId, String organizerUserId);
+    MoimRegistration getApplicant(int moimRegId, String organizerUserId);
 
 }

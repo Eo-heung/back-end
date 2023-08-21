@@ -26,4 +26,26 @@ public class MoimRegistrationDTO {
     private LocalDateTime applicationDate;
     private LocalDateTime subscribeDate;
     private int regAlarm;
+    private String applicantUserNickname;
+    private String applicantUserAddr;
+
+    public MoimRegistrationDTO EntityToDTO() {
+        return MoimRegistrationDTO.builder()
+                .moimRegId(this.moimRegId)
+                .moim(this.moim)
+                .user(this.user)
+                .moimProfile(this.moimProfile)
+                .regStatus(this.regStatus)
+                .applicationDate(this.applicationDate)
+                .subscribeDate(this.subscribeDate)
+                .regAlarm(this.regAlarm)
+                .applicantUserNickname(this.getUser().getUserNickname())
+                .applicantUserAddr(this.getUser().getUserAddr3())
+                .build();
+    }
+
+
+
+
+
 }

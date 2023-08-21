@@ -63,6 +63,21 @@ public class MoimRegistration {
         QUIT //탈퇴(신청자)
     }
 
+
+    public String applicantUserNickname() {
+        if (this.user != null) {
+            return this.user.getUserNickname();
+        }
+        return null;
+    }
+
+    public String applicantUserAddr() {
+        if (this.user != null) {
+            return this.user.getUserAddr3();
+        }
+        return null;
+    }
+
     public MoimRegistrationDTO EntityToDTO() {
         return MoimRegistrationDTO.builder()
                 .moimRegId(this.moimRegId)

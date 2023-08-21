@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -62,19 +63,15 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             throw new EntityNotFoundException("프로필 이미지를 찾을 수 없습니다.");
         }
 
-
-        byte[] newBytes;
+        byte[] newBytes = null;
 
         if(moimProfile != null && !moimProfile.isEmpty()) {
             //새로운 모임 프로필 등록
             try {
                 newBytes = moimProfile.getBytes();
-            } catch (IOException e) {
-                throw new RuntimeException("파일 읽기 오류 발생", e);
+            } catch (IOException ioe) {
+                throw new RuntimeException(ioe.getMessage(), ioe);
             }
-        } else {
-            //미등록시 프로필 사진 사용
-            newBytes = profileImage.getFileData();
         }
 
         MoimRegistration moimReg = MoimRegistration.builder()
@@ -157,17 +154,50 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return existingRegistration;
     }
 
+    @Override
+    public MoimRegistration quitMoim(int moimId, String applicantUserId) {
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+        User user = userRepository.findById(applicantUserId)
+                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다"));
 
+        MoimRegistration existingRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user)
+                .orElseThrow(() -> new IllegalArgumentException("가입 신청하지 않은 모임입니다."));
 
+        existingRegistration.setRegStatus(MoimRegistration.RegStatus.QUIT);
 
+        // 탈퇴일
+        existingRegistration.setQuitDate(LocalDateTime.now());
 
+        return moimRegistrationRepository.save(existingRegistration);
+    }
 
+    @Override
+    public List<MoimRegistration> getApplicantList(int moimId, String organizerUserId) {
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
 
+        if (!moim.getUserId().getUserId().equals(organizerUserId)) {
+            throw new AccessDeniedException("모임장만 접근할 수 있습니다.");
+        }
 
+        return moimRegistrationRepository.findByMoim(moim);
+    }
 
+    @Override
+    public MoimRegistration getApplicant(int moimRegId, String organizerUserId) {
 
+        MoimRegistration moimRegistration = moimRegistrationRepository.findById(moimRegId)
+                .orElseThrow(() -> new EntityNotFoundException("신청자 정보를 찾을 수 없습니다."));
 
+        Moim moim = moimRegistration.getMoim();
 
+        if (!moim.getUserId().getUserId().equals(organizerUserId)) {
+            throw new AccessDeniedException("모임장만 접근할 수 있습니다.");
+        }
+
+        return moimRegistration;
+    }
 
 
 

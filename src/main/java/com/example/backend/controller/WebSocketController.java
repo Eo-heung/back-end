@@ -18,4 +18,8 @@ public class WebSocketController {
     public void sendNotification(@DestinationVariable Long toUserId, String message) {
         messagingTemplate.convertAndSend("/topic/notifications/" + toUserId, message);
     }
+
+
+
+
 }
