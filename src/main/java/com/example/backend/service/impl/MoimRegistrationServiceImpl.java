@@ -1,0 +1,143 @@
+package com.example.backend.service.impl;
+
+import com.example.backend.entity.Moim;
+import com.example.backend.entity.MoimRegistration;
+import com.example.backend.entity.User;
+import com.example.backend.jwt.CustomUserDetails;
+import com.example.backend.repository.MoimRegistrationRepository;
+import com.example.backend.repository.MoimRepository;
+import com.example.backend.repository.UserRepository;
+import com.example.backend.service.MoimRegistrationService;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class MoimRegistrationServiceImpl implements MoimRegistrationService {
+    private final UserRepository userRepository;
+    private final MoimRepository moimRepository;
+    private final MoimRegistrationRepository moimRegistrationRepository;
+
+    @Override
+    public MoimRegistration applyToMoim(int moimId, String userId) {
+
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다"));
+
+        if(moim.getUserId().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("모임장은 모임에 가입할 수 없습니다.");
+        }
+
+        Optional<MoimRegistration> existingRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user);
+        // 가입 가능 여부 및 CANCELED 상태 확인
+        if (existingRegistration.isPresent()) {
+            MoimRegistration registration = existingRegistration.get();
+
+            if (registration.getRegStatus() == MoimRegistration.RegStatus.CANCELED) {
+                // CANCELED 상태일 경우, 상태를 Waiting으로 업데이트하고 반환
+                registration.setRegStatus(MoimRegistration.RegStatus.Waiting);
+                registration.setApplicationDate(LocalDateTime.now());
+                return moimRegistrationRepository.save(registration);
+            } else {
+                throw new IllegalArgumentException("이미 가입 신청하거나 가입된 상태입니다.");
+            }
+        }
+
+
+        MoimRegistration moimReg = MoimRegistration.builder()
+                .moim(moim)
+                .user(user)
+                .regStatus(MoimRegistration.RegStatus.Waiting)
+                .applicationDate(LocalDateTime.now())
+                .build();
+
+        return moimRegistrationRepository.save(moimReg);
+    }
+
+    @Override
+    public MoimRegistration cancelMoim(int moimId, String userId) {
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다"));
+
+        MoimRegistration existingRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user)
+                .orElseThrow(() -> new IllegalArgumentException("가입 신청하지 않은 모임입니다."));
+
+        existingRegistration.setRegStatus(MoimRegistration.RegStatus.CANCELED);
+        return moimRegistrationRepository.save(existingRegistration);
+    }
+
+    @Override
+    public MoimRegistration approveMoim(int moimId, String applicantUserId, String organizerUserId) {
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+        User applicant = userRepository.findById(applicantUserId)
+                .orElseThrow(() -> new EntityNotFoundException("신청자를 찾을 수 없습니다."));
+
+        // 현재 로그인한 사용자의 정보 가져오기
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        String loggedInUserId;
+
+        if (principal instanceof CustomUserDetails) {
+            loggedInUserId = ((CustomUserDetails) principal).getUser().getUserName();  //userId
+        } else {
+            throw new IllegalStateException("로그인된 사용자 정보가 유효하지 않습니다.");
+        }
+
+        // 모임장 확인
+        if(!moim.getUserId().getUserId().equals(loggedInUserId)) {
+            throw new AccessDeniedException("모임장만 승인할 수 있습니다.");
+        }
+
+        MoimRegistration existingRegistration = moimRegistrationRepository.findByMoimAndUser(moim, applicant)
+                .orElseThrow(() -> new IllegalArgumentException("신청한 사용자가 없습니다."));
+
+        existingRegistration.setRegStatus(MoimRegistration.RegStatus.APPROVED);
+        return moimRegistrationRepository.save(existingRegistration);
+    }
+
+    @Override
+    public MoimRegistration rejectMoim(int moimId, String applicantUserId, String organizerUserId) {
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+        User applicant = userRepository.findById(applicantUserId)
+                .orElseThrow(() -> new EntityNotFoundException("신청자를 찾을 수 없습니다."));
+
+        if (!moim.getUserId().getUserId().equals(organizerUserId)) {
+            throw new AccessDeniedException("모임장만 거절할 수 있습니다.");
+        }
+
+        MoimRegistration existingRegistration = moimRegistrationRepository.findByMoimAndUser(moim, applicant)
+                .orElseThrow(() -> new IllegalArgumentException("가입 신청하지 않은 모임입니다."));
+
+        existingRegistration.setRegStatus(MoimRegistration.RegStatus.REJECTED); // 거절 상태로 변경
+        moimRegistrationRepository.save(existingRegistration);
+
+        return existingRegistration;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}

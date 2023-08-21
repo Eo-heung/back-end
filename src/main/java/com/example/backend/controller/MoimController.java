@@ -5,29 +5,16 @@ import com.example.backend.dto.MoimPictureDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimPicture;
-import com.example.backend.entity.User;
-import com.example.backend.jwt.CustomUserDetails;
-import com.example.backend.jwt.JwtTokenProvider;
 import com.example.backend.repository.MoimPictureRepository;
 import com.example.backend.repository.MoimRepository;
-import com.example.backend.repository.UserRepository;
 import com.example.backend.service.MoimPictureService;
 import com.example.backend.service.MoimService;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -129,7 +116,7 @@ public class MoimController {
                 int moimId = moim.getMoimId();
                 Map<String, Object> returnMap = new HashMap<>();
 
-                if(moimPictureList.get(i).getMoimId().getMoimId() == moimId ) {
+                if(moimPictureList.get(i).getMoimId().getMoimId() == moimId) {
 
                     String base64Encoded = Base64.getEncoder().encodeToString(moimPictureList.get(i).getMoimPic());
                     returnMap.put("moimId", moim.getMoimId());
