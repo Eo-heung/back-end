@@ -11,28 +11,33 @@ import java.util.Map;
 public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     @Query(value = "SELECT ff.friendsId" +
-            "            , u. " +
+            "            , ff.id, p.profile, u.user_name, u.user_addr3, u.user_status_message " +
             "           FROM (SELECT CASE " +
-            "                           WHEN f.fromUser = :name" +
-            "                           THEN f.toUser" +
-            "                           WHEN f.toUser = :name" +
-            "                           THEN f.fromUser" +
-            "                        END AS friendsId" +
-            "                      , f.status" +
-            "               Friend f) ff " +
-            "           LEFT JOIN User u " +
-            "                 on ff.friendsId = u.userId " +
-            "       WHERE (f.toUser = :name) AND f.status = true ", nativeQuery = true)
+            "                           WHEN f.from_friend_user = :name" +
+            "                           THEN f.to_friend_user" +
+            "                           WHEN f.to_friend_user = :name" +
+            "                           THEN f.from_friend_user" +
+            "                        ELSE NULL " +
+            "           END AS friendsId, " +
+            "           f.status, " +
+            "           f.id "+
+            "    FROM FRIEND f " +
+            "    WHERE f.to_friend_user = :name AND f.status = true " +
+            ") AS ff " +
+            "LEFT JOIN USER u ON ff.friendsId = u.user_id " +
+            "LEFT JOIN PICTURE p ON u.user_id = p.user_id",
+            nativeQuery = true)
     List<Map<String, Object>> findFriendsByFromUserOrToUserAndStatusTrue(@Param("name") String name);
 
     @Query(value =
-            "SELECT ff.friendsId, p.profile, u.user_name, u.user_addr3, u.user_status_message  " +
+            "SELECT ff.friendsId,ff.id, p.profile, u.user_name, u.user_addr3, u.user_status_message " +
                     "FROM ( " +
                     "    SELECT CASE " +
                     "           WHEN f.to_friend_user = :name THEN f.from_friend_user " +
                     "           ELSE NULL " +
                     "           END AS friendsId, " +
-                    "           f.status " +
+                    "           f.status, " +
+                    "           f.id "+
                     "    FROM FRIEND f " +
                     "    WHERE f.to_friend_user = :name AND f.status = false " +
                     ") AS ff " +

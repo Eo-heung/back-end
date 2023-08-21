@@ -30,19 +30,19 @@ public class FriendController {
     private final UserRepository userRepository;
 
     @PostMapping("/friendList")
-    public ResponseEntity<?> getfriendList(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getFriendList(@RequestHeader("Authorization") String token) {
         ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
-
         try {
             // userId를 가지고 옴.
             String toUser = jwtTokenProvider.validateAndGetUsername(token);
-            User user = userRepository.findByUserId(toUser).get();
-            String toUserNickName = user.getUserName();
-
-            responseDTO.setItems(friendService.getFriends(toUserNickName));
+            User user = userRepository.findByUserId(toUser).orElseThrow(() -> new RuntimeException("User not found"));
+            List<Map<String, Object>> friendsList = friendService.getFriends(user.getUserId());
             System.out.println(responseDTO);
-            responseDTO.setStatusCode(HttpStatus.OK.value());
-
+            List<Map<String, Object>> friendsList1 = friendsList.stream()
+                    .map(this::convertProfileToBase64)
+                    .collect(Collectors.toList());
+            responseDTO.setItems(friendsList1);
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.ok().body(responseDTO);
 
         } catch (Exception e) {
