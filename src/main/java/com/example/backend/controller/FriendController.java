@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/friend")
@@ -28,7 +32,7 @@ public class FriendController {
 
     @PostMapping("/friendList")
     public ResponseEntity<?> getfriendList(@RequestHeader("Authorization") String token) {
-        ResponseDTO<Friend> responseDTO = new ResponseDTO<>();
+        ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
 
         try {
             // userId를 가지고 옴.
@@ -51,15 +55,18 @@ public class FriendController {
 
     @PostMapping("/requestFriendList")
     public ResponseEntity<?> getRequestfriendList(@RequestHeader("Authorization") String token) {
-        ResponseDTO<Friend> responseDTO = new ResponseDTO<>();
+        ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
         try {
             // userId를 가지고 옴.
             String toUser = jwtTokenProvider.validateAndGetUsername(token);
             User user = userRepository.findByUserId(toUser).get();
-            // 닉네임 가져오기.
-            String toUserNickName = user.getUserName();
+            // 닉네임 가져오기
 
-            responseDTO.setItems(friendService.requestFriends(toUserNickName));
+            List<Map<String, String>> friendsList = new ArrayList<>();
+
+            friendsList = friendService.requestFriends(user.getUserId());
+
+            responseDTO.setItems(friendsList);
             responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok().body(responseDTO);
@@ -78,11 +85,11 @@ public class FriendController {
 //            String fromUser, long req
     ) {
         System.out.println("@@@@@@@@@@@@");
-        ResponseDTO<Friend> responseDTO = new ResponseDTO<>();
+        ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
         /* fromUser먼저*/
 
-        String toUser = "재민";
-        String fromUser = "효준";
+        String toUser = "11";
+        String fromUser = "1";
         int req = 0;
 
         try {
@@ -103,8 +110,7 @@ public class FriendController {
 
 
 
-            responseDTO.setItems(friendService.getFriends("재민"));
-            responseDTO.setItem(friend);
+            responseDTO.setItems(friendService.getFriends("11"));
             System.out.println(responseDTO);
             responseDTO.setStatusCode(HttpStatus.OK.value());
 

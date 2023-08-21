@@ -6,14 +6,42 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface FriendRepository extends JpaRepository<Friend, Long> {
 
-    @Query("SELECT f FROM Friend f WHERE (f.fromUser = :name OR f.toUser = :name) AND f.status = true")
-    List<Friend> findFriendsByFromUserOrToUserAndStatusTrue(@Param("name") String name);
+    @Query(value = "SELECT ff.friendsId" +
+            "            , u. " +
+            "           FROM (SELECT CASE " +
+            "                           WHEN f.fromUser = :name" +
+            "                           THEN f.toUser" +
+            "                           WHEN f.toUser = :name" +
+            "                           THEN f.fromUser" +
+            "                        END AS friendsId" +
+            "                      , f.status" +
+            "               Friend f) ff " +
+            "           LEFT JOIN User u " +
+            "                 on ff.friendsId = u.userId " +
+            "       WHERE (f.toUser = :name) AND f.status = true ", nativeQuery = true)
+    List<Map<String, String>> findFriendsByFromUserOrToUserAndStatusTrue(@Param("name") String name);
 
-    @Query("SELECT f FROM Friend f WHERE (f.toUser = :name) AND f.status = false ")
-    List<Friend> findFriendsByToUserAndStatusFalse(@Param("name") String name);
+    @Query(value =
+            "SELECT ff.friendsId, u.user_name " +
+                    "FROM ( " +
+                    "    SELECT CASE " +
+                    "           WHEN f.to_friend_user = :name THEN f.from_friend_user " +
+                    "           ELSE NULL " +
+                    "           END AS friendsId, " +
+                    "           f.status " +
+                    "    FROM FRIEND f " +
+                    "    WHERE f.to_friend_user = :name AND f.status = false " +
+                    ") AS ff " +
+                    "LEFT JOIN USER u ON ff.friendsId = u.user_id",
+            nativeQuery = true)
+    List<Map<String, String>> findFriendsByToUserAndStatusFalse(@Param("name") String name);
+
+
+
 
     Friend deleteFriendByFromUserAndToUser(String fromName, String toName);
     Friend findFriendByFromUserAndToUser(String fromName, String toName);
