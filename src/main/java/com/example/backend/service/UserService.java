@@ -15,14 +15,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public User login(String userId, String userPw){
+    public User login(String userId, String userPw) {
         Optional<User> loginUser = userRepository.findByUserId(userId);
 
-        if(loginUser.isEmpty()) {
+        if (loginUser.isEmpty()) {
             throw new RuntimeException("id not exist");
         }
 
-        if(!passwordEncoder.matches(userPw, loginUser.get().getUserPw())) {
+        if (!passwordEncoder.matches(userPw, loginUser.get().getUserPw())) {
             throw new RuntimeException("wrong pw");
         }
 
@@ -47,7 +47,7 @@ public class UserService {
         Optional<User> userOptional = userRepository.findByUserId(userDTO.getUserId());
 
         // 사용자가 존재하는 경우 비밀번호를 업데이트합니다.
-        if(userOptional.isPresent()) {
+        if (userOptional.isPresent()) {
             User user = userOptional.get();
 
             // DTO에서 받은 비밀번호를 암호화합니다.
@@ -71,6 +71,7 @@ public class UserService {
             throw new RuntimeException("User with the given ID not found");
         }
     }
+
     public UserDTO getUserInfo(String userId) {
         Optional<User> optionalUser = userRepository.findByUserId(userId);
         if (optionalUser.isPresent()) {
@@ -78,6 +79,13 @@ public class UserService {
         } else {
             return null;
         }
+    }
+
+    public User newKaKao(String userId) {
+        if (userRepository.findByUserId(userId).isPresent())
+            return userRepository.findByUserId(userId).get();
+        else
+            return null;
     }
 
 }
