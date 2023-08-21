@@ -2,10 +2,12 @@ package com.example.backend.service.impl;
 
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimRegistration;
+import com.example.backend.entity.ProfileImage;
 import com.example.backend.entity.User;
 import com.example.backend.jwt.CustomUserDetails;
 import com.example.backend.repository.MoimRegistrationRepository;
 import com.example.backend.repository.MoimRepository;
+import com.example.backend.repository.ProfileImageRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.MoimRegistrationService;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,7 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -23,9 +27,11 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
     private final UserRepository userRepository;
     private final MoimRepository moimRepository;
     private final MoimRegistrationRepository moimRegistrationRepository;
+    private final ProfileImageRepository profileImageRepository;
 
     @Override
-    public MoimRegistration applyToMoim(int moimId, String userId) {
+    public MoimRegistration applyToMoim(int moimId, String userId,
+                                        MultipartFile moimProfile) {
 
         Moim moim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
@@ -51,10 +57,31 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             }
         }
 
+        ProfileImage profileImage = profileImageRepository.findByUserId(user);
+        if (profileImage == null) {
+            throw new EntityNotFoundException("프로필 이미지를 찾을 수 없습니다.");
+        }
+
+
+        byte[] newBytes;
+
+        if(moimProfile != null && !moimProfile.isEmpty()) {
+            //새로운 모임 프로필 등록
+            try {
+                newBytes = moimProfile.getBytes();
+            } catch (IOException e) {
+                throw new RuntimeException("파일 읽기 오류 발생", e);
+            }
+        } else {
+            //미등록시 프로필 사진 사용
+            newBytes = profileImage.getFileData();
+        }
 
         MoimRegistration moimReg = MoimRegistration.builder()
                 .moim(moim)
                 .user(user)
+                .moimProfile(newBytes)
+                .createMoimProfile(LocalDateTime.now())
                 .regStatus(MoimRegistration.RegStatus.Waiting)
                 .applicationDate(LocalDateTime.now())
                 .build();
@@ -103,6 +130,10 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
                 .orElseThrow(() -> new IllegalArgumentException("신청한 사용자가 없습니다."));
 
         existingRegistration.setRegStatus(MoimRegistration.RegStatus.APPROVED);
+
+        // 가입일을 현재 날짜 및 시간으로 설정
+        existingRegistration.setSubscribeDate(LocalDateTime.now());
+
         return moimRegistrationRepository.save(existingRegistration);
     }
 

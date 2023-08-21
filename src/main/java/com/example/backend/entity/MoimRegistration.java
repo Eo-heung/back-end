@@ -28,6 +28,16 @@ public class MoimRegistration {
     @JoinColumn(name = "user_id")
     private User user; //가입자 Id
 
+    @Lob
+    @Column(name = "moim_profile", columnDefinition = "MEDIUMBLOB")
+    private byte[] moimProfile; //모임에서만 사용할 프로필 사진
+
+    @Column(name = "create_moim_profile")
+    private LocalDateTime createMoimProfile; //사진 저장일
+
+    @Column(name = "update_moim_profile")
+    private LocalDateTime updateMoimProfile; //사진 수정일
+
     @Enumerated(EnumType.STRING)
     @Column(name = "reg_status")
     private RegStatus regStatus; // 가입 상태 (승인, 대기, 거절, 취소, 탈퇴)
@@ -37,6 +47,9 @@ public class MoimRegistration {
 
     @Column(name = "subscribe_date")
     private LocalDateTime subscribeDate; // 가입일
+
+    @Column(name = "quit_date")
+    private LocalDateTime quitDate; // 탈퇴일
 
     //알림 전송용 코드
     @Column(name = "Reg_ALARM")
@@ -55,6 +68,7 @@ public class MoimRegistration {
                 .moimRegId(this.moimRegId)
                 .moim(this.moim)
                 .user(this.user)
+                .moimProfile(this.moimProfile)
                 .regStatus(this.regStatus)
                 .applicationDate(this.applicationDate)
                 .subscribeDate(this.subscribeDate)
