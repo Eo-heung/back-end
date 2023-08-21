@@ -1,21 +1,27 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.ProfileImageDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.dto.UserDTO;
 import com.example.backend.entity.Moim;
+import com.example.backend.entity.ProfileImage;
 import com.example.backend.entity.User;
 import com.example.backend.jwt.JwtTokenProvider;
 import com.example.backend.repository.MoimRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.MyPageService;
+import com.example.backend.service.ProfileImageService;
 import com.example.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -35,6 +41,8 @@ public class MyPageController {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final ProfileImageService profileImageService;
+
     @PostMapping("/myinfo")
     public ResponseEntity<ResponseDTO<UserDTO>> getUserInfo(@RequestHeader("Authorization") String token) {
         ResponseDTO<UserDTO> responseDTO = new ResponseDTO<>();
@@ -44,6 +52,7 @@ public class MyPageController {
             UserDTO userDTO = userService.getUserInfo(userId);
 
             if (userDTO != null) {
+                userDTO.setUserPw("");
                 responseDTO.setItem(userDTO);
                 responseDTO.setStatusCode(HttpStatus.OK.value());
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
@@ -129,6 +138,7 @@ public class MyPageController {
 
             user.setUserTel(userDTO.getUserTel());
             user.setUserEmail(userDTO.getUserEmail());
+            user.setUserGender(userDTO.getUserGender());
             user.setUserUpdate(LocalDateTime.now());
 
 
@@ -195,6 +205,55 @@ public class MyPageController {
 
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+    @PostMapping("/changeprofileimage")
+    public ResponseEntity<?> uploadProfileImage(@RequestHeader("Authorization") String token, @RequestParam("fileData") MultipartFile file) {
+        ResponseDTO<ProfileImageDTO> responseDTO = new ResponseDTO<>();
+
+        try {
+            String userId = jwtTokenProvider.validateAndGetUsername(token);
+
+            ProfileImageDTO profileImageDTO = ProfileImageDTO.builder()
+                    .userId(userId)
+                    .fileData(file.getBytes())
+                    .build();
+
+            ProfileImage profileImage = profileImageService.update(profileImageDTO.DTOToEntity());
+            ProfileImageDTO editProfileImage = profileImage.EntityToDTO();
+
+            responseDTO.setItem(editProfileImage);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+    @PostMapping("/getprofileimage")
+    public ResponseEntity<?> getProfileImage(@RequestHeader("Authorization") String token) {
+        ResponseDTO<String> responseDTO = new ResponseDTO<>();
+
+        try {
+            String userId = jwtTokenProvider.validateAndGetUsername(token);
+            User user = userRepository.findByUserId(userId).get();
+
+            ProfileImage profileImage = profileImageService.getImage(user);
+
+            String base64Encoded = Base64.getEncoder().encodeToString(profileImage.getFileData());
+            responseDTO.setItem(base64Encoded);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+
             responseDTO.setErrorMessage(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(responseDTO);

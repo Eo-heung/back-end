@@ -9,6 +9,7 @@ import java.util.List;
 public class ResponseDTO<T> {
     private List<T> items;
     private Page<T> pageItems;
+
     private T item;
     private String errorMessage;
     private int statusCode;
