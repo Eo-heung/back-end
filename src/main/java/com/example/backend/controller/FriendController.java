@@ -120,4 +120,26 @@ public class FriendController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+    @PostMapping("/deleteFriend/{id}")
+    public ResponseEntity<?> deleteFriend(@PathVariable Long id) {
+        ResponseDTO<Friend> responseDTO = new ResponseDTO<>();
+        /* fromUser먼저*/
+        try {
+//            String toUser = jwtTokenProvider.validateAndGetUsername(token);
+
+            Friend friend = new Friend();
+
+                friendRepository.deleteById(id);
+
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setItem(friend);
+
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
 }
