@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.FriendDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.Friend;
 import com.example.backend.entity.Hobby;
@@ -12,10 +13,7 @@ import com.example.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,6 +26,7 @@ public class FriendController {
     private final FriendService friendService;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final FriendRepository friendRepository;
 
     @PostMapping("/friendList")
     public ResponseEntity<?> getFriendList(@RequestHeader("Authorization") String token) {
@@ -88,41 +87,30 @@ public class FriendController {
         return newMap; // 수정된 새로운 Map 반환
     }
 
-    @PostMapping("/requestFriend")
-    public ResponseEntity<?> requestFriend(
-//            @RequestHeader("Authorization") String token,
-//            String toUser,
-//            String fromUser, long req
-    ) {
-        System.out.println("@@@@@@@@@@@@");
-        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+    @PostMapping("/requestFriend/{id}")
+    public ResponseEntity<?> requestFriend(@PathVariable Long id, @RequestBody FriendDTO friendDTO) {
+        Long request = friendDTO.getId();
+        ResponseDTO<Friend> responseDTO = new ResponseDTO<>();
         /* fromUser먼저*/
-
-        String toUser = "11";
-        String fromUser = "1";
-        int req = 0;
 
         try {
 //            String toUser = jwtTokenProvider.validateAndGetUsername(token);
 
             Friend friend = new Friend();
 
-            if(req == 1)
+            if(request == 1)
             {
-                friend = friendService.requestFriend(fromUser,toUser);
+                friend = friendRepository.findById(id).get();
                 friend.setStatus(true);
 
                 friend = friendService.saveFriend(friend);
             }
             else {
-                friend =  friendService.deleteRequest( fromUser, toUser);
+                friendRepository.deleteById(id);
             }
 
-
-
-            responseDTO.setItems(friendService.getFriends("11"));
-            System.out.println(responseDTO);
             responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setItem(friend);
 
             return ResponseEntity.ok().body(responseDTO);
 
