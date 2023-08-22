@@ -51,7 +51,10 @@ public class Moim {
     private String moimAddr; //모임 상세 입력주소
 
     @Column(name = "max_moim_user")
-    private String maxMoimUser; //정원(최대 50명)
+    private int maxMoimUser; //정원(최대 50명)
+
+    @Column(name = "current_moim_user")
+    private int currentMoimUser; //현재 모임 가입자
 
     @Column(name = "is_delete")
     private String isDelete; //삭제여부
@@ -71,6 +74,7 @@ public class Moim {
                 .onOff(this.onOff)
                 .moimAddr(this.moimAddr)
                 .maxMoimUser(this.maxMoimUser)
+                .currentMoimUser(this.currentMoimUser)
                 .isDelete(this.isDelete)
                 .isEnd(this.isEnd)
                 .build();

@@ -21,8 +21,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,7 +60,7 @@ public class MoimRegistrationController {
 
     //로그인 사용자의 모임 가입 상태 체크
     @GetMapping("/check-registration-state/{moimId}")
-    public ResponseEntity<MoimRegistration.RegStatus> getCurrentUserRegStatus(@PathVariable int moimId,
+    public ResponseEntity<?> getCurrentUserRegStatus(@PathVariable int moimId,
                                                                               @AuthenticationPrincipal UserDetails userDetails) {
         String currentUser = userDetails.getUsername();
 
@@ -68,12 +70,21 @@ public class MoimRegistrationController {
         Moim currentMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다"));
 
+        MoimRegistration moimRegId = moimRegistrationRepository.findByMoim(currentMoim)
+                .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다"));
+
         MoimRegistration.RegStatus status = moimRegistrationRepository.findByMoimAndUser(currentMoim, currentUserId)
                 .map(MoimRegistration::getRegStatus)
                 .orElse(null);
 
-        return ResponseEntity.ok(status);
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", status);
+        response.put("moimRegId", moimRegId);
+
+        return ResponseEntity.ok(response);
     }
+
+
 
     @PostMapping("/{moimRegId}/applicant-state")
     public ResponseEntity<?> handleMoim(@PathVariable int moimRegId,
@@ -134,12 +145,12 @@ public class MoimRegistrationController {
     @GetMapping("get-applicant-list/{moimId}")
     public ResponseEntity<?> getApplicantList(@PathVariable int moimId,
                                               @AuthenticationPrincipal UserDetails userDetails) {
-        ResponseDTO<List<MoimRegistration>> responseDTO = new ResponseDTO<>();
+        ResponseDTO<Optional<MoimRegistration>> responseDTO = new ResponseDTO<>();
 
         String organizerUserId = userDetails.getUsername();  //userId
 
         try {
-            List<MoimRegistration> MoimRegList = moimRegistrationService.getApplicantList(moimId, organizerUserId);
+            Optional<MoimRegistration> MoimRegList = moimRegistrationService.getApplicantList(moimId, organizerUserId);
             return ResponseEntity.ok().body(MoimRegList);
         } catch (Exception e) {
             return handleException(e);

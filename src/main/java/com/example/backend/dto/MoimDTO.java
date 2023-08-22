@@ -23,7 +23,8 @@ public class MoimDTO {
     private String moimContent;
     private String onOff;
     private String moimAddr;
-    private String maxMoimUser;
+    private int maxMoimUser;
+    private int currentMoimUser;
     private String isDelete;
     private String isEnd;
 
@@ -45,6 +46,7 @@ public class MoimDTO {
                 .onOff(this.onOff)
                 .moimAddr(this.moimAddr)
                 .maxMoimUser(this.maxMoimUser)
+                .currentMoimUser(this.currentMoimUser)
                 .isDelete(this.isDelete)
                 .isEnd(this.isEnd)
                 .build();

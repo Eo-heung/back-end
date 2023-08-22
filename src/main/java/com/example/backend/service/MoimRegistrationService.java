@@ -4,6 +4,7 @@ import com.example.backend.entity.MoimRegistration;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MoimRegistrationService {
     MoimRegistration applyToMoim(int moimId, String userId, MultipartFile moimProfile);
@@ -18,7 +19,7 @@ public interface MoimRegistrationService {
 
     MoimRegistration modifyMoimProfile(int moimId, String userId, MultipartFile moimProfile);
 
-    List<MoimRegistration> getApplicantList(int moimId, String organizerUserId);
+    Optional<MoimRegistration> getApplicantList(int moimId, String organizerUserId);
     MoimRegistration getApplicant(int moimRegId, String organizerUserId);
 
 }

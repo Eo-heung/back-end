@@ -12,7 +12,7 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
     Optional<MoimRegistration> findByMoimAndUser(Moim moim, User user);
 
     Optional<MoimRegistration> findByUser(User user);
-    List<MoimRegistration> findByMoim(Moim moim);
+    Optional<MoimRegistration> findByMoim(Moim moim);
 
 
 }

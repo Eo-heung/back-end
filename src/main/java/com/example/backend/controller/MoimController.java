@@ -124,8 +124,8 @@ public class MoimController {
                     returnMap.put("moimCategory", moim.getMoimCategory());
                     returnMap.put("moimTitle", moim.getMoimTitle());
                     returnMap.put("moimAddr", moim.getMoimAddr());
-//                    returnMap.put("currentUser", moim.getCurrentUser);
                     returnMap.put("maxMoimUser", moim.getMaxMoimUser());
+                    returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
                     returnMap.put("moimContent", moim.getMoimContent());
                     if(moimPictureList.size() - 1 > i ) {
                         i++;
@@ -136,8 +136,8 @@ public class MoimController {
                     returnMap.put("moimCategory", moim.getMoimCategory());
                     returnMap.put("moimTitle", moim.getMoimTitle());
                     returnMap.put("moimAddr", moim.getMoimAddr());
-//                    returnMap.put("currentUser", moim.getCurrentUser);
                     returnMap.put("maxMoimUser", moim.getMaxMoimUser());
+                    returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
                     returnMap.put("moimContent", moim.getMoimContent());
                 }
 
@@ -210,9 +210,10 @@ public class MoimController {
 //            카테고리, 소모임 이름, 모임 주소, 현재 가입한 회원 수, 최대 인원, 모임 소개, 그림
             moim.setMoimTitle(moimDTO.getMoimTitle());
             moim.setMoimCategory(moimDTO.getMoimCategory());
-            moim.setMaxMoimUser(moimDTO.getMaxMoimUser());
             moim.setMoimContent(moimDTO.getMoimContent());
             moim.setMoimAddr(moimDTO.getMoimAddr());
+            moim.setMaxMoimUser(moimDTO.getMaxMoimUser());
+            moim.setCurrentMoimUser(moimDTO.getCurrentMoimUser());
 
             Moim editMoim = moimService.modifyMoim(moim);
 

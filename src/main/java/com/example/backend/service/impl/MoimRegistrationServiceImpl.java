@@ -199,7 +199,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
     }
 
     @Override
-    public List<MoimRegistration> getApplicantList(int moimId, String organizerUserId) {
+    public Optional<MoimRegistration> getApplicantList(int moimId, String organizerUserId) {
         Moim moim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
 
