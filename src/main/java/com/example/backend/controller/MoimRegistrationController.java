@@ -60,8 +60,7 @@ public class MoimRegistrationController {
 
     //로그인 사용자의 모임 가입 상태 체크
     @GetMapping("/check-registration-state/{moimId}")
-    public ResponseEntity<?> getCurrentUserRegStatus(@PathVariable int moimId,
-                                                                              @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Map<String, Object>> getCurrentUserRegStatus(@PathVariable int moimId, @AuthenticationPrincipal UserDetails userDetails) {
         String currentUser = userDetails.getUsername();
 
         User currentUserId = userRepository.findByUserId(currentUser)
@@ -70,21 +69,16 @@ public class MoimRegistrationController {
         Moim currentMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다"));
 
-        List<MoimRegistration> moimRegs = moimRegistrationRepository.findByMoim(currentMoim);
+        MoimRegistration registration = moimRegistrationRepository.findByMoimAndUser(currentMoim, currentUserId)
+                .orElse(null); // 여기서 해당 조건에 맞는 MoimRegistration을 찾습니다.
 
-        if (moimRegs.isEmpty()) {
-            throw new RuntimeException("모임을 찾을 수 없습니다");
+        if (registration == null) {
+            throw new RuntimeException("등록 정보를 찾을 수 없습니다");
         }
 
-        MoimRegistration moimRegId = moimRegs.get(0);
-
-        MoimRegistration.RegStatus status = moimRegistrationRepository.findByMoimAndUser(currentMoim, currentUserId)
-                .map(MoimRegistration::getRegStatus)
-                .orElse(null);
-
         Map<String, Object> response = new HashMap<>();
-        response.put("status", status);
-        response.put("moimRegId", moimRegId);
+        response.put("status", registration.getRegStatus());
+        response.put("moimRegId", registration.getMoimRegId());
 
         return ResponseEntity.ok(response);
     }
@@ -93,13 +87,25 @@ public class MoimRegistrationController {
 
     @PostMapping("/{moimRegId}/applicant-state")
     public ResponseEntity<?> handleMoim(@PathVariable int moimRegId,
-                                        @RequestParam MoimRegistration.RegStatus nowStatus,
+                                        @RequestParam("nowStatus") MoimRegistration.RegStatus nowStatus,
                                         @RequestBody(required = false) Map<String, String> body,
                                         @AuthenticationPrincipal UserDetails userDetails) {
 
         ResponseDTO<String> responseDTO = new ResponseDTO<>();
 
         String currentUserId = userDetails.getUsername();  //로그인 유저
+        User currentUser = userRepository.findById(currentUserId).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.badRequest().body("User not found.");
+        }
+
+        Optional<MoimRegistration> registrationOpt = moimRegistrationRepository.findById(moimRegId);
+        if (!registrationOpt.isPresent()) {
+            return ResponseEntity.badRequest().body("Moim registration not found.");
+        }
+
+        int currentMoimId = registrationOpt.get().getMoim().getMoimId();
+
         String applicantUserId; //신청자
         String organizerUserId; //모임장
 
@@ -109,9 +115,9 @@ public class MoimRegistrationController {
                 case QUIT:
                     applicantUserId = currentUserId;
                     if (nowStatus == MoimRegistration.RegStatus.CANCELED) {
-                        moimRegistrationService.cancelMoim(moimRegId, applicantUserId);
+                        moimRegistrationService.cancelMoim(currentMoimId, applicantUserId);
                     } else {
-                        moimRegistrationService.quitMoim(moimRegId, applicantUserId);
+                        moimRegistrationService.quitMoim(currentMoimId, applicantUserId);
                     }
                     break;
                 case APPROVED:
@@ -125,9 +131,9 @@ public class MoimRegistrationController {
                     applicantUserId = body.get("applicantUserId");
 
                     if (nowStatus == MoimRegistration.RegStatus.APPROVED) {
-                        moimRegistrationService.approveMoim(moimRegId, applicantUserId, organizerUserId);
+                        moimRegistrationService.approveMoim(currentMoimId, applicantUserId, organizerUserId);
                     } else {
-                        moimRegistrationService.rejectMoim(moimRegId, applicantUserId, organizerUserId);
+                        moimRegistrationService.rejectMoim(currentMoimId, applicantUserId, organizerUserId);
                     }
                     break;
                 default:
@@ -162,6 +168,25 @@ public class MoimRegistrationController {
         }
     }
 
+    //신청자 상세페이지
+    @GetMapping("get-applicant/{moimRegId}")
+    public ResponseEntity<?> getApplicant(@PathVariable int moimRegId,
+                                          @AuthenticationPrincipal UserDetails userDetails) {
+        ResponseDTO<MoimRegistration> responseDTO = new ResponseDTO<>();
+
+        String organizerUserId = userDetails.getUsername();  //userId
+
+        try {
+            MoimRegistration moimRegistration = moimRegistrationService.getApplicant(moimRegId, organizerUserId);
+            responseDTO.setItem(moimRegistration);
+
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
     //모임 유저 프로필 수정
     @PostMapping("/modify-moim-profile/{moimId}")
     public ResponseEntity<?> modifyMoimProfile(@PathVariable int moimId,
@@ -182,24 +207,6 @@ public class MoimRegistrationController {
         }
     }
 
-    //신청자 상세페이지
-    @GetMapping("get-applicant/{moimRegId}")
-    public ResponseEntity<?> getApplicant(@PathVariable int moimRegId,
-                                          @AuthenticationPrincipal UserDetails userDetails) {
-        ResponseDTO<MoimRegistration> responseDTO = new ResponseDTO<>();
-
-        String organizerUserId = userDetails.getUsername();  //userId
-
-        try {
-            MoimRegistration moimRegistration = moimRegistrationService.getApplicant(moimRegId, organizerUserId);
-            responseDTO.setItem(moimRegistration);
-
-            return ResponseEntity.ok().body(responseDTO);
-
-        } catch (Exception e) {
-            return handleException(e);
-        }
-    }
 
 
 
