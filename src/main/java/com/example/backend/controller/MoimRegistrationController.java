@@ -122,13 +122,12 @@ public class MoimRegistrationController {
                     break;
                 case APPROVED:
                 case REJECTED:
-                    organizerUserId = currentUserId;
-
                     if (body == null || !body.containsKey("applicantUserId")) {
                         throw new IllegalArgumentException("request body에서 applicantUserId를 전달받지 못했습니다.");
                     }
 
                     applicantUserId = body.get("applicantUserId");
+                    organizerUserId = body.get("organizerUserId");
 
                     if (nowStatus == MoimRegistration.RegStatus.APPROVED) {
                         moimRegistrationService.approveMoim(currentMoimId, applicantUserId, organizerUserId);

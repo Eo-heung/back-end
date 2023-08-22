@@ -28,6 +28,7 @@ public class MoimRegistrationDTO {
     private int regAlarm;
     private String applicantUserNickname;
     private String applicantUserAddr;
+    private String applicantUserId;
 
     public MoimRegistrationDTO EntityToDTO() {
         return MoimRegistrationDTO.builder()

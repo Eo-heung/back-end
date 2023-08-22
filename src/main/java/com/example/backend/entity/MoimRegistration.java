@@ -100,6 +100,7 @@ public class MoimRegistration {
                 .applicationDate(this.applicationDate)
                 .applicantUserNickname(this.user.getUserNickname())
                 .applicantUserAddr(this.user.getUserAddr3())
+                .applicantUserId(this.user.getUserId())
                 .build();
     }
 

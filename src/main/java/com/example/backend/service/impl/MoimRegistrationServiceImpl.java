@@ -109,19 +109,8 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         User applicant = userRepository.findById(applicantUserId)
                 .orElseThrow(() -> new EntityNotFoundException("신청자를 찾을 수 없습니다."));
 
-        // 현재 로그인한 사용자의 정보 가져오기
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        String loggedInUserId;
-
-        if (principal instanceof CustomUserDetails) {
-            loggedInUserId = ((CustomUserDetails) principal).getUser().getUserName();  //userId
-        } else {
-            throw new IllegalStateException("로그인된 사용자 정보가 유효하지 않습니다.");
-        }
-
-        // 모임장 확인
-        if(!moim.getUserId().getUserId().equals(loggedInUserId)) {
+        // 모임장 확인을 위해 로그인 사용자 대신 organizerUserId 사용
+        if(!moim.getUserId().getUserId().equals(organizerUserId)) {
             throw new AccessDeniedException("모임장만 승인할 수 있습니다.");
         }
 
