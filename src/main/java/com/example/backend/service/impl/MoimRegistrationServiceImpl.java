@@ -207,6 +207,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             throw new AccessDeniedException("모임장만 접근할 수 있습니다.");
         }
 
+        System.out.println(moimRegistrationRepository.findByMoim(moim));
         return moimRegistrationRepository.findByMoim(moim);
     }
 

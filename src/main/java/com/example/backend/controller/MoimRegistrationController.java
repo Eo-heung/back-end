@@ -6,6 +6,7 @@ import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimRegistration;
 import com.example.backend.entity.User;
 import com.example.backend.jwt.CustomUserDetails;
+import com.example.backend.jwt.JwtTokenProvider;
 import com.example.backend.repository.MoimRegistrationRepository;
 import com.example.backend.repository.MoimRepository;
 import com.example.backend.repository.UserRepository;
@@ -34,6 +35,7 @@ public class MoimRegistrationController {
     private final MoimRegistrationRepository moimRegistrationRepository;
     private final UserRepository userRepository;
     private final MoimRepository moimRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/apply-moim/{moimId}")
     public ResponseEntity<?> applyToMoim(@PathVariable int moimId,
@@ -151,15 +153,16 @@ public class MoimRegistrationController {
     }
 
     //신청자 리스트
-    @GetMapping("get-applicant-list/{moimId}")
+    @PostMapping("/get-applicant-list/{moimId}")
     public ResponseEntity<?> getApplicantList(@PathVariable int moimId,
-                                              @AuthenticationPrincipal UserDetails userDetails) {
+            @RequestHeader("Authorization") String token) {
         ResponseDTO<List<MoimRegistration>> responseDTO = new ResponseDTO<>();
 
-        String organizerUserId = userDetails.getUsername();  //userId
+            String userId = jwtTokenProvider.validateAndGetUsername(token);
+//          User user = userRepository.findByUserId(userId).get();
 
         try {
-            List<MoimRegistration> MoimRegList = moimRegistrationService.getApplicantList(moimId, organizerUserId);
+            List<MoimRegistration> MoimRegList = moimRegistrationService.getApplicantList(moimId, userId);
             return ResponseEntity.ok().body(MoimRegList);
         } catch (Exception e) {
             return handleException(e);
@@ -167,7 +170,7 @@ public class MoimRegistrationController {
     }
 
     //신청자 상세페이지
-    @GetMapping("get-applicant/{moimRegId}")
+    @GetMapping("/get-applicant/{moimRegId}")
     public ResponseEntity<?> getApplicant(@PathVariable int moimRegId,
                                           @AuthenticationPrincipal UserDetails userDetails) {
         ResponseDTO<MoimRegistration> responseDTO = new ResponseDTO<>();
