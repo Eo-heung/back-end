@@ -61,6 +61,8 @@ public class UserDTO {
 
     private String token;
 
+    private Long  totalGam;
+
     public User DTOToEntity() {
         return User.builder()
                 .userId(userId)
@@ -85,6 +87,7 @@ public class UserDTO {
                 .userStatusMessage(userStatusMessage)
                 .createDatetime(createDatetime)
                 .updateDatetime(updateDatetime)
+                .totalGam(totalGam)
                 .build();
     }
 

@@ -24,7 +24,7 @@ public class PaymentGamDTO {
 
     public PaymentGam DTOToEntity() {
         return PaymentGam.builder()
-                .user_id(this.user_id)
+                .userId(this.user_id)
                 .imp_uid(this.imp_uid)
                 .merchant_uid(this.merchant_uid)
                 .value(this.value)

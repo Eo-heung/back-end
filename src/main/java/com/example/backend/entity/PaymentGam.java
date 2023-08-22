@@ -24,7 +24,7 @@ public class PaymentGam {
         private Long id;
 
         @Column(name = "userId")
-        private String user_id;
+        private String userId;
 
         @Column(name = "imp_uid")
         private String imp_uid;
@@ -46,7 +46,7 @@ public class PaymentGam {
         private Boolean status;
         public PaymentGamDTO EntityToDTO() {
                 return PaymentGamDTO.builder()
-                        .user_id(this.user_id)
+                        .user_id(this.userId)
                         .imp_uid(this.imp_uid)
                         .merchant_uid(this.merchant_uid)
                         .value(this.value)

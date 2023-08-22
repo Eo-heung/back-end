@@ -83,6 +83,9 @@ public class User {
         @Column(name = "update_datetime")
         private LocalDateTime updateDatetime;
 
+        @Column(name = "totalGam")
+        private Long totalGam;
+
     public UserDTO EntityToDTO() {
             return UserDTO.builder()
                 .userId(this.userId)
@@ -107,6 +110,7 @@ public class User {
                 .userStatusMessage(this.userStatusMessage)
                 .createDatetime(this.createDatetime)
                 .updateDatetime(this.updateDatetime)
+                .totalGam(this.totalGam)
                 .build();
     }
 }
