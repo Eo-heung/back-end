@@ -63,7 +63,6 @@ public class MoimRegistration {
         QUIT //탈퇴(신청자)
     }
 
-
     public String applicantUserNickname() {
         if (this.user != null) {
             return this.user.getUserNickname();

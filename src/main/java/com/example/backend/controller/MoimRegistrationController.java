@@ -70,8 +70,13 @@ public class MoimRegistrationController {
         Moim currentMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다"));
 
-        MoimRegistration moimRegId = moimRegistrationRepository.findByMoim(currentMoim)
-                .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다"));
+        List<MoimRegistration> moimRegs = moimRegistrationRepository.findByMoim(currentMoim);
+
+        if (moimRegs.isEmpty()) {
+            throw new RuntimeException("모임을 찾을 수 없습니다");
+        }
+
+        MoimRegistration moimRegId = moimRegs.get(0);
 
         MoimRegistration.RegStatus status = moimRegistrationRepository.findByMoimAndUser(currentMoim, currentUserId)
                 .map(MoimRegistration::getRegStatus)
@@ -150,7 +155,7 @@ public class MoimRegistrationController {
         String organizerUserId = userDetails.getUsername();  //userId
 
         try {
-            Optional<MoimRegistration> MoimRegList = moimRegistrationService.getApplicantList(moimId, organizerUserId);
+            List<MoimRegistration> MoimRegList = moimRegistrationService.getApplicantList(moimId, organizerUserId);
             return ResponseEntity.ok().body(MoimRegList);
         } catch (Exception e) {
             return handleException(e);
