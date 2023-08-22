@@ -16,6 +16,8 @@ public interface MoimRegistrationService {
 
     MoimRegistration quitMoim(int moimId, String applicantUserId);
 
+    MoimRegistration modifyMoimProfile(int moimId, String userId, MultipartFile moimProfile);
+
     List<MoimRegistration> getApplicantList(int moimId, String organizerUserId);
     MoimRegistration getApplicant(int moimRegId, String organizerUserId);
 

@@ -50,7 +50,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
 
             if (registration.getRegStatus() == MoimRegistration.RegStatus.CANCELED) {
                 // CANCELED 상태일 경우, 상태를 Waiting으로 업데이트하고 반환
-                registration.setRegStatus(MoimRegistration.RegStatus.Waiting);
+                registration.setRegStatus(MoimRegistration.RegStatus.WAITING);
                 registration.setApplicationDate(LocalDateTime.now());
                 return moimRegistrationRepository.save(registration);
             } else {
@@ -79,7 +79,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
                 .user(user)
                 .moimProfile(newBytes)
                 .createMoimProfile(LocalDateTime.now())
-                .regStatus(MoimRegistration.RegStatus.Waiting)
+                .regStatus(MoimRegistration.RegStatus.WAITING)
                 .applicationDate(LocalDateTime.now())
                 .build();
 
@@ -170,6 +170,32 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         existingRegistration.setQuitDate(LocalDateTime.now());
 
         return moimRegistrationRepository.save(existingRegistration);
+    }
+
+    @Override
+    public MoimRegistration modifyMoimProfile(int moimId, String userId, MultipartFile moimProfile) {
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다"));
+
+        //a모임 가입여부 확인
+        Optional<MoimRegistration> moimChk = moimRegistrationRepository.findByMoimAndUser(moim, user);
+
+        if (!moimChk.isPresent()) {
+            throw new IllegalArgumentException("모임에 가입하지 않은 사용자입니다.");
+        }
+
+        MoimRegistration moimReg = moimChk.get();
+
+        try {
+            moimReg.setMoimProfile(moimProfile.getBytes());
+            moimReg.setUpdateMoimProfile(LocalDateTime.now());
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe.getMessage(), ioe);
+        }
+
+        return moimRegistrationRepository.save(moimReg);
     }
 
     @Override
