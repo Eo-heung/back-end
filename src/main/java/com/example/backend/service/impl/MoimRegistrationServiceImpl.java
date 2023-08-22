@@ -1,5 +1,6 @@
 package com.example.backend.service.impl;
 
+import com.example.backend.dto.MoimRegistrationDTO;
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimRegistration;
 import com.example.backend.entity.ProfileImage;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -199,7 +201,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
     }
 
     @Override
-    public List<MoimRegistration> getApplicantList(int moimId, String organizerUserId) {
+    public List<MoimRegistrationDTO> getApplicantList(int moimId, String organizerUserId) {
         Moim moim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
 
@@ -207,8 +209,8 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             throw new AccessDeniedException("모임장만 접근할 수 있습니다.");
         }
 
-        System.out.println(moimRegistrationRepository.findByMoim(moim));
-        return moimRegistrationRepository.findByMoim(moim);
+        List<MoimRegistration> moimRegList = moimRegistrationRepository.findByMoim(moim);
+        return moimRegList.stream().map(MoimRegistration::toDTO).collect(Collectors.toList());
     }
 
     @Override

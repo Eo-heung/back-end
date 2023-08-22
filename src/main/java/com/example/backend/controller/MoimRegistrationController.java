@@ -154,20 +154,18 @@ public class MoimRegistrationController {
 
     //신청자 리스트
     @PostMapping("/get-applicant-list/{moimId}")
-    public ResponseEntity<?> getApplicantList(@PathVariable int moimId,
-            @RequestHeader("Authorization") String token) {
-        ResponseDTO<List<MoimRegistration>> responseDTO = new ResponseDTO<>();
+    public ResponseEntity<?> getApplicantList(@PathVariable int moimId, @RequestHeader("Authorization") String token) {
+        ResponseDTO<List<MoimRegistrationDTO>> responseDTO = new ResponseDTO<>();
 
-            String userId = jwtTokenProvider.validateAndGetUsername(token);
-//          User user = userRepository.findByUserId(userId).get();
-
+        String userId = jwtTokenProvider.validateAndGetUsername(token);
         try {
-            List<MoimRegistration> MoimRegList = moimRegistrationService.getApplicantList(moimId, userId);
-            return ResponseEntity.ok().body(MoimRegList);
+            List<MoimRegistrationDTO> MoimRegDTOList = moimRegistrationService.getApplicantList(moimId, userId);
+            return ResponseEntity.ok().body(MoimRegDTOList);
         } catch (Exception e) {
             return handleException(e);
         }
     }
+
 
     //신청자 상세페이지
     @GetMapping("/get-applicant/{moimRegId}")

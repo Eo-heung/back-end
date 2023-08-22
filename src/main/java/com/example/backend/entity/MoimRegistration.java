@@ -92,4 +92,15 @@ public class MoimRegistration {
     }
 
 
+    public MoimRegistrationDTO toDTO() {
+        return MoimRegistrationDTO.builder()
+                .moimRegId(this.moimRegId)
+                .moimProfile(this.moimProfile)
+                .regStatus(this.regStatus)
+                .applicationDate(this.applicationDate)
+                .applicantUserNickname(this.user.getUserNickname())
+                .applicantUserAddr(this.user.getUserAddr3())
+                .build();
+    }
+
 }
