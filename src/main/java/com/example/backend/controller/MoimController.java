@@ -125,7 +125,7 @@ public class MoimController {
                     returnMap.put("moimTitle", moim.getMoimTitle());
                     returnMap.put("moimAddr", moim.getMoimAddr());
                     returnMap.put("maxMoimUser", moim.getMaxMoimUser());
-                    returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
+//                    returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
                     returnMap.put("moimContent", moim.getMoimContent());
                     if(moimPictureList.size() - 1 > i ) {
                         i++;
@@ -137,7 +137,7 @@ public class MoimController {
                     returnMap.put("moimTitle", moim.getMoimTitle());
                     returnMap.put("moimAddr", moim.getMoimAddr());
                     returnMap.put("maxMoimUser", moim.getMaxMoimUser());
-                    returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
+//                    returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
                     returnMap.put("moimContent", moim.getMoimContent());
                 }
 
@@ -213,7 +213,7 @@ public class MoimController {
             moim.setMoimContent(moimDTO.getMoimContent());
             moim.setMoimAddr(moimDTO.getMoimAddr());
             moim.setMaxMoimUser(moimDTO.getMaxMoimUser());
-            moim.setCurrentMoimUser(moimDTO.getCurrentMoimUser());
+//            moim.setCurrentMoimUser(moimDTO.getCurrentMoimUser());
 
             Moim editMoim = moimService.modifyMoim(moim);
 

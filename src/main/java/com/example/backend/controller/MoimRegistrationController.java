@@ -83,8 +83,6 @@ public class MoimRegistrationController {
         return ResponseEntity.ok(response);
     }
 
-
-
     @PostMapping("/{moimRegId}/applicant-state")
     public ResponseEntity<?> handleMoim(@PathVariable int moimRegId,
                                         @RequestParam("nowStatus") MoimRegistration.RegStatus nowStatus,
@@ -156,7 +154,7 @@ public class MoimRegistrationController {
     @GetMapping("get-applicant-list/{moimId}")
     public ResponseEntity<?> getApplicantList(@PathVariable int moimId,
                                               @AuthenticationPrincipal UserDetails userDetails) {
-        ResponseDTO<Optional<MoimRegistration>> responseDTO = new ResponseDTO<>();
+        ResponseDTO<List<MoimRegistration>> responseDTO = new ResponseDTO<>();
 
         String organizerUserId = userDetails.getUsername();  //userId
 

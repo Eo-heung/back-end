@@ -4,7 +4,6 @@ import com.example.backend.entity.MoimRegistration;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface MoimRegistrationService {
     MoimRegistration applyToMoim(int moimId, String userId, MultipartFile moimProfile);

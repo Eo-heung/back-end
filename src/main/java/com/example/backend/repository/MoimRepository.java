@@ -13,9 +13,9 @@ public interface MoimRepository extends JpaRepository<Moim, Integer> {
     List<Moim> findByUserId(User user);
 
     Page<Moim> findByMoimTitleContainingOrMoimContentContainingOrMoimNicknameContaining(String searchKeyword,
-            String searchKeyword1,
-            String moimNickname,
-            Pageable pageable);
+                                                                                        String searchKeyword1,
+                                                                                        String moimNickname,
+                                                                                        Pageable pageable);
 
     Page<Moim> findByMoimTitleContaining(String searchKeyword, Pageable pageable);
 
