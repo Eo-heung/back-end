@@ -199,7 +199,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
     @Override
     public Page<MoimRegistrationDTO> getApplicantList(int moimId,
                                                       String organizerUserId,
-                                                      String moimNickname,
+                                                      String applicantUserNickname,
                                                       Pageable pageable) {
         Moim moim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
@@ -208,11 +208,11 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             throw new AccessDeniedException("모임장만 접근할 수 있습니다.");
         }
 
-        if (moimNickname == null || moimNickname.trim().isEmpty()) {
-            moimNickname = "";
+        if (applicantUserNickname == null || applicantUserNickname.trim().isEmpty()) {
+            applicantUserNickname = "";
         }
 
-        Page<MoimRegistration> moimRegList = moimRegistrationRepository.findByMoimAndUserNickname(moim, moimNickname, pageable);
+        Page<MoimRegistration> moimRegList = moimRegistrationRepository.findByMoimAndUserNickname(moim, applicantUserNickname, pageable);
         return moimRegList.map(MoimRegistration::toDTO);
     }
 

@@ -20,7 +20,7 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
 
     long countByMoimAndRegStatus(Moim moim, MoimRegistration.RegStatus regStatus);
 
-    @Query("SELECT m FROM MoimRegistration m JOIN m.user u WHERE m.moim = :moim AND m.regStatus = 'WAITING' AND u.userNickname LIKE %:moimNickname%")
-    Page<MoimRegistration> findByMoimAndUserNickname(Moim moim, String moimNickname, Pageable pageable);
+    @Query("SELECT m FROM MoimRegistration m JOIN m.user u WHERE m.moim = :moim AND m.regStatus = 'WAITING' AND u.userNickname LIKE %:applicantUserNickname%")
+    Page<MoimRegistration> findByMoimAndUserNickname(Moim moim, String applicantUserNickname, Pageable pageable);
 }
 
