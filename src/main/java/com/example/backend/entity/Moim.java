@@ -60,6 +60,10 @@ public class Moim {
     @Column(name = "is_end")
     private String isEnd; //종료여부
 
+    @OneToOne(mappedBy = "moimId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private MoimPicture moimPicture;
+
+
     // 모임 가입자 수 증가
     public void incrementCurrentMoimUser() {
         if (this.currentMoimUser + 1 > this.maxMoimUser) {

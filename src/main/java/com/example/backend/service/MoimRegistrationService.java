@@ -3,6 +3,8 @@ package com.example.backend.service;
 import com.example.backend.dto.MoimRegistrationDTO;
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimRegistration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -20,7 +22,7 @@ public interface MoimRegistrationService {
 
     MoimRegistration modifyMoimProfile(int moimId, String userId, MultipartFile moimProfile);
 
-    List<MoimRegistrationDTO> getApplicantList(int moimId, String organizerUserId);
+    Page<MoimRegistrationDTO> getApplicantList(int moimId, String organizerUserId, String moimNickname, Pageable pageable);
     MoimRegistrationDTO getApplicant(int moimId, int moimRegId, String organizerUserId);
 
 

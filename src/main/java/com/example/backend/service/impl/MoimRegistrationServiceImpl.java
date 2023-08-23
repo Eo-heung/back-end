@@ -12,6 +12,8 @@ import com.example.backend.repository.UserRepository;
 import com.example.backend.service.MoimRegistrationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -195,7 +197,10 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
     }
 
     @Override
-    public List<MoimRegistrationDTO> getApplicantList(int moimId, String organizerUserId) {
+    public Page<MoimRegistrationDTO> getApplicantList(int moimId,
+                                                      String organizerUserId,
+                                                      String moimNickname,
+                                                      Pageable pageable) {
         Moim moim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
 
@@ -203,8 +208,12 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             throw new AccessDeniedException("모임장만 접근할 수 있습니다.");
         }
 
-        List<MoimRegistration> moimRegList = moimRegistrationRepository.findByMoim(moim);
-        return moimRegList.stream().map(MoimRegistration::toDTO).collect(Collectors.toList());
+        if (moimNickname == null || moimNickname.trim().isEmpty()) {
+            moimNickname = "";
+        }
+
+        Page<MoimRegistration> moimRegList = moimRegistrationRepository.findByMoimAndUserNickname(moim, moimNickname, pageable);
+        return moimRegList.map(MoimRegistration::toDTO);
     }
 
     @Override

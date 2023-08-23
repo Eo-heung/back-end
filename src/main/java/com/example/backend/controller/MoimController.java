@@ -10,9 +10,13 @@ import com.example.backend.repository.MoimRepository;
 import com.example.backend.service.MoimPictureService;
 import com.example.backend.service.MoimService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -96,69 +100,55 @@ public class MoimController {
 
 
     @GetMapping("/list-moim")
-    public ResponseEntity<?> getMoimList() {
+    public ResponseEntity<?> getMoimList(@RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "3") int size,
+                                         @RequestParam(required = false) String category,
+                                         @RequestParam(required = false) String searchKeyword,
+                                         @RequestParam(required = false, defaultValue = "all") String searchType){
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Moim> moimPage = moimService.searchMoims(category, searchKeyword, searchType, pageable);
+
         ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
 
         try {
-            //모임 리스트 불러오기
-            List<Moim> moimList = moimService.getMoimList();
-            List<MoimPicture> moimPictureList = moimPictureService.getPictureList();
-
             Map<String, Object> result = new HashMap<>();
 
+        for (Moim moim : moimPage.getContent()) {
 
-//            카테고리, 소모임 이름, 모임 주소, 현재 가입한 회원 수, 최대 인원, 모임 소개, 그림
+            int moimId = moim.getMoimId();
+            Map<String, Object> returnMap = new HashMap<>();
 
-            int i = 0;
+            MoimPicture matchingPicture = moim.getMoimPicture();
 
-            for(Moim moim : moimList) {
-
-                int moimId = moim.getMoimId();
-                Map<String, Object> returnMap = new HashMap<>();
-
-                if(moimPictureList.get(i).getMoimId().getMoimId() == moimId) {
-
-                    String base64Encoded = Base64.getEncoder().encodeToString(moimPictureList.get(i).getMoimPic());
-                    returnMap.put("moimId", moim.getMoimId());
-                    returnMap.put("moimPic", base64Encoded);
-                    returnMap.put("moimCategory", moim.getMoimCategory());
-                    returnMap.put("moimTitle", moim.getMoimTitle());
-                    returnMap.put("moimAddr", moim.getMoimAddr());
-                    returnMap.put("maxMoimUser", moim.getMaxMoimUser());
-//                    returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
-                    returnMap.put("moimContent", moim.getMoimContent());
-                    if(moimPictureList.size() - 1 > i ) {
-                        i++;
-                    }
-
-                } else {
-                    returnMap.put("moimId", moim.getMoimId());
-                    returnMap.put("moimCategory", moim.getMoimCategory());
-                    returnMap.put("moimTitle", moim.getMoimTitle());
-                    returnMap.put("moimAddr", moim.getMoimAddr());
-                    returnMap.put("maxMoimUser", moim.getMaxMoimUser());
-//                    returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
-                    returnMap.put("moimContent", moim.getMoimContent());
-                }
-
-                System.out.println(returnMap);
-
-                String name = "moim" + moimId;
-                result.put(name, returnMap);
+            if (matchingPicture != null) {
+                String base64Encoded = Base64.getEncoder().encodeToString(matchingPicture.getMoimPic());
+                returnMap.put("moimPic", base64Encoded);
             }
 
-            responseDTO.setItem(result);
-            responseDTO.setStatusCode(HttpStatus.OK.value());
+            returnMap.put("moimId", moim.getMoimId());
+            returnMap.put("moimCategory", moim.getMoimCategory());
+            returnMap.put("moimTitle", moim.getMoimTitle());
+            returnMap.put("moimAddr", moim.getMoimAddr());
+            returnMap.put("maxMoimUser", moim.getMaxMoimUser());
+            returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
+            returnMap.put("moimContent", moim.getMoimContent());
 
-            return ResponseEntity.ok().body(responseDTO);
+            String name = "moim" + moimId;
+            result.put(name, returnMap);
+        }
 
-        } catch(Exception e) {
+        responseDTO.setItem(result);
+        responseDTO.setStatusCode(HttpStatus.OK.value());
+
+        return ResponseEntity.ok().body(responseDTO);
+    } catch(Exception e) {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDTO.setErrorMessage(e.getMessage());
 
             return ResponseEntity.badRequest().body(responseDTO);
         }
-    }
+}
 
 
 
@@ -196,9 +186,6 @@ public class MoimController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
-
-
-
 
     @PostMapping(value = "/modify-moim/{moimId}")
     public ResponseEntity<?> modifyMoim(@PathVariable int moimId, @RequestBody MoimDTO moimDTO) {

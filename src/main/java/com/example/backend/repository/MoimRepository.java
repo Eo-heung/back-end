@@ -12,14 +12,13 @@ import java.util.Optional;
 public interface MoimRepository extends JpaRepository<Moim, Integer> {
     List<Moim> findByUserId(User user);
 
-    Page<Moim> findByMoimTitleContainingOrMoimContentContainingOrMoimNicknameContaining(String searchKeyword,
-                                                                                        String searchKeyword1,
-                                                                                        String moimNickname,
-                                                                                        Pageable pageable);
 
-    Page<Moim> findByMoimTitleContaining(String searchKeyword, Pageable pageable);
+    Page<Moim> findByMoimTitleContaining(String keyword, Pageable pageable);
+    Page<Moim> findByMoimContentContaining(String keyword, Pageable pageable);
+    Page<Moim> findByMoimNicknameContaining(String keyword, Pageable pageable);
 
-    Page<Moim> findByMoimContentContaining(String searchKeyword, Pageable pageable);
-
-    Page<Moim> findByUserIdContaining(User user, Pageable pageable);
+    Page<Moim> findByMoimCategoryAndMoimTitleContaining(String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimCategoryAndMoimContentContaining(String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimCategoryAndMoimNicknameContaining(String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimCategory(String category, Pageable pageable);
 }

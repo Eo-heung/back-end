@@ -28,7 +28,7 @@ public class MoimPicture {
     @JoinColumn(name = "user_id")
     private User userId; //모임장Id
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "moim_id")
     private Moim moimId; //모임Id
 

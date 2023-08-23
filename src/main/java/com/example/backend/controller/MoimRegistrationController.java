@@ -13,6 +13,9 @@ import com.example.backend.repository.UserRepository;
 import com.example.backend.service.MoimRegistrationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -153,13 +156,18 @@ public class MoimRegistrationController {
 
     //신청자 리스트
     @PostMapping("/get-applicant-list/{moimId}")
-    public ResponseEntity<?> getApplicantList(@PathVariable int moimId, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getApplicantList(@PathVariable int moimId,
+                                              @RequestParam(required = false, defaultValue = "") String moimNickname,
+                                              @RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "3") int size,
+                                              @RequestHeader("Authorization") String token) {
         ResponseDTO<List<MoimRegistrationDTO>> responseDTO = new ResponseDTO<>();
 
         String userId = jwtTokenProvider.validateAndGetUsername(token);
         try {
-            List<MoimRegistrationDTO> MoimRegDTOList = moimRegistrationService.getApplicantList(moimId, userId);
-            return ResponseEntity.ok().body(MoimRegDTOList);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<MoimRegistrationDTO> MoimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, moimNickname, pageable);
+            return ResponseEntity.ok().body(MoimRegDTOPage);
         } catch (Exception e) {
             return handleException(e);
         }
