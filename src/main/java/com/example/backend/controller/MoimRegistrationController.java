@@ -157,7 +157,7 @@ public class MoimRegistrationController {
     //신청자 리스트
     @PostMapping("/get-applicant-list/{moimId}")
     public ResponseEntity<?> getApplicantList(@PathVariable int moimId,
-                                              @RequestParam(required = false, defaultValue = "") String moimNickname,
+                                              @RequestParam(required = false, defaultValue = "") String applicantUserNickname,
                                               @RequestParam(defaultValue = "0") int page,
                                               @RequestParam(defaultValue = "3") int size,
                                               @RequestHeader("Authorization") String token) {
@@ -166,7 +166,7 @@ public class MoimRegistrationController {
         String userId = jwtTokenProvider.validateAndGetUsername(token);
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<MoimRegistrationDTO> MoimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, moimNickname, pageable);
+            Page<MoimRegistrationDTO> MoimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, applicantUserNickname, pageable);
             return ResponseEntity.ok().body(MoimRegDTOPage);
         } catch (Exception e) {
             return handleException(e);

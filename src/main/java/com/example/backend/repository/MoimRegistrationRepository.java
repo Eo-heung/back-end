@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +21,9 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
 
     long countByMoimAndRegStatus(Moim moim, MoimRegistration.RegStatus regStatus);
 
-    @Query("SELECT m FROM MoimRegistration m JOIN m.user u WHERE m.moim = :moim AND m.regStatus = 'WAITING' AND u.userNickname LIKE %:applicantUserNickname%")
+    @Query("SELECT m FROM MoimRegistration m JOIN m.user u ON m.user = :userId WHERE m.moim = :moim AND m.regStatus = 'WAITING' AND u.userNickname LIKE %:applicantUserNickname%")
     Page<MoimRegistration> findByMoimAndUserNickname(Moim moim, String applicantUserNickname, Pageable pageable);
+
+
 }
 
