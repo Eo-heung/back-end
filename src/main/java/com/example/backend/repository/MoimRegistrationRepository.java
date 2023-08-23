@@ -15,4 +15,5 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
     List<MoimRegistration> findByMoim(Moim moim);
 
 
+    long countByMoimAndRegStatus(Moim moim, MoimRegistration.RegStatus regStatus);
 }

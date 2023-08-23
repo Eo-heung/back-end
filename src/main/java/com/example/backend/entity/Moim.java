@@ -1,7 +1,6 @@
 package com.example.backend.entity;
 
 import com.example.backend.dto.MoimDTO;
-import com.example.backend.dto.UserDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Entity
 @Data
@@ -61,6 +59,22 @@ public class Moim {
 
     @Column(name = "is_end")
     private String isEnd; //종료여부
+
+    // 모임 가입자 수 증가
+    public void incrementCurrentMoimUser() {
+        if (this.currentMoimUser + 1 > this.maxMoimUser) {
+            throw new IllegalStateException("모임 정원을 초과하여 가입할 수 없습니다.");
+        }
+        this.currentMoimUser += 1;
+    }
+
+    // 모임 가입자 수 감소
+    public void decrementCurrentMoimUser() {
+        if (this.currentMoimUser - 1 < 0) {
+            throw new IllegalStateException("모임 가입자 수가 이미 0입니다.");
+        }
+        this.currentMoimUser -= 1;
+    }
 
     public MoimDTO EntityToDTO() {
         return MoimDTO.builder()

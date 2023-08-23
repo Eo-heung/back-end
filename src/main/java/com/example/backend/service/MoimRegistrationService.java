@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.MoimRegistrationDTO;
+import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimRegistration;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +21,7 @@ public interface MoimRegistrationService {
     MoimRegistration modifyMoimProfile(int moimId, String userId, MultipartFile moimProfile);
 
     List<MoimRegistrationDTO> getApplicantList(int moimId, String organizerUserId);
-    MoimRegistrationDTO getApplicant(int moimRegId, String organizerUserId);
+    MoimRegistrationDTO getApplicant(int moimId, int moimRegId, String organizerUserId);
+
 
 }
