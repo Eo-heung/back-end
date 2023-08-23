@@ -7,20 +7,25 @@ import com.example.backend.entity.User;
 import com.example.backend.jwt.JwtTokenProvider;
 import com.example.backend.repository.PaymentRepository;
 import com.example.backend.repository.UserRepository;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @RestController
@@ -31,13 +36,15 @@ public class PaymentController {
     private final JwtTokenProvider jwtTokenProvider;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+    private final RestTemplate restTemplate;
 
     @Autowired
-    public PaymentController(JwtTokenProvider jwtTokenProvider, PaymentRepository paymentRepository, UserRepository userRepository) {
+    public PaymentController(JwtTokenProvider jwtTokenProvider, PaymentRepository paymentRepository, UserRepository userRepository, RestTemplate restTemplate) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.paymentRepository = paymentRepository;
         this.userRepository = userRepository;
         this.iamportClient = new IamportClient("8106611653013332", "AfZoYvt3SkS88yRfzmqB7IT1Np6MAwxIa9PKkW367CZu5xUU3bGFvZr65LCCoC0gtQqyAkAYZiDeFN0W");
+        this.restTemplate = restTemplate;
     }
 
     @PostMapping("/verifyIamport/{imp_uid}")
@@ -78,7 +85,6 @@ public class PaymentController {
         return ResponseEntity.ok(responseDTO);
     }
 
-
     @PostMapping("/paymentList")
     public ResponseEntity<?> PaymentList(@RequestHeader("Authorization") String token) {
         System.out.println("#################");
@@ -89,6 +95,91 @@ public class PaymentController {
 
         responseDTO.setItems(payments);
         return ResponseEntity.ok(responseDTO);
+    }
+
+    @PostMapping("/cancelPayment/{id}")
+    public ResponseEntity<?> cancelPayment(@PathVariable String id) {
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+
+        try {
+            String accessToken = getToken();
+
+            String url = "https://api.iamport.kr/payments/cancel";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(accessToken);
+
+            Map<String, String> body = new HashMap<>();
+            body.put("imp_uid", id);
+
+            HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+            CancelResponse response = restTemplate.postForObject(url, requestEntity, CancelResponse.class);
+            Map<String, Object> returnMap = new HashMap<>();
+
+            if (response.getCode() == 0) {
+                returnMap.put("msg", "취소가 완료되었습니다.");
+
+                responseDTO.setItem(returnMap);
+                responseDTO.setStatusCode(HttpStatus.OK.value());
+                return ResponseEntity.ok().body(responseDTO);
+            } else {
+                returnMap.put("msg", "결제 취소가 실패하였습니다.");
+
+                responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+                responseDTO.setErrorMessage(response.getMessage());
+                responseDTO.setItem(returnMap);
+
+                return ResponseEntity.badRequest().body(responseDTO);
+            }
+
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+    public static String getToken() {
+        RestTemplate restTemplate = new RestTemplate();
+
+        // API endpoint
+        String url = "https://api.iamport.kr/users/getToken";
+
+        // REST API 키와 REST API Secret를 설정
+        Map<String, String> body = new HashMap<>();
+        body.put("imp_key", "8106611653013332");
+        body.put("imp_secret", "AfZoYvt3SkS88yRfzmqB7IT1Np6MAwxIa9PKkW367CZu5xUU3bGFvZr65LCCoC0gtQqyAkAYZiDeFN0W");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);
+        TokenResponse response = restTemplate.postForObject(url, requestEntity, TokenResponse.class);
+
+        System.out.println("Access Token: " + response.getResponse().getAccess_token());
+
+        return response.getResponse().getAccess_token();
+    }
+
+    @Data
+    public static class TokenResponse {
+        private int code;
+        private String message;
+        private TokenDetails response;
+    }
+    @Data
+    public static class TokenDetails {
+        private String access_token;
+        private long now;
+        private long expired_at;
+    }
+    @Data
+    public static class CancelResponse {
+        private int code;
+        private String message;
+        private Map<String, Object> response;
     }
 
 }
