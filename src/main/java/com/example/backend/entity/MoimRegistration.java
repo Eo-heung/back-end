@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "MOIM_REGISTRATION")
+@EntityListeners(MoimRegistrationListener.class)
 public class MoimRegistration {
     @Id
     @Column(name = "moim_reg_id")

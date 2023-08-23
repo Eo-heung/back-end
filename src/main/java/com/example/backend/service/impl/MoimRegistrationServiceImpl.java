@@ -170,7 +170,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다"));
 
-        //a모임 가입여부 확인
+        //모임 가입여부 확인
         Optional<MoimRegistration> moimChk = moimRegistrationRepository.findByMoimAndUser(moim, user);
 
         if (!moimChk.isPresent()) {
@@ -203,7 +203,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
     }
 
     @Override
-    public MoimRegistration getApplicant(int moimRegId, String organizerUserId) {
+    public MoimRegistrationDTO getApplicant(int moimRegId, String organizerUserId) {
 
         MoimRegistration moimRegistration = moimRegistrationRepository.findById(moimRegId)
                 .orElseThrow(() -> new EntityNotFoundException("신청자 정보를 찾을 수 없습니다."));
@@ -212,9 +212,10 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
 
         if (!moim.getUserId().getUserId().equals(organizerUserId)) {
             throw new AccessDeniedException("모임장만 접근할 수 있습니다.");
+
         }
 
-        return moimRegistration;
+        return moimRegistration.toDTO();
     }
 
 

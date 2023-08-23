@@ -20,6 +20,6 @@ public interface MoimRegistrationService {
     MoimRegistration modifyMoimProfile(int moimId, String userId, MultipartFile moimProfile);
 
     List<MoimRegistrationDTO> getApplicantList(int moimId, String organizerUserId);
-    MoimRegistration getApplicant(int moimRegId, String organizerUserId);
+    MoimRegistrationDTO getApplicant(int moimRegId, String organizerUserId);
 
 }

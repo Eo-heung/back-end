@@ -169,14 +169,14 @@ public class MoimRegistrationController {
     //신청자 상세페이지
     @GetMapping("/get-applicant/{moimRegId}")
     public ResponseEntity<?> getApplicant(@PathVariable int moimRegId,
-                                          @AuthenticationPrincipal UserDetails userDetails) {
-        ResponseDTO<MoimRegistration> responseDTO = new ResponseDTO<>();
+                                          @RequestHeader("Authorization") String token) {
+        ResponseDTO<MoimRegistrationDTO> responseDTO = new ResponseDTO<>();
 
-        String organizerUserId = userDetails.getUsername();  //userId
+        String userId = jwtTokenProvider.validateAndGetUsername(token);
 
         try {
-            MoimRegistration moimRegistration = moimRegistrationService.getApplicant(moimRegId, organizerUserId);
-            responseDTO.setItem(moimRegistration);
+            MoimRegistrationDTO moimRegistrationDTO = moimRegistrationService.getApplicant(moimRegId, userId);
+            responseDTO.setItem(moimRegistrationDTO);
 
             return ResponseEntity.ok().body(responseDTO);
 
