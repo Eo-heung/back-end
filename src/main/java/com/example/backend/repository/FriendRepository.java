@@ -11,7 +11,7 @@ import java.util.Map;
 public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     @Query(value = "SELECT ff.friendsId" +
-            "            , ff.id, p.profile, u.user_name, u.user_addr3, u.user_status_message " +
+            "            , ff.id, p.profile, u.user_name, u.user_addr3, u.user_status_message, u.online " +
             "           FROM (SELECT CASE " +
             "                           WHEN f.from_friend_user = :name" +
             "                           THEN f.to_friend_user" +
