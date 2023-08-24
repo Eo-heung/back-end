@@ -160,10 +160,11 @@ public class MoimRegistrationController {
                                               @RequestParam(required = false, defaultValue = "") String applicantUserNickname,
                                               @RequestParam(defaultValue = "0") int page,
                                               @RequestParam(defaultValue = "3") int size,
-                                              @RequestHeader("Authorization") String token) {
+                                             @RequestHeader("Authorization") String token) {
         ResponseDTO<List<MoimRegistrationDTO>> responseDTO = new ResponseDTO<>();
 
         String userId = jwtTokenProvider.validateAndGetUsername(token);
+
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<MoimRegistrationDTO> MoimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, applicantUserNickname, pageable);

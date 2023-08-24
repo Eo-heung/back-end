@@ -21,8 +21,18 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
 
     long countByMoimAndRegStatus(Moim moim, MoimRegistration.RegStatus regStatus);
 
-    @Query("SELECT m FROM MoimRegistration m JOIN m.user u ON m.user = :userId WHERE m.moim = :moim AND m.regStatus = 'WAITING' AND u.userNickname LIKE %:applicantUserNickname%")
-    Page<MoimRegistration> findByMoimAndUserNickname(Moim moim, String applicantUserNickname, Pageable pageable);
+//    @Query("SELECT m FROM MoimRegistration m JOIN m.user u ON u.userId = :userId WHERE m.moim = :moim AND m.regStatus = 'WAITING' AND u.userNickname LIKE %:applicantUserNickname%")
+//    Page<MoimRegistration> findByMoimAndUserNickname(Moim moim, String userId, String applicantUserNickname, Pageable pageable);
+
+    @Query("SELECT m FROM MoimRegistration m JOIN m.user u ON u.userId = :userId WHERE m.moim.moimId = :moim AND m.regStatus = 'WAITING' AND u.userNickname LIKE %:applicantUserNickname%")
+    List<MoimRegistration> findByMoimAndUserNickname(int moim, String userId, String applicantUserNickname);
+
+    @Query("SELECT m FROM MoimRegistration m JOIN m.user u ON u.userId = :userId WHERE m.moim = :moim AND m.regStatus = 'WAITING'")
+
+    List<MoimRegistration> findByMoimId(Moim moim, String userId);
+
+    @Query("SELECT mr FROM MoimRegistration mr INNER JOIN mr.moim m WHERE m.userId.userId = :userId AND mr.regStatus = 'WAITING' AND m.moimId = :moimId")
+    Page<MoimRegistration> findApplicantsByMoimIdAndUserId(@Param("moimId") int moimId, @Param("userId") String userId, Pageable pageable);
 
 
 }

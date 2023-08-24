@@ -212,7 +212,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             applicantUserNickname = "";
         }
 
-        Page<MoimRegistration> moimRegList = moimRegistrationRepository.findByMoimAndUserNickname(moim, applicantUserNickname, pageable);
+        Page<MoimRegistration> moimRegList = moimRegistrationRepository.findApplicantsByMoimIdAndUserId(moimId, organizerUserId, pageable);
         return moimRegList.map(MoimRegistration::toDTO);
     }
 
