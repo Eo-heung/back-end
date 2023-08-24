@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import com.example.backend.dto.MoimDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,6 +62,7 @@ public class Moim {
     private String isEnd; //종료여부
 
     @OneToOne(mappedBy = "moimId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private MoimPicture moimPicture;
 
 

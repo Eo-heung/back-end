@@ -5,6 +5,7 @@ import com.example.backend.dto.MoimPictureDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimPicture;
+import com.example.backend.jwt.JwtTokenProvider;
 import com.example.backend.repository.MoimPictureRepository;
 import com.example.backend.repository.MoimRepository;
 import com.example.backend.service.MoimPictureService;
@@ -34,6 +35,7 @@ public class MoimController {
     private final MoimPictureService moimPictureService;
     private final MoimRepository moimRepository;
     private final MoimPictureRepository moimPictureRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/create-moim")
     public ResponseEntity<?> createMoim(@RequestBody MoimDTO moimDTO) {
@@ -97,58 +99,76 @@ public class MoimController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+    @PostMapping("/list-moim/asc")
+    public ResponseEntity<?> getMoimListAsc(@RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(required = false) String category,
+                                            @RequestParam(required = false) String searchKeyword,
+                                            @RequestParam(required = false, defaultValue = "all") String searchType,
+                                            @RequestHeader("Authorization") String token) {
 
+        return getResponse(page, category, searchKeyword, searchType, "ascending", token);
+    }
 
-    @GetMapping("/list-moim")
-    public ResponseEntity<?> getMoimList(@RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "3") int size,
-                                         @RequestParam(required = false) String category,
-                                         @RequestParam(required = false) String searchKeyword,
-                                         @RequestParam(required = false, defaultValue = "all") String searchType){
+    @PostMapping("/list-moim/desc")
+    public ResponseEntity<?> getMoimListDesc(@RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(required = false) String category,
+                                             @RequestParam(required = false) String searchKeyword,
+                                             @RequestParam(required = false, defaultValue = "all") String searchType,
+                                             @RequestHeader("Authorization") String token) {
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Moim> moimPage = moimService.searchMoims(category, searchKeyword, searchType, pageable);
+        return getResponse(page, category, searchKeyword, searchType, "descending", token);
+    }
 
-        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
-
-        try {
-            Map<String, Object> result = new HashMap<>();
-
-        for (Moim moim : moimPage.getContent()) {
-
-            int moimId = moim.getMoimId();
-            Map<String, Object> returnMap = new HashMap<>();
-
-            MoimPicture matchingPicture = moim.getMoimPicture();
-
-            if (matchingPicture != null) {
-                String base64Encoded = Base64.getEncoder().encodeToString(matchingPicture.getMoimPic());
-                returnMap.put("moimPic", base64Encoded);
-            }
-
-            returnMap.put("moimId", moim.getMoimId());
-            returnMap.put("moimCategory", moim.getMoimCategory());
-            returnMap.put("moimTitle", moim.getMoimTitle());
-            returnMap.put("moimAddr", moim.getMoimAddr());
-            returnMap.put("maxMoimUser", moim.getMaxMoimUser());
-            returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
-            returnMap.put("moimContent", moim.getMoimContent());
-
-            String name = "moim" + moimId;
-            result.put(name, returnMap);
-        }
-
-        responseDTO.setItem(result);
-        responseDTO.setStatusCode(HttpStatus.OK.value());
-
-        return ResponseEntity.ok().body(responseDTO);
-    } catch(Exception e) {
-            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            responseDTO.setErrorMessage(e.getMessage());
-
-            return ResponseEntity.badRequest().body(responseDTO);
-        }
-}
+//    @GetMapping("/list-moim")
+//    public ResponseEntity<?> getMoimList(@RequestParam(defaultValue = "0") int page,
+//                                         @RequestParam(required = false) String category,
+//                                         @RequestParam(required = false) String searchKeyword,
+//                                         @RequestParam(required = false, defaultValue = "all") String searchType,
+//                                         @RequestParam String orderBy,
+//                                         @RequestHeader("Authorization") String token) {
+//        String userId = jwtTokenProvider.validateAndGetUsername(token);
+//
+//        Pageable pageable = PageRequest.of(page, 3);
+//        Page<Moim> moimPage = moimService.searchMoims(category, searchKeyword, searchType, orderBy, pageable);
+//
+//        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+//
+//        try {
+//            Map<String, Object> result = new HashMap<>();
+//
+//            for (Moim moim : moimPage.getContent()) {
+//                int moimId = moim.getMoimId();
+//                Map<String, Object> returnMap = new HashMap<>();
+//
+//                MoimPicture matchingPicture = moim.getMoimPicture();
+//                if (matchingPicture != null) {
+//                    String base64Encoded = Base64.getEncoder().encodeToString(matchingPicture.getMoimPic());
+//                    returnMap.put("moimPic", base64Encoded);
+//                }
+//
+//                returnMap.put("moimId", moim.getMoimId());
+//                returnMap.put("moimCategory", moim.getMoimCategory());
+//                returnMap.put("moimTitle", moim.getMoimTitle());
+//                returnMap.put("moimAddr", moim.getMoimAddr());
+//                returnMap.put("maxMoimUser", moim.getMaxMoimUser());
+//                returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
+//                returnMap.put("moimContent", moim.getMoimContent());
+//
+//                String name = "moim" + moimId;
+//                result.put(name, returnMap);
+//            }
+//
+//            responseDTO.setItem(result);
+//            responseDTO.setStatusCode(HttpStatus.OK.value());
+//            return ResponseEntity.ok().body(responseDTO);
+//
+//        } catch(Exception e) {
+//            System.out.println(e.getMessage());
+//            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+//            responseDTO.setErrorMessage(e.getMessage());
+//            return ResponseEntity.badRequest().body(responseDTO);
+//        }
+//    }
 
 
 
@@ -187,13 +207,15 @@ public class MoimController {
         }
     }
 
+
+
     @PostMapping(value = "/modify-moim/{moimId}")
     public ResponseEntity<?> modifyMoim(@PathVariable int moimId, @RequestBody MoimDTO moimDTO) {
         ResponseDTO<Moim> responseDTO = new ResponseDTO<>();
 
+
         try {
             Moim moim = moimService.viewMoim(moimId);
-
 //            카테고리, 소모임 이름, 모임 주소, 현재 가입한 회원 수, 최대 인원, 모임 소개, 그림
             moim.setMoimTitle(moimDTO.getMoimTitle());
             moim.setMoimCategory(moimDTO.getMoimCategory());
@@ -206,7 +228,6 @@ public class MoimController {
 
             responseDTO.setItem(editMoim);
             responseDTO.setStatusCode(HttpStatus.OK.value());
-
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -275,6 +296,60 @@ public class MoimController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+
+
+    private ResponseEntity<?> getResponse(int page, String category, String searchKeyword, String searchType, String orderBy, String token) {
+        String userId = jwtTokenProvider.validateAndGetUsername(token);
+
+        Pageable pageable = PageRequest.of(page, 3);
+        Page<Moim> moimPage;
+
+        if ("ascending".equals(orderBy)) {
+            moimPage = moimService.searchMoims(category, searchKeyword, searchType, "asc", pageable);
+        } else {
+            moimPage = moimService.searchMoims(category, searchKeyword, searchType, "desc", pageable);
+        }
+
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+
+        try {
+            Map<String, Object> result = new HashMap<>();
+
+            for (Moim moim : moimPage.getContent()) {
+                int moimId = moim.getMoimId();
+                Map<String, Object> returnMap = new HashMap<>();
+                MoimPicture matchingPicture = moim.getMoimPicture();
+
+                if (matchingPicture != null) {
+                    String base64Encoded = Base64.getEncoder().encodeToString(matchingPicture.getMoimPic());
+                    returnMap.put("moimPic", base64Encoded);
+                }
+
+                returnMap.put("moimId", moim.getMoimId());
+                returnMap.put("moimCategory", moim.getMoimCategory());
+                returnMap.put("moimTitle", moim.getMoimTitle());
+                returnMap.put("moimAddr", moim.getMoimAddr());
+                returnMap.put("maxMoimUser", moim.getMaxMoimUser());
+                returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
+                returnMap.put("moimContent", moim.getMoimContent());
+                String name = "moim" + moimId;
+                result.put(name, returnMap);
+            }
+
+            responseDTO.setItem(result);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+
+
 
 
 

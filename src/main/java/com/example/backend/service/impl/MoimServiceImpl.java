@@ -44,32 +44,68 @@ public class MoimServiceImpl implements MoimService {
     }
 
     @Override
-    public Page<Moim> searchMoims(String category, String keyword, String searchType, Pageable pageable) {
+    public Page<Moim> searchMoims(String category, String keyword, String searchType, String orderBy, Pageable pageable) {
         if ("all".equalsIgnoreCase(category) && "all".equalsIgnoreCase(searchType)) {
-            return moimRepository.findAll(pageable);
+            if ("ascending".equals(orderBy)) {
+                return moimRepository.findAllByOrderByMoimIdAsc(pageable);
+            } else {
+                return moimRepository.findAllByOrderByMoimIdDesc(pageable);
+            }
         }
 
         if ("all".equalsIgnoreCase(category)) {
             switch (searchType) {
                 case "title":
-                    return moimRepository.findByMoimTitleContaining(keyword, pageable);
+                    if ("ascending".equals(orderBy)) {
+                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(keyword, pageable);
+                    } else {
+                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(keyword, pageable);
+                    }
                 case "content":
-                    return moimRepository.findByMoimContentContaining(keyword, pageable);
+                    if ("ascending".equals(orderBy)) {
+                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(keyword, pageable);
+                    } else {
+                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(keyword, pageable);
+                    }
                 case "nickname":
-                    return moimRepository.findByMoimNicknameContaining(keyword, pageable);
+                    if ("ascending".equals(orderBy)) {
+                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(keyword, pageable);
+                    } else {
+                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(keyword, pageable);
+                    }
                 default:
-                    return moimRepository.findAll(pageable);
+                    if ("ascending".equals(orderBy)) {
+                        return moimRepository.findAllByOrderByMoimIdAsc(pageable);
+                    } else {
+                        return moimRepository.findAllByOrderByMoimIdDesc(pageable);
+                    }
             }
         } else {
             switch (searchType) {
                 case "title":
-                    return moimRepository.findByMoimCategoryAndMoimTitleContaining(category, keyword, pageable);
+                    if ("ascending".equals(orderBy)) {
+                        return moimRepository.findByMoimCategoryAndMoimTitleContainingOrderByMoimIdAsc(category, keyword, pageable);
+                    } else {
+                        return moimRepository.findByMoimCategoryAndMoimTitleContainingOrderByMoimIdDesc(category, keyword, pageable);
+                    }
                 case "content":
-                    return moimRepository.findByMoimCategoryAndMoimContentContaining(category, keyword, pageable);
+                    if ("ascending".equals(orderBy)) {
+                        return moimRepository.findByMoimCategoryAndMoimContentContainingOrderByMoimIdAsc(category, keyword, pageable);
+                    } else {
+                        return moimRepository.findByMoimCategoryAndMoimContentContainingOrderByMoimIdDesc(category, keyword, pageable);
+                    }
                 case "nickname":
-                    return moimRepository.findByMoimCategoryAndMoimNicknameContaining(category, keyword, pageable);
+                    if ("ascending".equals(orderBy)) {
+                        return moimRepository.findByMoimCategoryAndMoimNicknameContainingOrderByMoimIdAsc(category, keyword, pageable);
+                    } else {
+                        return moimRepository.findByMoimCategoryAndMoimNicknameContainingOrderByMoimIdDesc(category, keyword, pageable);
+                    }
                 default:
-                    return moimRepository.findByMoimCategory(category, pageable);
+                    if ("ascending".equals(orderBy)) {
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(category, pageable);
+                    } else {
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(category, pageable);
+                    }
             }
         }
     }

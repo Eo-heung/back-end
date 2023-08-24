@@ -25,6 +25,7 @@ public class MoimPictureServiceImpl implements MoimPictureService {
     private final MoimPictureRepository moimPictureRepository;
 
     @Override
+    @Transactional
     public MoimPicture createMoim(MoimPicture moimPicture) {
         return moimPictureRepository.save(moimPicture);
     }

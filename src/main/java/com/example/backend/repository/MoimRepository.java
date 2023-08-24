@@ -12,13 +12,30 @@ import java.util.Optional;
 public interface MoimRepository extends JpaRepository<Moim, Integer> {
     List<Moim> findByUserId(User user);
 
+    
 
-    Page<Moim> findByMoimTitleContaining(String keyword, Pageable pageable);
-    Page<Moim> findByMoimContentContaining(String keyword, Pageable pageable);
-    Page<Moim> findByMoimNicknameContaining(String keyword, Pageable pageable);
+    Page<Moim> findAllByOrderByMoimIdAsc(Pageable pageable);
+    Page<Moim> findAllByOrderByMoimIdDesc(Pageable pageable);
 
-    Page<Moim> findByMoimCategoryAndMoimTitleContaining(String category, String keyword, Pageable pageable);
-    Page<Moim> findByMoimCategoryAndMoimContentContaining(String category, String keyword, Pageable pageable);
-    Page<Moim> findByMoimCategoryAndMoimNicknameContaining(String category, String keyword, Pageable pageable);
-    Page<Moim> findByMoimCategory(String category, Pageable pageable);
+    Page<Moim> findByMoimTitleContainingOrderByMoimIdAsc(String keyword, Pageable pageable);
+    Page<Moim> findByMoimTitleContainingOrderByMoimIdDesc(String keyword, Pageable pageable);
+
+    Page<Moim> findByMoimContentContainingOrderByMoimIdAsc(String keyword, Pageable pageable);
+    Page<Moim> findByMoimContentContainingOrderByMoimIdDesc(String keyword, Pageable pageable);
+
+    Page<Moim> findByMoimNicknameContainingOrderByMoimIdAsc(String keyword, Pageable pageable);
+    Page<Moim> findByMoimNicknameContainingOrderByMoimIdDesc(String keyword, Pageable pageable);
+
+    Page<Moim> findByMoimCategoryAndMoimTitleContainingOrderByMoimIdAsc(String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimCategoryAndMoimTitleContainingOrderByMoimIdDesc(String category, String keyword, Pageable pageable);
+
+    Page<Moim> findByMoimCategoryAndMoimContentContainingOrderByMoimIdAsc(String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimCategoryAndMoimContentContainingOrderByMoimIdDesc(String category, String keyword, Pageable pageable);
+
+    Page<Moim> findByMoimCategoryAndMoimNicknameContainingOrderByMoimIdAsc(String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimCategoryAndMoimNicknameContainingOrderByMoimIdDesc(String category, String keyword, Pageable pageable);
+
+    Page<Moim> findByMoimCategoryOrderByMoimIdAsc(String category, Pageable pageable);
+
+    Page<Moim> findByMoimCategoryOrderByMoimIdDesc(String category, Pageable pageable);
 }

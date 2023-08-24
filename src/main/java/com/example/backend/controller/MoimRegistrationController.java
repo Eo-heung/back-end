@@ -176,7 +176,7 @@ public class MoimRegistrationController {
 
 
     //신청자 상세페이지
-    @GetMapping("/moimReg/get-applicant/{moimId}/{moimRegId}")
+    @GetMapping("/get-applicant/{moimId}/{moimRegId}")
     public ResponseEntity<?> getApplicant(@PathVariable int moimId,
                                           @PathVariable int moimRegId,
                                           @RequestHeader("Authorization") String token) {
