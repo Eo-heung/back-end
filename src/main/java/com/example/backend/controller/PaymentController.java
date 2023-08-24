@@ -65,7 +65,7 @@ public class PaymentController {
         paymentGam.setUserId(userId);
         paymentRepository.save(paymentGam);
 
-        List<PaymentGam> payments = paymentRepository.findByUserId(userId);
+        List<PaymentGam> payments = paymentRepository.findByUserIdOrderByPayDateDesc(userId);
 
         // gotGam 값들의 합 계산
         Long totalGotGam = payments.stream()
@@ -91,7 +91,7 @@ public class PaymentController {
         ResponseDTO<PaymentGam> responseDTO = new ResponseDTO<>();
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
-        List<PaymentGam> payments = paymentRepository.findByUserId(userId);
+        List<PaymentGam> payments = paymentRepository.findByUserIdOrderByPayDateDesc(userId);
 
         responseDTO.setItems(payments);
         return ResponseEntity.ok(responseDTO);
