@@ -86,6 +86,9 @@ public class User {
         @Column(name = "totalGam")
         private Long totalGam;
 
+        @Column(name = "online")
+        private Boolean online;
+
     public UserDTO EntityToDTO() {
             return UserDTO.builder()
                 .userId(this.userId)
@@ -111,6 +114,7 @@ public class User {
                 .createDatetime(this.createDatetime)
                 .updateDatetime(this.updateDatetime)
                 .totalGam(this.totalGam)
+                    .online(this.online)
                 .build();
     }
 }

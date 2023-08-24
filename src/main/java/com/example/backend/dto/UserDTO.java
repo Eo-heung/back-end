@@ -63,6 +63,8 @@ public class UserDTO {
 
     private Long  totalGam;
 
+    private Boolean online;
+
     public User DTOToEntity() {
         return User.builder()
                 .userId(userId)
@@ -88,6 +90,7 @@ public class UserDTO {
                 .createDatetime(createDatetime)
                 .updateDatetime(updateDatetime)
                 .totalGam(totalGam)
+                .online(online)
                 .build();
     }
 
