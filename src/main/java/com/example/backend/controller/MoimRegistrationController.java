@@ -5,7 +5,6 @@ import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimRegistration;
 import com.example.backend.entity.User;
-import com.example.backend.jwt.CustomUserDetails;
 import com.example.backend.jwt.JwtTokenProvider;
 import com.example.backend.repository.MoimRegistrationRepository;
 import com.example.backend.repository.MoimRepository;
@@ -16,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,11 +24,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -159,16 +155,21 @@ public class MoimRegistrationController {
     public ResponseEntity<?> getApplicantList(@PathVariable int moimId,
                                               @RequestParam(required = false, defaultValue = "") String applicantUserNickname,
                                               @RequestParam(defaultValue = "0") int page,
-                                              @RequestParam(defaultValue = "3") int size,
+                                              @RequestParam("orderBy")String orderBy,
                                              @RequestHeader("Authorization") String token) {
-        ResponseDTO<List<MoimRegistrationDTO>> responseDTO = new ResponseDTO<>();
+        ResponseDTO<MoimRegistrationDTO> responseDTO = new ResponseDTO<>();
 
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
+
         try {
             Pageable pageable = PageRequest.of(0, (page + 1) * 3);
-            Page<MoimRegistrationDTO> MoimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, applicantUserNickname, pageable);
-            return ResponseEntity.ok().body(MoimRegDTOPage);
+
+            Page<MoimRegistrationDTO> moimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, applicantUserNickname, orderBy, pageable);
+
+            responseDTO.setItems(moimRegDTOPage.getContent());
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
             return handleException(e);
         }

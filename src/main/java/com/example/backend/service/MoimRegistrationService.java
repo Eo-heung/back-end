@@ -22,7 +22,7 @@ public interface MoimRegistrationService {
 
     MoimRegistration modifyMoimProfile(int moimId, String userId, MultipartFile moimProfile);
 
-    Page<MoimRegistrationDTO> getApplicantList(int moimId, String organizerUserId, String applicantUserNickname, Pageable pageable);
+    Page<MoimRegistrationDTO> getApplicantList(int moimId, String organizerUserId, String applicantUserNickname, String orderBy, Pageable pageable);
     MoimRegistrationDTO getApplicant(int moimId, int moimRegId, String organizerUserId);
 
 

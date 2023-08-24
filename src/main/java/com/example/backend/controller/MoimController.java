@@ -104,7 +104,7 @@ public class MoimController {
     }
     @PostMapping("/list-moim/asc")
     public ResponseEntity<?> getMoimListAsc(@RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(required = false, defaultValue = "all") String category,
+                                            @RequestParam(required = false, defaultValue = "999") int category,
                                             @RequestParam(required = false) String searchKeyword,
                                             @RequestParam(required = false, defaultValue = "all") String searchType,
                                             @RequestHeader("Authorization") String token) {
@@ -114,7 +114,7 @@ public class MoimController {
 
     @PostMapping("/list-moim/desc")
     public ResponseEntity<?> getMoimListDesc(@RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(required = false, defaultValue = "all") String category,
+                                             @RequestParam(required = false, defaultValue = "999") int category,
                                              @RequestParam(required = false) String searchKeyword,
                                              @RequestParam(required = false, defaultValue = "all") String searchType,
                                              @RequestHeader("Authorization") String token) {
@@ -248,7 +248,7 @@ public class MoimController {
     }
 
 
-    private ResponseEntity<?> getResponse(int page, String category, String searchKeyword, String searchType, String orderBy, String token) {
+    private ResponseEntity<?> getResponse(int page, int category, String searchKeyword, String searchType, String orderBy, String token) {
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
         User user = userRepository.findByUserId(userId)
@@ -261,9 +261,9 @@ public class MoimController {
         Page<Moim> moimPage;
 
         if ("ascending".equals(orderBy)) {
-            moimPage = moimService.searchMoims(user, category, searchKeyword, searchType, "asc", pageable);
+            moimPage = moimService.searchMoims(user, category, searchKeyword, searchType, orderBy, pageable);
         } else {
-            moimPage = moimService.searchMoims(user, category, searchKeyword, searchType, "desc", pageable);
+            moimPage = moimService.searchMoims(user, category, searchKeyword, searchType, orderBy, pageable);
         }
 
         ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();

@@ -21,45 +21,48 @@ public interface MoimRepository extends JpaRepository<Moim, Integer> {
     @Query("SELECT m FROM Moim m WHERE m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
     Page<Moim> findAllByOrderByMoimIdDesc(User user, Pageable pageable);
 
-    @Query("SELECT m FROM Moim m WHERE m.moimTitle LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
-    Page<Moim> findByMoimTitleContainingOrderByMoimIdAsc(User user, String keyword, Pageable pageable);
-
-    @Query("SELECT m FROM Moim m WHERE m.moimTitle LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
-    Page<Moim> findByMoimTitleContainingOrderByMoimIdDesc(User user, String keyword, Pageable pageable);
-
-    @Query("SELECT m FROM Moim m WHERE m.moimContent LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
-    Page<Moim> findByMoimContentContainingOrderByMoimIdAsc(User user, String keyword, Pageable pageable);
-
-    @Query("SELECT m FROM Moim m WHERE m.moimContent LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
-    Page<Moim> findByMoimContentContainingOrderByMoimIdDesc(User user, String keyword, Pageable pageable);
-
-    @Query("SELECT m FROM Moim m WHERE m.moimNickname LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
-    Page<Moim> findByMoimNicknameContainingOrderByMoimIdAsc(User user, String keyword, Pageable pageable);
-
-    @Query("SELECT m FROM Moim m WHERE m.moimNickname LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
-    Page<Moim> findByMoimNicknameContainingOrderByMoimIdDesc(User user, String keyword, Pageable pageable);
-
     @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimTitle LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
-    Page<Moim> findByMoimCategoryAndMoimTitleContainingOrderByMoimIdAsc(User user, String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimTitleContainingOrderByMoimIdAsc(User user, int category, String keyword, Pageable pageable);
 
     @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimTitle LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
-    Page<Moim> findByMoimCategoryAndMoimTitleContainingOrderByMoimIdDesc(User user, String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimTitleContainingOrderByMoimIdDesc(User user, int category, String keyword, Pageable pageable);
 
     @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimContent LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
-    Page<Moim> findByMoimCategoryAndMoimContentContainingOrderByMoimIdAsc(User user, String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimContentContainingOrderByMoimIdAsc(User user, int category, String keyword, Pageable pageable);
 
     @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimContent LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
-    Page<Moim> findByMoimCategoryAndMoimContentContainingOrderByMoimIdDesc(User user, String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimContentContainingOrderByMoimIdDesc(User user, int category, String keyword, Pageable pageable);
 
     @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimNickname LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
-    Page<Moim> findByMoimCategoryAndMoimNicknameContainingOrderByMoimIdAsc(User user, String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimNicknameContainingOrderByMoimIdAsc(User user, int category, String keyword, Pageable pageable);
 
     @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimNickname LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
-    Page<Moim> findByMoimCategoryAndMoimNicknameContainingOrderByMoimIdDesc(User user, String category, String keyword, Pageable pageable);
+    Page<Moim> findByMoimNicknameContainingOrderByMoimIdDesc(User user, int category, String keyword, Pageable pageable);
+
+
+//    dyddyydydydydydrl
+
+    @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimTitle LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
+    Page<Moim> findByMoimCategoryAndMoimTitleContainingOrderByMoimIdAsc(User user, int category, String keyword, Pageable pageable);
+
+    @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimTitle LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
+    Page<Moim> findByMoimCategoryAndMoimTitleContainingOrderByMoimIdDesc(User user, int category, String keyword, Pageable pageable);
+
+    @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimContent LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
+    Page<Moim> findByMoimCategoryAndMoimContentContainingOrderByMoimIdAsc(User user, int category, String keyword, Pageable pageable);
+
+    @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimContent LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
+    Page<Moim> findByMoimCategoryAndMoimContentContainingOrderByMoimIdDesc(User user, int category, String keyword, Pageable pageable);
+
+    @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimNickname LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
+    Page<Moim> findByMoimCategoryAndMoimNicknameContainingOrderByMoimIdAsc(User user, int category, String keyword, Pageable pageable);
+
+    @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimNickname LIKE %:keyword% AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
+    Page<Moim> findByMoimCategoryAndMoimNicknameContainingOrderByMoimIdDesc(User user, int category, String keyword, Pageable pageable);
 
     @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
-    Page<Moim> findByMoimCategoryOrderByMoimIdAsc(User user, String category, Pageable pageable);
+    Page<Moim> findByMoimCategoryOrderByMoimIdAsc(User user, int category, Pageable pageable);
 
     @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
-    Page<Moim> findByMoimCategoryOrderByMoimIdDesc(User user, String category, Pageable pageable);
+    Page<Moim> findByMoimCategoryOrderByMoimIdDesc(User user, int category, Pageable pageable);
 }

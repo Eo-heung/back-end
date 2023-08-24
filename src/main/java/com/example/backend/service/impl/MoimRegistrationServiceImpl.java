@@ -15,16 +15,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -196,10 +192,33 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(moimReg);
     }
 
+//    @Override
+//    public Page<MoimRegistrationDTO> getApplicantList(int moimId,
+//                                                      String organizerUserId,
+//                                                      String orderBy,
+//                                                      String applicantUserNickname,
+//                                                      Pageable pageable) {
+//        Moim moim = moimRepository.findById(moimId)
+//                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+//
+//        if (!moim.getUserId().getUserId().equals(organizerUserId)) {
+//            throw new AccessDeniedException("모임장만 접근할 수 있습니다.");
+//        }
+//
+//        if (applicantUserNickname == null || applicantUserNickname.trim().isEmpty()) {
+//            applicantUserNickname = "";
+//        }
+//
+//        Page<MoimRegistration> moimRegList = moimRegistrationRepository.findApplicantsByMoimIdAndUserId(moimId, organizerUserId, pageable);
+//        return moimRegList.map(MoimRegistration::toDTO);
+//    }
+
     @Override
-    public Page<MoimRegistrationDTO> getApplicantList(int moimId,
+    public Page<MoimRegistrationDTO> getApplicantList(
+                                                      int moimId,
                                                       String organizerUserId,
                                                       String applicantUserNickname,
+                                                      String orderBy,
                                                       Pageable pageable) {
         Moim moim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
@@ -212,7 +231,16 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             applicantUserNickname = "";
         }
 
-        Page<MoimRegistration> moimRegList = moimRegistrationRepository.findApplicantsByMoimIdAndUserId(moimId, organizerUserId, pageable);
+        Page<MoimRegistration> moimRegList = null;
+        System.out.println("orderBy");
+        System.out.println(orderBy);
+        if ("ascending".equals(orderBy)) {
+            moimRegList = moimRegistrationRepository.findApplicantsByMoimIdAndUserIdOrderByMoimIdAsc(moimId, organizerUserId, pageable);
+            System.out.println(moimRegList);
+        } else {
+            moimRegList = moimRegistrationRepository.findApplicantsByMoimIdAndUserIdOrderByMoimIdDesc(moimId, organizerUserId, pageable);
+        }
+
         return moimRegList.map(MoimRegistration::toDTO);
     }
 
