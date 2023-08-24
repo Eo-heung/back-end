@@ -151,8 +151,8 @@ public class MoimRegistrationController {
     }
 
     //신청자 리스트
-    @PostMapping("/get-applicant-list/{moimId}")
-    public ResponseEntity<?> getApplicantList(@PathVariable int moimId,
+    @PostMapping("/get-applicant-list/asc/{moimId}")
+    public ResponseEntity<?> getApplicantListAsc(@PathVariable int moimId,
                                               @RequestParam(required = false, defaultValue = "") String applicantUserNickname,
                                               @RequestParam(defaultValue = "0") int page,
                                               @RequestParam("orderBy")String orderBy,
@@ -165,7 +165,31 @@ public class MoimRegistrationController {
         try {
             Pageable pageable = PageRequest.of(0, (page + 1) * 3);
 
-            Page<MoimRegistrationDTO> moimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, applicantUserNickname, orderBy, pageable);
+            Page<MoimRegistrationDTO> moimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, applicantUserNickname, "ascending", pageable);
+
+            responseDTO.setItems(moimRegDTOPage.getContent());
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @PostMapping("/get-applicant-list/desc/{moimId}")
+    public ResponseEntity<?> getApplicantListDesc(@PathVariable int moimId,
+                                              @RequestParam(required = false, defaultValue = "") String applicantUserNickname,
+                                              @RequestParam(defaultValue = "0") int page,
+                                              @RequestParam("orderBy")String orderBy,
+                                              @RequestHeader("Authorization") String token) {
+        ResponseDTO<MoimRegistrationDTO> responseDTO = new ResponseDTO<>();
+
+        String userId = jwtTokenProvider.validateAndGetUsername(token);
+
+
+        try {
+            Pageable pageable = PageRequest.of(0, (page + 1) * 3);
+
+            Page<MoimRegistrationDTO> moimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, applicantUserNickname, "descending", pageable);
 
             responseDTO.setItems(moimRegDTOPage.getContent());
             responseDTO.setStatusCode(HttpStatus.OK.value());
