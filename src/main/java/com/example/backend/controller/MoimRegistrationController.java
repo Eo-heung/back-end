@@ -166,7 +166,7 @@ public class MoimRegistrationController {
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
         try {
-            Pageable pageable = PageRequest.of(page, size);
+            Pageable pageable = PageRequest.of(0, (page + 1) * 3);
             Page<MoimRegistrationDTO> MoimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, applicantUserNickname, pageable);
             return ResponseEntity.ok().body(MoimRegDTOPage);
         } catch (Exception e) {

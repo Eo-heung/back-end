@@ -19,7 +19,7 @@ public interface MoimService {
 
     List<Moim> getMoimList();
 
-    Page<Moim> searchMoims(String category, String keyword, String searchType, String orderBy, Pageable pageable);
+    Page<Moim> searchMoims(User user, String category, String keyword, String searchType, String orderBy, Pageable pageable);
 
 
 }

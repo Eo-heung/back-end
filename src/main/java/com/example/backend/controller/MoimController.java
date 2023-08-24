@@ -5,9 +5,11 @@ import com.example.backend.dto.MoimPictureDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimPicture;
+import com.example.backend.entity.User;
 import com.example.backend.jwt.JwtTokenProvider;
 import com.example.backend.repository.MoimPictureRepository;
 import com.example.backend.repository.MoimRepository;
+import com.example.backend.repository.UserRepository;
 import com.example.backend.service.MoimPictureService;
 import com.example.backend.service.MoimService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class MoimController {
     private final MoimRepository moimRepository;
     private final MoimPictureRepository moimPictureRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
     @PostMapping("/create-moim")
     public ResponseEntity<?> createMoim(@RequestBody MoimDTO moimDTO) {
@@ -101,7 +104,7 @@ public class MoimController {
     }
     @PostMapping("/list-moim/asc")
     public ResponseEntity<?> getMoimListAsc(@RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(required = false) String category,
+                                            @RequestParam(required = false, defaultValue = "all") String category,
                                             @RequestParam(required = false) String searchKeyword,
                                             @RequestParam(required = false, defaultValue = "all") String searchType,
                                             @RequestHeader("Authorization") String token) {
@@ -111,66 +114,13 @@ public class MoimController {
 
     @PostMapping("/list-moim/desc")
     public ResponseEntity<?> getMoimListDesc(@RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(required = false) String category,
+                                             @RequestParam(required = false, defaultValue = "all") String category,
                                              @RequestParam(required = false) String searchKeyword,
                                              @RequestParam(required = false, defaultValue = "all") String searchType,
                                              @RequestHeader("Authorization") String token) {
 
         return getResponse(page, category, searchKeyword, searchType, "descending", token);
     }
-
-//    @GetMapping("/list-moim")
-//    public ResponseEntity<?> getMoimList(@RequestParam(defaultValue = "0") int page,
-//                                         @RequestParam(required = false) String category,
-//                                         @RequestParam(required = false) String searchKeyword,
-//                                         @RequestParam(required = false, defaultValue = "all") String searchType,
-//                                         @RequestParam String orderBy,
-//                                         @RequestHeader("Authorization") String token) {
-//        String userId = jwtTokenProvider.validateAndGetUsername(token);
-//
-//        Pageable pageable = PageRequest.of(page, 3);
-//        Page<Moim> moimPage = moimService.searchMoims(category, searchKeyword, searchType, orderBy, pageable);
-//
-//        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
-//
-//        try {
-//            Map<String, Object> result = new HashMap<>();
-//
-//            for (Moim moim : moimPage.getContent()) {
-//                int moimId = moim.getMoimId();
-//                Map<String, Object> returnMap = new HashMap<>();
-//
-//                MoimPicture matchingPicture = moim.getMoimPicture();
-//                if (matchingPicture != null) {
-//                    String base64Encoded = Base64.getEncoder().encodeToString(matchingPicture.getMoimPic());
-//                    returnMap.put("moimPic", base64Encoded);
-//                }
-//
-//                returnMap.put("moimId", moim.getMoimId());
-//                returnMap.put("moimCategory", moim.getMoimCategory());
-//                returnMap.put("moimTitle", moim.getMoimTitle());
-//                returnMap.put("moimAddr", moim.getMoimAddr());
-//                returnMap.put("maxMoimUser", moim.getMaxMoimUser());
-//                returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
-//                returnMap.put("moimContent", moim.getMoimContent());
-//
-//                String name = "moim" + moimId;
-//                result.put(name, returnMap);
-//            }
-//
-//            responseDTO.setItem(result);
-//            responseDTO.setStatusCode(HttpStatus.OK.value());
-//            return ResponseEntity.ok().body(responseDTO);
-//
-//        } catch(Exception e) {
-//            System.out.println(e.getMessage());
-//            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
-//            responseDTO.setErrorMessage(e.getMessage());
-//            return ResponseEntity.badRequest().body(responseDTO);
-//        }
-//    }
-
-
 
     @GetMapping("/view-moim/{moimId}")
     public ResponseEntity<?> viewMoim(@PathVariable int moimId) {
@@ -222,7 +172,7 @@ public class MoimController {
             moim.setMoimContent(moimDTO.getMoimContent());
             moim.setMoimAddr(moimDTO.getMoimAddr());
             moim.setMaxMoimUser(moimDTO.getMaxMoimUser());
-//            moim.setCurrentMoimUser(moimDTO.getCurrentMoimUser());
+            moim.setCurrentMoimUser(moimDTO.getCurrentMoimUser());
 
             Moim editMoim = moimService.modifyMoim(moim);
 
@@ -301,19 +251,25 @@ public class MoimController {
     private ResponseEntity<?> getResponse(int page, String category, String searchKeyword, String searchType, String orderBy, String token) {
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
-        Pageable pageable = PageRequest.of(page, 3);
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+
+
+        Pageable pageable = PageRequest.of(0, (page + 1) * 3);
+
         Page<Moim> moimPage;
 
         if ("ascending".equals(orderBy)) {
-            moimPage = moimService.searchMoims(category, searchKeyword, searchType, "asc", pageable);
+            moimPage = moimService.searchMoims(user, category, searchKeyword, searchType, "asc", pageable);
         } else {
-            moimPage = moimService.searchMoims(category, searchKeyword, searchType, "desc", pageable);
+            moimPage = moimService.searchMoims(user, category, searchKeyword, searchType, "desc", pageable);
         }
 
         ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
 
         try {
-            Map<String, Object> result = new HashMap<>();
+            List<Map<String, Object>> result = new ArrayList<>();
 
             for (Moim moim : moimPage.getContent()) {
                 int moimId = moim.getMoimId();
@@ -333,10 +289,9 @@ public class MoimController {
                 returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
                 returnMap.put("moimContent", moim.getMoimContent());
                 String name = "moim" + moimId;
-                result.put(name, returnMap);
+                result.add(returnMap);
             }
-
-            responseDTO.setItem(result);
+            responseDTO.setItems(result);
             responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok().body(responseDTO);
@@ -345,6 +300,7 @@ public class MoimController {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDTO.setErrorMessage(e.getMessage());
             return ResponseEntity.badRequest().body(responseDTO);
+
         }
     }
 
