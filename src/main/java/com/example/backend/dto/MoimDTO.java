@@ -16,17 +16,15 @@ public class MoimDTO {
 
     private int moimId;
     private String userId;
+    private String moimNickname;
     private String moimCategory;
     private LocalDateTime moimRegdate;
     private String moimTitle;
     private String moimContent;
     private String onOff;
-    private String moimAddr1;
-    private String moimAddr2;
-    private String moimAddr3;
-    private String limitAge;
-    private String maxMoimUser;
-    private String cost;
+    private String moimAddr;
+    private int maxMoimUser;
+    private int currentMoimUser;
     private String isDelete;
     private String isEnd;
 
@@ -40,19 +38,19 @@ public class MoimDTO {
                                 .userId(this.userId)
                                 .build()
                 )
+                .moimNickname(this.moimNickname)
                 .moimCategory(this.moimCategory)
-                .moimRegdate(LocalDateTime.now())
+                .moimRegdate(this.moimRegdate)
                 .moimTitle(this.moimTitle)
                 .moimContent(this.moimContent)
                 .onOff(this.onOff)
-                .moimAddr1(this.moimAddr1)
-                .moimAddr2(this.moimAddr2)
-                .moimAddr3(this.moimAddr3)
-                .limitAge(this.limitAge)
+                .moimAddr(this.moimAddr)
                 .maxMoimUser(this.maxMoimUser)
-                .cost(this.cost)
+                .currentMoimUser(this.currentMoimUser)
                 .isDelete(this.isDelete)
                 .isEnd(this.isEnd)
                 .build();
     }
+
+
 }

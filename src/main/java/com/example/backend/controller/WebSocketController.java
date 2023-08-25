@@ -32,6 +32,7 @@ public class WebSocketController {
     public void sendNotification(@DestinationVariable String toUserId, String message) {
         messagingTemplate.convertAndSend("/topic/notifications/" + toUserId, message);
     }
+
     @MessageMapping("/online-status/{userId}")
     public void handleOnlineStatus(@DestinationVariable String userId, OnlineStatusDto onlineStatusDto) {
         // 여기에서 userId와 status를 처리합니다.
