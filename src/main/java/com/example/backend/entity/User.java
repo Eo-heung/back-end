@@ -66,13 +66,13 @@ public class User {
         private Boolean userAuthentication;
 
         @Column(name = "user_hobby1")
-        private String userHobby1;
+        private Integer userHobby1;
 
         @Column(name = "user_hobby2")
-        private String userHobby2;
+        private Integer userHobby2;
 
         @Column(name = "user_hobby3")
-        private String userHobby3;
+        private Integer userHobby3;
 
         @Column(name = "user_status_message")
         private String userStatusMessage;

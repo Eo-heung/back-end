@@ -47,11 +47,11 @@ public class UserDTO {
 
     private Boolean userAuthentication;
 
-    private String userHobby1;
+    private Integer userHobby1;
 
-    private String userHobby2;
+    private Integer userHobby2;
 
-    private String userHobby3;
+    private Integer userHobby3;
 
     private String userStatusMessage;
 
