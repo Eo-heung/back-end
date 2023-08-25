@@ -111,6 +111,8 @@ public class MoimController {
                                             @RequestHeader("Authorization") String token) {
         System.out.println("카테고리1컨");
         System.out.println(category);
+        System.out.println(searchType);
+        System.out.println(searchKeyword);
 
         return getResponse(page, category, searchKeyword, searchType, "ascending", token);
     }
@@ -118,13 +120,15 @@ public class MoimController {
     @PostMapping("/list-moim/desc")
     public ResponseEntity<?> getMoimListDesc(@RequestParam(defaultValue = "0") int page,
                                              @RequestParam(required = false, defaultValue = "전체") String category,
-                                             @RequestParam(required = false) String searchKeyword,
+                                             @RequestParam(required = false, defaultValue = "") String searchKeyword,
                                              @RequestParam(required = false, defaultValue = "all") String searchType,
                                              @RequestParam(defaultValue = "ascending") String orderBy,
                                              @RequestHeader("Authorization") String token) {
 
         System.out.println("카테고리1컨");
         System.out.println(category);
+        System.out.println(searchType);
+        System.out.println(searchKeyword);
 
         return getResponse(page, category, searchKeyword, searchType, "descending", token);
     }
@@ -263,6 +267,8 @@ public class MoimController {
 
         System.out.println("카테고리2컨");
         System.out.println(category);
+        System.out.println(searchType);
+        System.out.println(searchKeyword);
 
         Pageable pageable = PageRequest.of(0, (page + 1) * 3);
 
@@ -300,6 +306,7 @@ public class MoimController {
                 result.add(returnMap);
             }
             responseDTO.setItems(result);
+            responseDTO.setLastPage(moimPage.isLast());
             responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok().body(responseDTO);
