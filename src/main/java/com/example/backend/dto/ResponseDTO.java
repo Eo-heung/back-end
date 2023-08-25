@@ -9,8 +9,20 @@ import java.util.List;
 public class ResponseDTO<T> {
     private List<T> items;
     private Page<T> pageItems;
+
     private T item;
     private String errorMessage;
     private int statusCode;
+
+    private boolean lastPage;
+
+    public boolean isLastPage() {
+        return lastPage;
+    }
+
+    public void setLastPage(boolean lastPage) {
+        this.lastPage = lastPage;
+    }
+
     private String token;
 }
