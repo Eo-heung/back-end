@@ -46,6 +46,9 @@ public class MoimServiceImpl implements MoimService {
 
     @Override
     public Page<Moim> searchMoims(User user, String category, String keyword, String searchType, String orderBy, Pageable pageable) {
+
+        System.out.println("카테고리3컨");
+        System.out.println(category);
         if ("전체".equalsIgnoreCase(category) && "all".equalsIgnoreCase(searchType)) {
             if ("ascending".equals(orderBy)) {
                 return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
@@ -53,6 +56,9 @@ public class MoimServiceImpl implements MoimService {
                 return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
             }
         }
+
+        System.out.println("카테고리4컨");
+        System.out.println(category);
 
         if ("전체".equalsIgnoreCase(category)) {
             switch (searchType) {
@@ -76,9 +82,9 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         } else if ("인문학/책".equalsIgnoreCase(category)) {
@@ -103,9 +109,9 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         }else if ("운동".equalsIgnoreCase(category)) {
@@ -130,9 +136,9 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         }else if ("요리/맛집".equalsIgnoreCase(category)) {
@@ -157,9 +163,9 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         }else if ("공예/만들기".equalsIgnoreCase(category)) {
@@ -184,9 +190,9 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         }else if ("원예".equalsIgnoreCase(category)) {
@@ -211,12 +217,14 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         }else if ("동네친구".equalsIgnoreCase(category)) {
+            System.out.println(category);
+
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
@@ -238,9 +246,9 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         }else if ("음악/악기".equalsIgnoreCase(category)) {
@@ -265,9 +273,9 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         }else if ("반려동물".equalsIgnoreCase(category)) {
@@ -292,9 +300,9 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         }else if ("여행".equalsIgnoreCase(category)) {
@@ -319,9 +327,9 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         }else if ("문화/여가".equalsIgnoreCase(category)) {
@@ -346,9 +354,9 @@ public class MoimServiceImpl implements MoimService {
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
                     } else {
-                        return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
+                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
                     }
             }
         }else {

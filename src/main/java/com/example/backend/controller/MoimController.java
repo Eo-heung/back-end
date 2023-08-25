@@ -104,20 +104,27 @@ public class MoimController {
     }
     @PostMapping("/list-moim/asc")
     public ResponseEntity<?> getMoimListAsc(@RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(required = false, defaultValue = "전체") String category,
+                                            @RequestParam(required = false) String category,
                                             @RequestParam(required = false) String searchKeyword,
                                             @RequestParam(required = false, defaultValue = "all") String searchType,
+                                            @RequestParam(defaultValue = "ascending") String orderBy,
                                             @RequestHeader("Authorization") String token) {
+        System.out.println("카테고리1컨");
+        System.out.println(category);
 
         return getResponse(page, category, searchKeyword, searchType, "ascending", token);
     }
 
     @PostMapping("/list-moim/desc")
     public ResponseEntity<?> getMoimListDesc(@RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(required = false, defaultValue = "전체") String category,
+                                             @RequestParam(required = false) String category,
                                              @RequestParam(required = false) String searchKeyword,
                                              @RequestParam(required = false, defaultValue = "all") String searchType,
+                                             @RequestParam(defaultValue = "ascending") String orderBy,
                                              @RequestHeader("Authorization") String token) {
+
+        System.out.println("카테고리1컨");
+        System.out.println(category);
 
         return getResponse(page, category, searchKeyword, searchType, "descending", token);
     }
@@ -254,7 +261,8 @@ public class MoimController {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-
+        System.out.println("카테고리2컨");
+        System.out.println(category);
 
         Pageable pageable = PageRequest.of(0, (page + 1) * 3);
 
