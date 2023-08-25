@@ -168,6 +168,7 @@ public class MoimRegistrationController {
             Page<MoimRegistrationDTO> moimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, applicantUserNickname, "ascending", pageable);
 
             responseDTO.setItems(moimRegDTOPage.getContent());
+            responseDTO.setLastPage(moimRegDTOPage.isLast());
             responseDTO.setStatusCode(HttpStatus.OK.value());
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
@@ -192,6 +193,7 @@ public class MoimRegistrationController {
             Page<MoimRegistrationDTO> moimRegDTOPage = moimRegistrationService.getApplicantList(moimId, userId, applicantUserNickname, "descending", pageable);
 
             responseDTO.setItems(moimRegDTOPage.getContent());
+            responseDTO.setLastPage(moimRegDTOPage.isLast());
             responseDTO.setStatusCode(HttpStatus.OK.value());
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {

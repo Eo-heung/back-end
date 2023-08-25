@@ -104,7 +104,7 @@ public class MoimController {
     }
     @PostMapping("/list-moim/asc")
     public ResponseEntity<?> getMoimListAsc(@RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(required = false) String category,
+                                            @RequestParam(required = false, defaultValue = "전체") String category,
                                             @RequestParam(required = false) String searchKeyword,
                                             @RequestParam(required = false, defaultValue = "all") String searchType,
                                             @RequestParam(defaultValue = "ascending") String orderBy,
@@ -117,7 +117,7 @@ public class MoimController {
 
     @PostMapping("/list-moim/desc")
     public ResponseEntity<?> getMoimListDesc(@RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(required = false) String category,
+                                             @RequestParam(required = false, defaultValue = "전체") String category,
                                              @RequestParam(required = false) String searchKeyword,
                                              @RequestParam(required = false, defaultValue = "all") String searchType,
                                              @RequestParam(defaultValue = "ascending") String orderBy,
