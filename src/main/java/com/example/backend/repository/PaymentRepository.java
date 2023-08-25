@@ -13,4 +13,6 @@ public interface PaymentRepository extends JpaRepository<PaymentGam, Integer> {
     List<PaymentGam> findByUserIdAndPayDateGreaterThanEqualOrderByPayDateDesc(String userId, LocalDateTime date);
     List<PaymentGam> findByUserIdAndPayDateBeforeOrderByPayDateDesc(String userId, LocalDateTime date);
 
+    PaymentGam findByImpUid(String ImpUid);
+
 }
