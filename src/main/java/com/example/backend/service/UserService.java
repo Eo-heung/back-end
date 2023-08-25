@@ -4,10 +4,13 @@ import com.example.backend.dto.UserDTO;
 import com.example.backend.entity.User;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -44,6 +47,17 @@ public class UserService {
             return optionalUser.get().EntityToDTO();
         } else {
             return null;
+        }
+    }
+
+    @Scheduled(fixedRate = 10 * 60 * 1000) // 10분마다 온라인 상태 친구 확인 로직
+    public void checkUserHeartbeats() {
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(10);
+
+        List<User> users = userRepository.findAllByOnlineTrueAndLastHeartbeatBefore(threshold);
+        for (User user : users) {
+            user.setOnline(false);
+            userRepository.save(user);
         }
     }
 

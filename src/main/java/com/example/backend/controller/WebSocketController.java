@@ -2,8 +2,11 @@ package com.example.backend.controller;
 
 
 import com.example.backend.dto.UserDTO;
+import com.example.backend.entity.Friend;
 import com.example.backend.entity.User;
+import com.example.backend.repository.FriendRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.FriendService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -12,6 +15,9 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Controller
@@ -20,6 +26,7 @@ public class WebSocketController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
+    private final FriendService friendService;
 
     @MessageMapping("/sendNotification/{toUserId}")
     public void sendNotification(@DestinationVariable String toUserId, String message) {
@@ -43,13 +50,30 @@ public class WebSocketController {
 
         userRepository.save(user);
 
-        // 필요한 경우, 메시지를 다른 주제로 전송할 수 있습니다.
-        // messagingTemplate.convertAndSend("/topic/notifications/" + userId, message);
-    }
+        List<Map<String, Object>> friendList = friendService.getFriends(user.getUserId());
 
+        for (Map<String, Object> friend : friendList) {
+            String friendsId = (String) friend.get("friendsId");
+
+            // friendsId를 사용하여 메시지 전송
+            messagingTemplate.convertAndSend("/topic/user-status-updates/" + friendsId,
+                    "친구상태변경");
+        }
+    }
     @Data
     public static class OnlineStatusDto {
         private String status;
     }
+
+    @MessageMapping("/heartbeat/{userId}")
+    public void handleHeartbeat(@DestinationVariable String userId) {
+        User user = userRepository.findByUserId(userId).orElse(null);
+
+        if (user != null) {
+            user.setLastHeartbeat(LocalDateTime.now());
+            userRepository.save(user);
+        }
+    }
+
 
 }

@@ -55,9 +55,7 @@ public class UserDTO {
 
     private String userStatusMessage;
 
-    private LocalDateTime createDatetime;
-
-    private LocalDateTime updateDatetime;
+    private LocalDateTime lastHeartbeat;
 
     private String token;
 
@@ -87,8 +85,7 @@ public class UserDTO {
                 .userHobby2(userHobby2)
                 .userHobby3(userHobby3)
                 .userStatusMessage(userStatusMessage)
-                .createDatetime(createDatetime)
-                .updateDatetime(updateDatetime)
+                .lastHeartbeat(lastHeartbeat)
                 .totalGam(totalGam)
                 .online(online)
                 .build();
