@@ -23,4 +23,6 @@ public class ResponseDTO<T> {
     public void setLastPage(boolean lastPage) {
         this.lastPage = lastPage;
     }
+
+    private String token;
 }
