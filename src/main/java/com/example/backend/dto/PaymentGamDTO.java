@@ -21,6 +21,7 @@ public class PaymentGamDTO {
     private Long gotGam;
     private LocalDateTime payDate;
     private Boolean status;
+    private Boolean refund;
 
     public PaymentGam DTOToEntity() {
         return PaymentGam.builder()
@@ -31,6 +32,7 @@ public class PaymentGamDTO {
                 .gotGam(this.gotGam)
                 .payDate(this.payDate)
                 .status(this.status)
+                .refund(this.refund)
                 .build();
     }
 }

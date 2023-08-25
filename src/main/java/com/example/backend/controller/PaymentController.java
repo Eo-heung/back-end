@@ -63,6 +63,7 @@ public class PaymentController {
         paymentGam.setGotGam(paymentGam.getValue()/1000);
         paymentGam.setStatus(true);
         paymentGam.setUserId(userId);
+        paymentGam.setRefund(true);
         paymentRepository.save(paymentGam);
 
         List<PaymentGam> payments = paymentRepository.findByUserIdOrderByPayDateDesc(userId);
@@ -87,14 +88,31 @@ public class PaymentController {
 
     @PostMapping("/paymentList")
     public ResponseEntity<?> PaymentList(@RequestHeader("Authorization") String token) {
-        System.out.println("#################");
         ResponseDTO<PaymentGam> responseDTO = new ResponseDTO<>();
         String userId = jwtTokenProvider.validateAndGetUsername(token);
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
 
         List<PaymentGam> payments = paymentRepository.findByUserIdOrderByPayDateDesc(userId);
 
         responseDTO.setItems(payments);
         return ResponseEntity.ok(responseDTO);
+    }
+    @PostMapping("/refundBlock")
+    public ResponseEntity<?> refundBlock(@RequestHeader("Authorization") String token)
+    {
+        String userId = jwtTokenProvider.validateAndGetUsername(token);
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        List<PaymentGam> payments = paymentRepository.findByUserIdAndPayDateBeforeOrderByPayDateDesc(userId, oneWeekAgo);
+
+        for (PaymentGam payment : payments) {
+            payment.setRefund(false);
+        }
+
+        // 변경된 엔티티들을 데이터베이스에 다시 저장
+        paymentRepository.saveAll(payments);
+
+        // 작업이 성공적으로 완료된 경우 적절한 응답 반환 (예: OK 상태)
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/cancelPayment/{id}")
@@ -120,7 +138,6 @@ public class PaymentController {
 
             if (response.getCode() == 0) {
                 returnMap.put("msg", "취소가 완료되었습니다.");
-
                 responseDTO.setItem(returnMap);
                 responseDTO.setStatusCode(HttpStatus.OK.value());
                 return ResponseEntity.ok().body(responseDTO);

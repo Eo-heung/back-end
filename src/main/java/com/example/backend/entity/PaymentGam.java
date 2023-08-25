@@ -44,6 +44,9 @@ public class PaymentGam {
 
         @Column(name = "status")
         private Boolean status;
+
+        @Column(name = "refund")
+        private Boolean refund;
         public PaymentGamDTO EntityToDTO() {
                 return PaymentGamDTO.builder()
                         .user_id(this.userId)
@@ -53,6 +56,7 @@ public class PaymentGam {
                         .gotGam(this.gotGam)
                         .payDate(this.payDate)
                         .status(this.status)
+                        .status(this.refund)
                         .build();
         }
 
