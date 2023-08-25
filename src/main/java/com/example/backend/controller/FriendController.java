@@ -40,6 +40,10 @@ public class FriendController {
             List<Map<String, Object>> friendsList1 = friendsList.stream()
                     .map(this::convertProfileToBase64)
                     .collect(Collectors.toList());
+            Map<String, Object> returnMap = new HashMap<>();
+            returnMap.put("userId", toUser);
+
+            responseDTO.setItem(returnMap);
             responseDTO.setItems(friendsList1);
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.ok().body(responseDTO);
