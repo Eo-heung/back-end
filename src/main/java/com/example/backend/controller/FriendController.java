@@ -124,6 +124,33 @@ public class FriendController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+
+    @PostMapping("/makefriend/{id}")
+    public ResponseEntity<?> makeFriend(@PathVariable String id, @RequestHeader("Authorization") String token) {
+        ResponseDTO<FriendDTO> responseDTO = new ResponseDTO<>();
+
+        String fromUser = jwtTokenProvider.validateAndGetUsername(token);
+
+        try {
+            Friend friend = new Friend();
+
+            friend.setStatus(false);
+            friend.setFromUser(fromUser);
+            friend.setToUser(id);
+
+            FriendDTO friendDTO = friendRepository.save(friend).EntityToDTO();
+
+            responseDTO.setItem(friendDTO);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
     @PostMapping("/deleteFriend/{id}")
     public ResponseEntity<?> deleteFriend(@PathVariable Long id) {
         ResponseDTO<Friend> responseDTO = new ResponseDTO<>();
