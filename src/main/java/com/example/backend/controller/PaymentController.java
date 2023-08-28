@@ -87,13 +87,26 @@ public class PaymentController {
 
     @PostMapping("/paymentList")
     public ResponseEntity<?> PaymentList(@RequestHeader("Authorization") String token) {
-        System.out.println("#################");
         ResponseDTO<PaymentGam> responseDTO = new ResponseDTO<>();
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
         List<PaymentGam> payments = paymentRepository.findByUserIdOrderByPayDateDesc(userId);
 
         responseDTO.setItems(payments);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @PostMapping("/totalGotGam")
+    public ResponseEntity<?> totalGotGam(@RequestHeader("Authorization") String token) {
+        System.out.println("#################");
+        ResponseDTO<Long> responseDTO = new ResponseDTO<>();
+        String userId = jwtTokenProvider.validateAndGetUsername(token);
+
+        User user = userRepository.findByUserId(userId).get();
+        Long totalGam = user.getTotalGam();
+        System.out.println(totalGam);
+
+        responseDTO.setItem(totalGam);
         return ResponseEntity.ok(responseDTO);
     }
 
