@@ -276,7 +276,7 @@ public class UserController {
                         passwordEncoder.encode((String) profile.get("email")));
                 userService.join(user);
                 String token1 = jwtTokenProvider.create(user);
-
+                userService.saveUser(user);
                 UserDTO loginUserDTO = user.EntityToDTO();
                 loginUserDTO.setUserPw("");
                 loginUserDTO.setToken(token1);

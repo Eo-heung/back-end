@@ -1,12 +1,14 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.UserDTO;
+import com.example.backend.entity.Friend;
 import com.example.backend.entity.User;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -100,6 +102,10 @@ public class UserService {
             return userRepository.findByUserId(userId).get();
         else
             return null;
+    }
+    @Transactional
+    public User saveUser(User user){
+        return userRepository.save(user);
     }
 
 }
