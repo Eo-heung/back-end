@@ -22,7 +22,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
             "           f.status, " +
             "           f.id "+
             "    FROM FRIEND f " +
-            "    WHERE f.to_friend_user = :name AND f.status = true " +
+            "    WHERE (f.to_friend_user = :name OR f.from_friend_user = :name) AND f.status = true " +
             ") AS ff " +
             "LEFT JOIN USER u ON ff.friendsId = u.user_id " +
             "LEFT JOIN PICTURE p ON u.user_id = p.user_id",

@@ -2,14 +2,13 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.1.2'
 	id 'io.spring.dependency-management' version '1.1.2'
+	id "com.github.node-gradle.node" version '4.0.0'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
 
-java {
-	sourceCompatibility = '17'
-}
 
 configurations {
 	compileOnly {
@@ -21,6 +20,7 @@ repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
 }
+
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
@@ -41,6 +41,12 @@ dependencies {
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
 	implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.webjars:sockjs-client:1.5.1'
+	implementation 'org.webjars:stomp-websocket:2.3.4'
+	implementation 'com.squareup.okhttp3:okhttp:4.9.1'
+	implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
+	implementation 'org.json:json:20210307'
 }
 
 tasks.named('test') {
