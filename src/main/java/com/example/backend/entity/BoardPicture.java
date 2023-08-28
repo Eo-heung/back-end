@@ -42,6 +42,6 @@ public class BoardPicture {
 
     @ManyToOne
     @JoinColumn(name = "board_id")
-    private Board boardId;
+    private Board board;
 
 }

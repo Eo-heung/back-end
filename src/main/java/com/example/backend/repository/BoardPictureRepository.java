@@ -11,5 +11,5 @@ import java.util.Optional;
 
 public interface BoardPictureRepository extends JpaRepository<BoardPicture, Integer> {
 
-    List<BoardPicture> findByBoardId(Board board);
+    List<BoardPicture> findByBoard(Board board);
 }

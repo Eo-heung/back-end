@@ -26,7 +26,7 @@ public class BoardPictureServiceImpl implements BoardPictureService {
 
 
     @Override
-    public List<BoardPicture> viewBoardPic(Board boardId) {
-        return boardPictureRepository.findByBoardId(boardId);
+    public List<BoardPicture> viewBoardPic(Board board) {
+        return boardPictureRepository.findByBoard(board);
     }
 }

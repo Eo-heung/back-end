@@ -48,7 +48,8 @@ public class BoardController {
         String loginUser = jwtTokenProvider.validateAndGetUsername(token);
         User checkUser = userRepository.findByUserId(loginUser)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
+        System.out.println("boardTitle");
+        System.out.println(boardTitle);
         BoardDTO boardDTO = BoardDTO.builder()
                 .moimId(moimId)
                 .boardTitle(boardTitle)
@@ -95,7 +96,6 @@ public class BoardController {
         }
     }
 
-    //수정하기 상세게시글 삭제
 
 
     @PostMapping("/{moimId}/free-board")
@@ -186,10 +186,75 @@ public class BoardController {
 
 
 
+    @PostMapping("/{moimId}/delete-board/{boardId}")
+    public ResponseEntity<?> deleteBoard(@PathVariable int moimId,
+                                         @PathVariable int boardId,
+                                         @RequestHeader("Authorization") String token) {
+        ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
+
+        String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+        User loginUser = userRepository.findByUserId(loggedInUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        try {
+            Board board = boardRepository.findById(boardId)
+                    .orElseThrow(() -> new Exception("게시글을 찾을 수 없습니다"));
+
+            if (!board.getUserId().equals(loginUser)) {
+                throw new IllegalStateException("You are not the author of this post.");
+            }
+
+            List<BoardPicture> boardPictures = boardPictureRepository.findByBoard(board);
+
+            for (BoardPicture boardPicture : boardPictures) {
+                boardPictureRepository.delete(boardPicture);
+            }
+
+            boardRepository.delete(board);
+
+            Map<String, String> returnMap = new HashMap<>();
+            returnMap.put("msg", "정상적으로 삭제되었습니다.");
+            responseDTO.setItem(returnMap);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
 
 
+    @PostMapping(value = "/{moimId}/modify-board/{boardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> modifyBoard(
+            @PathVariable int boardId,
+            @PathVariable int moimId,
+            @RequestBody BoardDTO boardDTO,
+            @RequestParam(required = false) List<MultipartFile> newPictures,
+            @RequestParam(required = false) List<Integer> deletePictureIds,
+            @RequestParam(required = false) Map<Integer, MultipartFile> updatePicturesMap,
+            @RequestHeader("Authorization") String token) {
 
+        try {
+            String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+            User loginUser = userRepository.findByUserId(loggedInUsername)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
+            boardDTO.setBoardId(boardId);
+
+            Board updatedBoard = boardService.modifyBoard(loginUser, boardDTO, newPictures, deletePictureIds, updatePicturesMap, moimId);
+
+            ResponseDTO<Board> responseDTO = new ResponseDTO<>();
+            responseDTO.setItem(updatedBoard);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch (Exception e) {
+            ResponseDTO<String> responseDTO = new ResponseDTO<>();
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
 
 
 
