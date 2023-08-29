@@ -49,13 +49,6 @@ public class Board {
     @Column(name="is_Public")
     private boolean isPublic;   //공개여부
 
-    @Column(name="is_Leader")
-    private boolean isLeader;   //모임장 여부
-
-    @Column(name="is_Member")
-    private boolean isMember;   //모임원 여부
-
-
     public enum BoardType {
         FREE, //자유
         NOTICE  // 공지

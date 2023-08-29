@@ -24,6 +24,7 @@ public interface BoardService {
     Board modifyBoard(User loginUser, BoardDTO boardDTO, List<MultipartFile> newPictures, List<Integer> deletePictureIds,
                       Map<Integer, MultipartFile> updatePicturesMap, int moimId) throws IOException;
 
-
+    public boolean verifyMemberRole(User user, Moim moim);
+    public boolean verifyLeaderRole(User user, Moim moim);
 
     }

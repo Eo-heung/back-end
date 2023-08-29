@@ -35,10 +35,10 @@ public class BoardServiceImpl implements BoardService {
 
         Board savedBoard;
 
-        if (loginUser.equals(checkMoim.getUserId())) { //모임장
+        if (loginUser.equals(checkMoim.getUserId())) { //모임장 구분
             savedBoard = boardRepository.save(board);
         } else {
-            if (isUserAMemberOfMoim(loginUser, checkMoim)) {
+            if (isUserAMemberOfMoim(loginUser, checkMoim)) { //모임원 구분
                 if (board.getBoardType().equals(Board.BoardType.FREE)) {
                     savedBoard = boardRepository.save(board);
                 } else {
@@ -226,8 +226,18 @@ public class BoardServiceImpl implements BoardService {
         return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED;
     }
 
+    public boolean verifyMemberRole(User user, Moim moim) {
+        Optional<MoimRegistration> registrationOpt = moimRegistrationRepository.findByMoimAndUser(moim, user);
+        if (registrationOpt.isPresent()) {
+            return registrationOpt.get().getRegStatus() == MoimRegistration.RegStatus.APPROVED;
+        } else {
+            return false;
+        }
+    }
 
-
+    public boolean verifyLeaderRole(User user, Moim moim) {
+        return user.equals(moim.getUserId());
+    }
 
 
 

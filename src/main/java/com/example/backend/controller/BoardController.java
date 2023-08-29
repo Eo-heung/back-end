@@ -259,6 +259,41 @@ public class BoardController {
     }
 
 
+    @PostMapping(value = "/{moimId}/verify-role")
+    public ResponseEntity<?> verifyLeader(
+            @PathVariable int moimId,
+            @RequestHeader("Authorization") String token) {
+
+        try {
+            String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+            User loginUser = userRepository.findByUserId(loggedInUsername)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            Moim checkMoim = moimRepository.findById(moimId)
+                    .orElseThrow(() -> new NoSuchElementException("Moim not found"));
+
+            boolean isMember = boardService.verifyMemberRole(loginUser, checkMoim);
+            boolean isLeader = boardService.verifyLeaderRole(loginUser, checkMoim);
+
+            Map<String, Boolean> responseMap = new HashMap<>();
+            responseMap.put("isMember", isMember);
+            responseMap.put("isLeader", isLeader);
+
+            ResponseDTO<Map<String, Boolean>> responseDTO = new ResponseDTO<>();
+            responseDTO.setItem(responseMap);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch (Exception e) {
+            ResponseDTO<String> responseDTO = new ResponseDTO<>();
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+
+
     private BoardDTO convertToDTO(Board board) {
         return BoardDTO.builder()
                 .boardId(board.getBoardId())
