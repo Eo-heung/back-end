@@ -60,12 +60,45 @@ public class BoardServiceImpl implements BoardService {
     }
 
 
-    public Page<BoardDTO> getNoticeBoard(User loginUser, Pageable pageable, int moimId) {
+    @Override
+    public Page<BoardDTO> getNoticeBoard(User loginUser, Pageable pageable, int moimId, String keyword, String searchType, String orderBy) {
         Moim checkMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new NoSuchElementException("Moim not found"));
 
         if (loginUser.equals(checkMoim.getUserId()) || isUserAMemberOfMoim(loginUser, checkMoim)) {
-            Page<Board> noticeList = boardRepository.findByBoardType(Board.BoardType.NOTICE, pageable);
+            Page<Board> noticeList;
+
+            switch (searchType) {
+                case "title":
+                    if ("ascending".equals(orderBy)) {
+                        noticeList = boardRepository.findByBoardTypeAndBoardTitleContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, keyword, pageable);
+                    } else {
+                        noticeList = boardRepository.findByBoardTypeAndBoardTitleContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, keyword, pageable);
+                    }
+                    break;
+                case "content":
+                    if ("ascending".equals(orderBy)) {
+                        noticeList = boardRepository.findByBoardTypeAndBoardContentContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, keyword, pageable);
+                    } else {
+                        noticeList = boardRepository.findByBoardTypeAndBoardContentContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, keyword, pageable);
+                    }
+                    break;
+                case "nickname":
+                    if ("ascending".equals(orderBy)) {
+                        noticeList = boardRepository.findByBoardTypeAndUserId_UserNameContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, keyword, pageable);
+                    } else {
+                        noticeList = boardRepository.findByBoardTypeAndUserId_UserNameContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, keyword, pageable);
+                    }
+                    break;
+                default:
+                    if ("ascending".equals(orderBy)) {
+                        noticeList = boardRepository.searchByBoardTypeAndKeywordAsc(Board.BoardType.NOTICE, keyword, pageable);
+                    } else {
+                        noticeList = boardRepository.searchByBoardTypeAndKeywordDesc(Board.BoardType.NOTICE, keyword, pageable);
+                    }
+                    break;
+            }
+
             return noticeList.map(board -> BoardDTO.builder()
                     .boardId(board.getBoardId())
                     .boardType(board.getBoardType())
@@ -81,25 +114,58 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
-    public Page<BoardDTO> getFreeBoard(User loginUser, Pageable pageable, int moimId) {
-        Moim checkMoim = moimRepository.findById(moimId)
-                .orElseThrow(() -> new NoSuchElementException("Moim not found"));
+    @Override
+    public Page<BoardDTO> getFreeBoard(User loginUser, Pageable pageable, int moimId, String keyword, String searchType, String orderBy) {
+            Moim checkMoim = moimRepository.findById(moimId)
+                    .orElseThrow(() -> new NoSuchElementException("Moim not found"));
 
-        if (loginUser.equals(checkMoim.getUserId()) || isUserAMemberOfMoim(loginUser, checkMoim)) {
-            Page<Board> freeList = boardRepository.findByBoardType(Board.BoardType.FREE, pageable);
-            return freeList.map(board -> BoardDTO.builder()
-                    .boardId(board.getBoardId())
-                    .boardType(board.getBoardType())
-                    .userId(board.getUserId().getUserId())
-                    .userName(board.getUserId().getUserName())
-                    .moimId(moimId)
-                    .boardTitle(board.getBoardTitle())
-                    .boardContent(board.getBoardContent())
-                    .boardRegdate(board.getBoardRegdate())
-                    .build());
-        } else {
-            throw new IllegalStateException("이 사용자는 이 모임에 승인되지 않았습니다.");
-        }
+            if (loginUser.equals(checkMoim.getUserId()) || isUserAMemberOfMoim(loginUser, checkMoim)) {
+                Page<Board> freeList;
+
+                switch (searchType) {
+                    case "title":
+                        if ("ascending".equals(orderBy)) {
+                            freeList = boardRepository.findByBoardTypeAndBoardTitleContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, keyword, pageable);
+                        } else {
+                            freeList = boardRepository.findByBoardTypeAndBoardTitleContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, keyword, pageable);
+                        }
+                        break;
+                    case "content":
+                        if ("ascending".equals(orderBy)) {
+                            freeList = boardRepository.findByBoardTypeAndBoardContentContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, keyword, pageable);
+                        } else {
+                            freeList = boardRepository.findByBoardTypeAndBoardContentContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, keyword, pageable);
+                        }
+                        break;
+                    case "nickname":
+                        if ("ascending".equals(orderBy)) {
+                            freeList = boardRepository.findByBoardTypeAndUserId_UserNameContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, keyword, pageable);
+                        } else {
+                            freeList = boardRepository.findByBoardTypeAndUserId_UserNameContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, keyword, pageable);
+                        }
+                        break;
+                    default:
+                        if ("ascending".equals(orderBy)) {
+                            freeList = boardRepository.searchByBoardTypeAndKeywordAsc(Board.BoardType.NOTICE, keyword, pageable);
+                        } else {
+                            freeList = boardRepository.searchByBoardTypeAndKeywordDesc(Board.BoardType.NOTICE, keyword, pageable);
+                        }
+                        break;
+                }
+
+                return freeList.map(board -> BoardDTO.builder()
+                        .boardId(board.getBoardId())
+                        .boardType(board.getBoardType())
+                        .userId(board.getUserId().getUserId())
+                        .userName(board.getUserId().getUserName())
+                        .moimId(moimId)
+                        .boardTitle(board.getBoardTitle())
+                        .boardContent(board.getBoardContent())
+                        .boardRegdate(board.getBoardRegdate())
+                        .build());
+            } else {
+                throw new IllegalStateException("이 사용자는 이 모임에 승인되지 않았습니다.");
+            }
     }
 
     @Override

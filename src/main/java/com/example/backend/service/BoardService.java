@@ -15,9 +15,9 @@ public interface BoardService {
 
     Board createBoard(User loginUser, Board board, List<BoardPicture> boardPic, int moimId);
 
-    Page<BoardDTO> getNoticeBoard(User loginUser, Pageable pageable, int moimId);
+    Page<BoardDTO> getNoticeBoard(User loginUser, Pageable pageable, int moimId, String keyword, String searchType, String orderBy);
 
-    Page<BoardDTO> getFreeBoard(User loginUser,Pageable pageable, int moimId);
+    Page<BoardDTO> getFreeBoard(User loginUser, Pageable pageable, int moimId, String keyword, String searchType, String orderBy);
 
     Board viewboard(User loginUser, int boardId, int moimId);
 

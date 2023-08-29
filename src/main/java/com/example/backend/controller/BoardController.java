@@ -101,7 +101,7 @@ public class BoardController {
     @PostMapping("/{moimId}/free-board")
     public ResponseEntity<?> getFreeList(@PathVariable("moimId") int moimId,
                                          @RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(required = false, defaultValue = "") String searchKeyword,
+                                         @RequestParam(required = false, defaultValue = "") String keyword,
                                          @RequestParam(required = false, defaultValue = "all") String searchType,
                                          @RequestParam(defaultValue = "ascending") String orderBy,
                                          @RequestHeader("Authorization") String token,
@@ -112,32 +112,30 @@ public class BoardController {
 
         pageable = PageRequest.of(0, (page + 1) * 10);
 
-
         try {
-            Page<BoardDTO> noticeBoards = boardService.getFreeBoard(loginUser, pageable, moimId);
-            return new ResponseEntity<>(noticeBoards, HttpStatus.OK);
+            Page<BoardDTO> freeBoards = boardService.getFreeBoard(loginUser, pageable, moimId, keyword, searchType, orderBy);
+            return new ResponseEntity<>(freeBoards, HttpStatus.OK);
         } catch (NoSuchElementException | IllegalStateException e) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
     }
 
-
     @PostMapping("/{moimId}/notice-board")
     public ResponseEntity<?> getNoticeList(@PathVariable("moimId") int moimId,
-                                            @RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(required = false, defaultValue = "") String searchKeyword,
-                                            @RequestParam(required = false, defaultValue = "all") String searchType,
-                                            @RequestParam(defaultValue = "ascending") String orderBy,
-                                            @RequestHeader("Authorization") String token,
-                                            Pageable pageable) {
+                                           @RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(required = false, defaultValue = "") String keyword,
+                                           @RequestParam(required = false, defaultValue = "all") String searchType,
+                                           @RequestParam(defaultValue = "ascending") String orderBy,
+                                           @RequestHeader("Authorization") String token,
+                                           Pageable pageable) {
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
-        User loginInUser = userRepository.findByUserId(loggedInUsername)
+        User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         pageable = PageRequest.of(0, (page + 1) * 10);
 
         try {
-            Page<BoardDTO> noticeBoards = boardService.getNoticeBoard(loginInUser, pageable, moimId);
+            Page<BoardDTO> noticeBoards = boardService.getNoticeBoard(loginUser, pageable, moimId, keyword, searchType, orderBy);
             return new ResponseEntity<>(noticeBoards, HttpStatus.OK);
         } catch (NoSuchElementException | IllegalStateException e) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
