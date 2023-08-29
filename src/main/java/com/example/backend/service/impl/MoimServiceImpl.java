@@ -380,4 +380,15 @@ public class MoimServiceImpl implements MoimService {
         }
     }
 
+    public Page<Moim> getMyMoim(String userId, String keyword,  String orderBy, Pageable pageable) {
+        System.out.println("5트");
+        if ("ascending".equalsIgnoreCase(orderBy)) {
+            System.out.println("6트");
+            System.out.println(keyword);
+            return moimRepository.findmyMoimAsc(userId, keyword, pageable);
+        } else {
+            return moimRepository.findmyMoimDesc(userId, keyword, pageable);
+
+        }
+    }
 }

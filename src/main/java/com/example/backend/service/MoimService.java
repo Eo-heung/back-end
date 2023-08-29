@@ -21,5 +21,5 @@ public interface MoimService {
 
     Page<Moim> searchMoims(User user, String category, String keyword, String searchType, String orderBy, Pageable pageable);
 
-
+    Page<Moim> getMyMoim(String userId, String keyword, String orderBy, Pageable pageable);
 }

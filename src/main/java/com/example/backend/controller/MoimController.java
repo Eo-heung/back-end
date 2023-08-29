@@ -133,6 +133,63 @@ public class MoimController {
         return getResponse(page, category, searchKeyword, searchType, "descending", token);
     }
 
+    @PostMapping(value ="/my-moim-list")
+    public ResponseEntity<?> getMyMoim(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "ascending") String orderBy,
+            @RequestParam(defaultValue = "0") int page) {
+        System.out.println("1트");
+
+        String loginUser = jwtTokenProvider.validateAndGetUsername(token);
+        User checkUser = userRepository.findByUserId(loginUser)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Pageable pageable = PageRequest.of(0, (page + 1) * 3);
+
+        Page<Moim> mymoimPage = moimService.getMyMoim(loginUser, keyword, orderBy, pageable);
+
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+        try {
+            System.out.println("2트");
+            List<Map<String, Object>> result = new ArrayList<>();
+
+            for (Moim moim : mymoimPage.getContent()) {
+                System.out.println("3트");
+                int moimId = moim.getMoimId();
+                Map<String, Object> returnMap = new HashMap<>();
+                MoimPicture matchingPicture = moim.getMoimPicture();
+
+                if (matchingPicture != null) {
+                    String base64Encoded = Base64.getEncoder().encodeToString(matchingPicture.getMoimPic());
+                    returnMap.put("moimPic", base64Encoded);
+                }
+
+                returnMap.put("moimId", moim.getMoimId());
+                returnMap.put("moimCategory", moim.getMoimCategory());
+                returnMap.put("moimTitle", moim.getMoimTitle());
+                returnMap.put("moimAddr", moim.getMoimAddr());
+                returnMap.put("maxMoimUser", moim.getMaxMoimUser());
+                returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
+                returnMap.put("moimContent", moim.getMoimContent());
+                result.add(returnMap);
+            }
+
+            System.out.println("4트");
+            responseDTO.setItems(result);
+            responseDTO.setLastPage(mymoimPage.isLast());
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+
+    }
+
     @GetMapping("/view-moim/{moimId}")
     public ResponseEntity<?> viewMoim(@PathVariable int moimId) {
         ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();

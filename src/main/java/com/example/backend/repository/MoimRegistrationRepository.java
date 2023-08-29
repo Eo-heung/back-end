@@ -25,6 +25,8 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
     Page<MoimRegistration> findApplicantsByMoimIdAndUserIdOrderByMoimIdDesc(@Param("moimId") int moimId, @Param("userId") String userId, Pageable pageable);
 
 
+
 }
+
 
 
