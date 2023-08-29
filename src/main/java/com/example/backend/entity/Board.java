@@ -28,7 +28,7 @@ public class Board {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User userId; //모임장, 모임원 확인
+    private User userId;
 
     @ManyToOne
     @JoinColumn(name = "moim_id")
@@ -48,6 +48,12 @@ public class Board {
 
     @Column(name="is_Public")
     private boolean isPublic;   //공개여부
+
+    @Column(name="is_Leader")
+    private boolean isLeader;   //모임장 여부
+
+    @Column(name="is_Member")
+    private boolean isMember;   //모임원 여부
 
 
     public enum BoardType {

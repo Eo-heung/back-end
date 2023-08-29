@@ -35,7 +35,7 @@ public class BoardServiceImpl implements BoardService {
 
         Board savedBoard;
 
-        if (loginUser.equals(checkMoim.getUserId())) {
+        if (loginUser.equals(checkMoim.getUserId())) { //모임장
             savedBoard = boardRepository.save(board);
         } else {
             if (isUserAMemberOfMoim(loginUser, checkMoim)) {
@@ -218,7 +218,6 @@ public class BoardServiceImpl implements BoardService {
 
         return board;
     }
-
 
 
     private boolean isUserAMemberOfMoim(User user, Moim moim) {

@@ -145,7 +145,7 @@ public class BoardController {
     }
 
     @PostMapping("{moimId}/view-board/{boardId}")
-    public ResponseEntity<?> viewMoim(@PathVariable int moimId,
+    public ResponseEntity<?> viewBoard(@PathVariable int moimId,
                                       @PathVariable int boardId,
                                       @RequestHeader("Authorization") String token) {
         ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
@@ -154,7 +154,8 @@ public class BoardController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
-            Board board = boardService.viewboard(loginUser, boardId, moimId);
+            Board boardEntity = boardService.viewboard(loginUser, boardId, moimId);
+
 
             List<BoardPicture> boardPictures = boardPictureService.viewBoardPic(
                     Board.builder()
@@ -162,7 +163,8 @@ public class BoardController {
                             .build()
             );
 
-            BoardDTO returnBoardDTO = board.EntityToDTO();
+            BoardDTO returnBoardDTO = convertToDTO(boardEntity);
+
 
             List<String> base64EncodedPics = boardPictures.stream()
                     .map(pic -> Base64.getEncoder().encodeToString(pic.getBoardPic()))
@@ -257,6 +259,18 @@ public class BoardController {
     }
 
 
+    private BoardDTO convertToDTO(Board board) {
+        return BoardDTO.builder()
+                .boardId(board.getBoardId())
+                .boardType(board.getBoardType())
+                .userId(board.getUserId().getUserId())
+                .userName(board.getUserId().getUserName())
+                .moimId(board.getMoimId().getMoimId())
+                .boardTitle(board.getBoardTitle())
+                .boardContent(board.getBoardContent())
+                .boardRegdate(board.getBoardRegdate())
+                .build();
+    }
 
 
 
