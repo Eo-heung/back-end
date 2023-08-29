@@ -7,8 +7,10 @@ import com.example.backend.dto.GeoLocationResponse;
 import com.example.backend.dto.NaverDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.dto.UserDTO;
+import com.example.backend.entity.PaymentGam;
 import com.example.backend.entity.User;
 import com.example.backend.jwt.JwtTokenProvider;
+import com.example.backend.repository.PaymentRepository;
 import com.example.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import okhttp3.FormBody;
@@ -31,6 +33,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -40,14 +43,11 @@ import java.util.TreeMap;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-
     private final PasswordEncoder passwordEncoder;
-
     private final JwtTokenProvider jwtTokenProvider;
-
     private final SmsService smsService;
-
     private final GeoLocation geoLocation;
+    private final PaymentRepository paymentRepository;
 
     @PostMapping("/join")
     public ResponseEntity<?> join(@RequestBody UserDTO userDTO) {
@@ -58,10 +58,18 @@ public class UserController {
 
             user.setUserPw(
                     passwordEncoder.encode(userDTO.getUserPw()));
+            user.setTotalGam(0L);
 
             // 회원가입처리(화면에서 보내준 내용을 디비에 저장)
             User joinUser = userService.join(user);
             joinUser.setUserPw("");
+
+            PaymentGam paymentGam = new PaymentGam();
+            paymentGam.setPayDate(LocalDateTime.now());
+            paymentGam.setGotGam(5L);
+            paymentGam.setStatus(false);
+            paymentGam.setUserId(joinUser.getUserId());
+            paymentRepository.save(paymentGam);
 
             UserDTO joinUserDTO = joinUser.EntityToDTO();
 
