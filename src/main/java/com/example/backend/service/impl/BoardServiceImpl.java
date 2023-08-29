@@ -170,20 +170,19 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Board viewboard(User loginUser,int boardId, int moimId) {
+    public Board viewboard(User loginUser, int boardId, int moimId) {
         Moim checkMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new NoSuchElementException("Moim not found"));
 
         Optional<Board> optionalBoard = boardRepository.findById(boardId);
 
-        if(optionalBoard.isEmpty()) {
+        if (optionalBoard.isEmpty()) {
             throw new NoSuchElementException("Board not found");
         }
 
         Board board = optionalBoard.get();
-        Moim relatedMoim = board.getMoimId();
 
-        if (loginUser.equals(relatedMoim.getUserId()) || isUserAMemberOfMoim(loginUser, relatedMoim)) {
+        if (loginUser.equals(checkMoim.getUserId()) || isUserAMemberOfMoim(loginUser, checkMoim)) {
             return board;
         } else {
             throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
@@ -202,19 +201,9 @@ public class BoardServiceImpl implements BoardService {
                              List<MultipartFile> updatePictures,
                              int moimId) throws IOException {
 
-        Board board = new Board();
-        board.setBoardId(boardId);
-        board.setUserId(loginUser);
-        board.setBoardType(boardType);
-        board.setBoardTitle(boardTitle);
-        board.setBoardContent(boardContent);
-        board.setBoardRegdate(board.getBoardRegdate());
-        board.setBoardUpdate(LocalDateTime.now());
-        board.setPublic(board.isPublic());
-
 
         // 게시글을 수정하기 전에 권한을 체크
-        Board existingBoard = boardRepository.findById(board.getBoardId())
+        Board existingBoard = boardRepository.findById(boardId)
                 .orElseThrow(() -> new NoSuchElementException("Board not found"));
 
         if (!loginUser.equals(existingBoard.getUserId())) {
@@ -226,25 +215,20 @@ public class BoardServiceImpl implements BoardService {
 
 
 
-        if (board.getBoardType().equals(Board.BoardType.FREE)) {
-            System.out.println("1111111111111111111111111111");
-            System.out.println(isUserAMemberOfMoim(loginUser, checkMoim));
-            System.out.println(loginUser.equals(checkMoim.getUserId()));
+        if (boardType.equals(Board.BoardType.FREE)) {
             if (!isUserAMemberOfMoim(loginUser, checkMoim) && !loginUser.equals(checkMoim.getUserId())) {
-                System.out.println("2333333333333333");
                 throw new IllegalStateException("모임원이나 모임장만 수정할 수 있습니다.");
             }
         } else if (!loginUser.equals(checkMoim.getUserId())) {
-            System.out.println("22222222222222222");
             throw new IllegalStateException("모임장만 공지 게시판을 수정할 수 있습니다.");
         }
 
-        existingBoard.setBoardTitle(board.getBoardTitle());
-        existingBoard.setBoardContent(board.getBoardContent());
-        existingBoard.setBoardType(board.getBoardType());
-        existingBoard.setPublic(board.isPublic());
-        existingBoard.setBoardRegdate(board.getBoardRegdate());
+        existingBoard.setUserId(loginUser);
+        existingBoard.setBoardType(boardType);
+        existingBoard.setBoardTitle(boardTitle);
+        existingBoard.setBoardContent(boardContent);
         existingBoard.setBoardUpdate(LocalDateTime.now());
+
 
         boardRepository.save(existingBoard);
 
@@ -260,7 +244,7 @@ public class BoardServiceImpl implements BoardService {
 
                 // 사진 수정
                 BoardPicture existingPicture = boardPictureRepository.findById(boardPicId)
-                        .orElseThrow(() -> new NoSuchElementException("Picture not found for ID: " + boardPicId));
+                        .orElseThrow(() -> new NoSuchElementException("Picture not found"));
 
                 byte[] picBytes = updatedFile.getBytes();
                 existingPicture.setBoardPic(picBytes);
