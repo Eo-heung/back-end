@@ -23,8 +23,7 @@ public class BoardDTO {
     private LocalDateTime boardRegdate;
     private LocalDateTime boardUpdate;
     private boolean isPublic;   //공개여부
-    private boolean isLeader; //모임장 여부
-    private boolean isMember; //모임원 여부
+
 
     public Board DTOToEntity() {
         return Board.builder()

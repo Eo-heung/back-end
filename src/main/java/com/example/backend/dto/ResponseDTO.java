@@ -15,6 +15,7 @@ public class ResponseDTO<T> {
     private int statusCode;
 
     private boolean lastPage;
+    private PaginationInfo paginationInfo; // 페이지네이션 정보
 
     public boolean isLastPage() {
         return lastPage;
@@ -25,4 +26,13 @@ public class ResponseDTO<T> {
     }
 
     private String token;
+
+    @Data
+    public static class PaginationInfo {
+
+        private int totalPages;     // 전체 페이지 수
+        private int currentPage;    // 현재 페이지 번호
+        private long totalElements; // 전체 게시글 수
+    }
+
 }

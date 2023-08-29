@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -97,25 +98,31 @@ public class BoardController {
         }
     }
 
-
-
     @PostMapping("/{moimId}/free-board")
     public ResponseEntity<?> getFreeList(@PathVariable("moimId") int moimId,
-                                         @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(required = false, defaultValue = "") String keyword,
                                          @RequestParam(required = false, defaultValue = "all") String searchType,
                                          @RequestParam(defaultValue = "ascending") String orderBy,
                                          @RequestHeader("Authorization") String token,
-                                         Pageable pageable) {
+                                         @PageableDefault(size = 10) Pageable pageable)  {
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        pageable = PageRequest.of(0, (page + 1) * 10);
-
         try {
             Page<BoardDTO> freeBoards = boardService.getFreeBoard(loginUser, pageable, moimId, keyword, searchType, orderBy);
-            return new ResponseEntity<>(freeBoards, HttpStatus.OK);
+
+            ResponseDTO.PaginationInfo paginationInfo = new ResponseDTO.PaginationInfo();
+            paginationInfo.setTotalPages(freeBoards.getTotalPages());
+            paginationInfo.setCurrentPage(freeBoards.getNumber());
+            paginationInfo.setTotalElements(freeBoards.getTotalElements());
+
+            ResponseDTO<Page<BoardDTO>> response = new ResponseDTO<>();
+            response.setItem(freeBoards);
+            response.setPaginationInfo(paginationInfo);
+            response.setStatusCode(HttpStatus.OK.value());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (NoSuchElementException | IllegalStateException e) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
@@ -123,21 +130,30 @@ public class BoardController {
 
     @PostMapping("/{moimId}/notice-board")
     public ResponseEntity<?> getNoticeList(@PathVariable("moimId") int moimId,
-                                           @RequestParam(defaultValue = "0") int page,
                                            @RequestParam(required = false, defaultValue = "") String keyword,
                                            @RequestParam(required = false, defaultValue = "all") String searchType,
                                            @RequestParam(defaultValue = "ascending") String orderBy,
                                            @RequestHeader("Authorization") String token,
-                                           Pageable pageable) {
+                                           @PageableDefault(size = 10) Pageable pageable) {
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        pageable = PageRequest.of(0, (page + 1) * 10);
 
         try {
             Page<BoardDTO> noticeBoards = boardService.getNoticeBoard(loginUser, pageable, moimId, keyword, searchType, orderBy);
-            return new ResponseEntity<>(noticeBoards, HttpStatus.OK);
+
+            ResponseDTO.PaginationInfo paginationInfo = new ResponseDTO.PaginationInfo();
+            paginationInfo.setTotalPages(noticeBoards.getTotalPages());
+            paginationInfo.setCurrentPage(noticeBoards.getNumber());
+            paginationInfo.setTotalElements(noticeBoards.getTotalElements());
+
+            ResponseDTO<Page<BoardDTO>> response = new ResponseDTO<>();
+            response.setItem(noticeBoards);
+            response.setPaginationInfo(paginationInfo);
+            response.setStatusCode(HttpStatus.OK.value());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (NoSuchElementException | IllegalStateException e) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
