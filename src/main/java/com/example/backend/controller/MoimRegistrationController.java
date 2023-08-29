@@ -9,6 +9,7 @@ import com.example.backend.jwt.JwtTokenProvider;
 import com.example.backend.repository.MoimRegistrationRepository;
 import com.example.backend.repository.MoimRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.BoardService;
 import com.example.backend.service.MoimRegistrationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ import java.util.*;
 @RequestMapping("/moimReg")
 public class MoimRegistrationController {
     private final MoimRegistrationService moimRegistrationService;
+    private final BoardService boardService;
     private final MoimRegistrationRepository moimRegistrationRepository;
     private final UserRepository userRepository;
     private final MoimRepository moimRepository;
@@ -73,9 +75,12 @@ public class MoimRegistrationController {
         MoimRegistration registration = moimRegistrationRepository.findByMoimAndUser(currentMoim, currentUserId)
                 .orElse(null); // 여기서 해당 조건에 맞는 MoimRegistration을 찾습니다.
 
-        if (registration == null) {
+
+        if (registration == null ) {
             throw new RuntimeException("등록 정보를 찾을 수 없습니다");
+
         }
+
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", registration.getRegStatus());

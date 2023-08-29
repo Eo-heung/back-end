@@ -19,7 +19,7 @@ public class BoardPicture {
     @Id
     @Column(name = "board_pic_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int freePicId; //게시글 사진 Id
+    private int boardPicId; //게시글 사진 Id
 
     @ManyToOne
     @JoinColumn(name = "user_id")

@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -228,20 +229,22 @@ public class BoardController {
     public ResponseEntity<?> modifyBoard(
             @PathVariable int boardId,
             @PathVariable int moimId,
-            @RequestBody BoardDTO boardDTO,
+            @RequestParam Board.BoardType boardType,
+            @RequestParam String boardTitle,
+            @RequestParam String boardContent,
             @RequestParam(required = false) List<MultipartFile> newPictures,
             @RequestParam(required = false) List<Integer> deletePictureIds,
-            @RequestParam(required = false) Map<Integer, MultipartFile> updatePicturesMap,
+            @RequestParam(required = false) List<MultipartFile> updatePictures,
             @RequestHeader("Authorization") String token) {
 
         try {
+
             String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
             User loginUser = userRepository.findByUserId(loggedInUsername)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            boardDTO.setBoardId(boardId);
-
-            Board updatedBoard = boardService.modifyBoard(loginUser, boardDTO, newPictures, deletePictureIds, updatePicturesMap, moimId);
+            Board updatedBoard = boardService.modifyBoard(boardId, loginUser, boardType,
+                    boardTitle, boardContent, newPictures, deletePictureIds, updatePictures, moimId);
 
             ResponseDTO<Board> responseDTO = new ResponseDTO<>();
             responseDTO.setItem(updatedBoard);
@@ -308,9 +311,6 @@ public class BoardController {
 
 
 }
-
-
-
 
 
 

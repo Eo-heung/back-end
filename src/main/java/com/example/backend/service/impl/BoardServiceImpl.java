@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.lang.IllegalStateException;
 import java.io.IOException;
@@ -189,15 +190,28 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
-
-    public Board modifyBoard(User loginUser,
-                             BoardDTO boardDTO,
+    @Transactional
+    @Override
+    public Board modifyBoard(int boardId,
+                             User loginUser,
+                             Board.BoardType boardType,
+                             String boardTitle,
+                             String boardContent,
                              List<MultipartFile> newPictures,
                              List<Integer> deletePictureIds,
-                             Map<Integer, MultipartFile> updatePicturesMap,
+                             List<MultipartFile> updatePictures,
                              int moimId) throws IOException {
 
-        Board board = toEntity(boardDTO);
+        Board board = new Board();
+        board.setBoardId(boardId);
+        board.setUserId(loginUser);
+        board.setBoardType(boardType);
+        board.setBoardTitle(boardTitle);
+        board.setBoardContent(boardContent);
+        board.setBoardRegdate(board.getBoardRegdate());
+        board.setBoardUpdate(LocalDateTime.now());
+        board.setPublic(board.isPublic());
+
 
         // 게시글을 수정하기 전에 권한을 체크
         Board existingBoard = boardRepository.findById(board.getBoardId())
@@ -210,11 +224,18 @@ public class BoardServiceImpl implements BoardService {
         Moim checkMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new NoSuchElementException("Moim not found"));
 
+
+
         if (board.getBoardType().equals(Board.BoardType.FREE)) {
+            System.out.println("1111111111111111111111111111");
+            System.out.println(isUserAMemberOfMoim(loginUser, checkMoim));
+            System.out.println(loginUser.equals(checkMoim.getUserId()));
             if (!isUserAMemberOfMoim(loginUser, checkMoim) && !loginUser.equals(checkMoim.getUserId())) {
+                System.out.println("2333333333333333");
                 throw new IllegalStateException("모임원이나 모임장만 수정할 수 있습니다.");
             }
         } else if (!loginUser.equals(checkMoim.getUserId())) {
+            System.out.println("22222222222222222");
             throw new IllegalStateException("모임장만 공지 게시판을 수정할 수 있습니다.");
         }
 
@@ -227,20 +248,21 @@ public class BoardServiceImpl implements BoardService {
 
         boardRepository.save(existingBoard);
 
-        // 기존 사진 삭제
-        if (deletePictureIds != null && !deletePictureIds.isEmpty()) {
-            for (Integer picId : deletePictureIds) {
-                boardPictureRepository.deleteById(picId);
-            }
-        }
 
-        // 기존 사진 수정
-        if (updatePicturesMap != null && !updatePicturesMap.isEmpty()) {
-            for (Map.Entry<Integer, MultipartFile> entry : updatePicturesMap.entrySet()) {
-                BoardPicture existingPicture = boardPictureRepository.findById(entry.getKey())
-                        .orElseThrow(() -> new NoSuchElementException("Picture not found "));
+        // 기존 사진 삭제 및 수정
+        if (deletePictureIds != null && updatePictures != null && !deletePictureIds.isEmpty() && !updatePictures.isEmpty()) {
+            for (int i = 0; i < deletePictureIds.size(); i++) {
+                Integer boardPicId = deletePictureIds.get(i);
+                MultipartFile updatedFile = updatePictures.get(i);
 
-                byte[] picBytes = entry.getValue().getBytes();
+                // 사진 삭제
+                boardPictureRepository.deleteById(boardPicId);
+
+                // 사진 수정
+                BoardPicture existingPicture = boardPictureRepository.findById(boardPicId)
+                        .orElseThrow(() -> new NoSuchElementException("Picture not found for ID: " + boardPicId));
+
+                byte[] picBytes = updatedFile.getBytes();
                 existingPicture.setBoardPic(picBytes);
                 existingPicture.setUpdateBoardPic(LocalDateTime.now());
 
@@ -248,7 +270,7 @@ public class BoardServiceImpl implements BoardService {
             }
         }
 
-        // 새로운 사진 추가
+// 새로운 사진 추가
         if (newPictures != null && !newPictures.isEmpty()) {
             for (MultipartFile file : newPictures) {
                 byte[] picBytes = file.getBytes();
@@ -267,38 +289,31 @@ public class BoardServiceImpl implements BoardService {
     }
 
 
-    private Board toEntity(BoardDTO boardDTO) {
-        Board board = new Board();
-        board.setBoardId(boardDTO.getBoardId());
-        board.setBoardType(boardDTO.getBoardType());
-        board.setBoardTitle(boardDTO.getBoardTitle());
-        board.setBoardContent(boardDTO.getBoardContent());
-        board.setBoardRegdate(boardDTO.getBoardRegdate());
-        board.setBoardUpdate(boardDTO.getBoardUpdate());
-        board.setPublic(boardDTO.isPublic());
-
-        User user = userRepository.findByUserId(boardDTO.getUserId())
-                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + boardDTO.getUserId()));
-
-        board.setUserId(user);
-
-        return board;
-    }
-
 
     private boolean isUserAMemberOfMoim(User user, Moim moim) {
-        MoimRegistration registration = moimRegistrationRepository.findByMoimAndUser(moim, user)
-                .orElseThrow(() -> new NoSuchElementException("이 모임에 등록되지 않은 사용자입니다."));
+        System.out.println("dmdkdkdkdkdkdkdkdk");
+
+        Optional<MoimRegistration> optionalRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user);
+
+        if (!optionalRegistration.isPresent()) {
+            return false; // 모임에 등록되지 않은 사용자
+        }
+
+        MoimRegistration registration = optionalRegistration.get();
         return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED;
     }
 
     public boolean verifyMemberRole(User user, Moim moim) {
-        Optional<MoimRegistration> registrationOpt = moimRegistrationRepository.findByMoimAndUser(moim, user);
-        if (registrationOpt.isPresent()) {
-            return registrationOpt.get().getRegStatus() == MoimRegistration.RegStatus.APPROVED;
-        } else {
-            return false;
+        System.out.println("dmdkdkdkdkdkdkdkdk");
+
+        Optional<MoimRegistration> optionalRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user);
+
+        if (!optionalRegistration.isPresent()) {
+            return false; // 모임에 등록되지 않은 사용자
         }
+
+        MoimRegistration registration = optionalRegistration.get();
+        return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED;
     }
 
     public boolean verifyLeaderRole(User user, Moim moim) {

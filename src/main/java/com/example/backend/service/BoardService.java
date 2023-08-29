@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -21,8 +22,15 @@ public interface BoardService {
 
     Board viewboard(User loginUser, int boardId, int moimId);
 
-    Board modifyBoard(User loginUser, BoardDTO boardDTO, List<MultipartFile> newPictures, List<Integer> deletePictureIds,
-                      Map<Integer, MultipartFile> updatePicturesMap, int moimId) throws IOException;
+    Board modifyBoard(int boardId,
+                      User loginUser,
+                      Board.BoardType boardType,
+                      String boardTitle,
+                      String boardContent,
+                      List<MultipartFile> newPictures,
+                      List<Integer> deletePictureIds,
+                      List<MultipartFile> updatePictures,
+                      int moimId) throws IOException;
 
     public boolean verifyMemberRole(User user, Moim moim);
     public boolean verifyLeaderRole(User user, Moim moim);
