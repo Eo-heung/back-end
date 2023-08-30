@@ -108,4 +108,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User delete(String userId) {
+        userRepository.deleteById(userId);
+            return null;
+    }
+
+
 }

@@ -126,6 +126,23 @@ public class UserController {
         }
     }
 
+    @PostMapping("/removeId")
+    public ResponseEntity<?> removeId(@RequestHeader("Authorization") String token) {
+        ResponseDTO<String> responseDTO = new ResponseDTO<>();
+        System.out.println(token);
+        try {
+            String userId = jwtTokenProvider.validateAndGetUsername(token);
+            userService.delete(userId);
+            responseDTO.setItem(userId);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
     @PostMapping("/kakaoLogin")
     public ResponseEntity<?> kakaoLogin(@RequestBody UserDTO userDTO) {
         ResponseDTO<UserDTO> responseDTO = new ResponseDTO<>();
@@ -281,13 +298,14 @@ public class UserController {
             } else {
                 user.setUserGender(0);
             }
+            user.setTotalGam(0L);
             user.setUserTel((String) profile.get("mobile"));
             int currentYear = LocalDate.now().getYear();
             String[] ageRange = ((String)profile.get("age")).split("-");
             int minAge = Integer.parseInt(ageRange[0]);
             int birthYear = currentYear - minAge;
             String birthday = ((String)profile.get("birthday")).replace("-", "");
-            user.setUserBirth(birthYear+birthday);
+            user.setUserBirth("    "+birthday);
             System.out.println(user);
             if (userService.newKaKao((String) profile.get("email")) == null) {
                 user.setUserPw(
@@ -298,6 +316,7 @@ public class UserController {
                 UserDTO loginUserDTO = user.EntityToDTO();
                 loginUserDTO.setUserName(user.getUserName());
                 loginUserDTO.setUserPw("");
+                loginUserDTO.setAge(minAge);
                 loginUserDTO.setToken(token1);
                 responseDTO.setItem(loginUserDTO);
             } else {
@@ -306,6 +325,7 @@ public class UserController {
                 UserDTO loginUserDTO = user.EntityToDTO();
                 loginUserDTO.setUserName(user.getUserName());
                 loginUserDTO.setUserPw("");
+                loginUserDTO.setAge(minAge);
                 loginUserDTO.setToken(token1);
                 responseDTO.setItem(loginUserDTO);
             }
