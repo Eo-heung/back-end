@@ -76,6 +76,33 @@ public class UserService {
         }
     }
 
+    public User registerUser(UserDTO userDTO) {
+        System.out.println(userDTO);
+        // 사용자 ID를 기반으로 사용자를 찾습니다.
+        Optional<User> userOptional = userRepository.findByUserId(userDTO.getUserId());
+        // 사용자가 존재하며 지정된 필드가 채워져 있는지 확인합니다.
+        if (userOptional.isPresent() &&
+                userOptional.get().getUserPw() != null &&
+                userOptional.get().getUserName() != null &&
+                userOptional.get().getUserAddr1() != null &&
+                userOptional.get().getUserAddr2() != null &&
+                userOptional.get().getUserAddr3() != null) {
+            // 사용자가 이미 존재하는 경우 예외를 발생시킵니다.
+            throw new RuntimeException("이미 가입된 회원입니다.");
+        } else {
+            User user = User.builder()
+                    .userId(userDTO.getUserId())
+                    .userPw(userDTO.getUserPw())
+                    .userName(userDTO.getUserName())
+                    .userTel(userDTO.getUserTel())
+                    .userAddr1(userDTO.getUserAddr1())
+                    .userAddr2(userDTO.getUserAddr2())
+                    .userAddr3(userDTO.getUserAddr3())
+                    .build();
+            return userRepository.save(user);
+        }
+    }
+
     public UserDTO getUserInfo(String userId) {
         Optional<User> optionalUser = userRepository.findByUserId(userId);
         if (optionalUser.isPresent()) {
