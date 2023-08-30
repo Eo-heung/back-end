@@ -135,9 +135,11 @@ public class UserController {
                 user.setUserPw(
                         passwordEncoder.encode(userDTO.getUserId()));
                 userService.join(user);
+
                 String token = jwtTokenProvider.create(user);
 
                 UserDTO loginUserDTO = user.EntityToDTO();
+                loginUserDTO.setUserName(user.getUserName());
                 loginUserDTO.setUserPw("");
                 loginUserDTO.setToken(token);
                 responseDTO.setItem(loginUserDTO);
@@ -145,6 +147,7 @@ public class UserController {
                 String token = jwtTokenProvider.create(user);
 
                 UserDTO loginUserDTO = user.EntityToDTO();
+                loginUserDTO.setUserName(user.getUserName());
                 loginUserDTO.setUserPw("");
                 loginUserDTO.setToken(token);
                 responseDTO.setItem(loginUserDTO);
