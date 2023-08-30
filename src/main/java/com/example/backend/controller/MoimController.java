@@ -19,11 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -66,7 +64,6 @@ public class MoimController {
                                            @RequestParam("moimId") Integer moimId) {
         ResponseDTO<MoimPictureDTO> responseDTO = new ResponseDTO<>();
 
-
         try {
             System.out.println(moimId);
 
@@ -101,17 +98,14 @@ public class MoimController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+
     @PostMapping("/list-moim/asc")
     public ResponseEntity<?> getMoimListAsc(@RequestParam(defaultValue = "0") int page,
                                             @RequestParam(required = false, defaultValue = "전체") String category,
                                             @RequestParam(required = false) String searchKeyword,
                                             @RequestParam(required = false, defaultValue = "all") String searchType,
-                                            @RequestParam(defaultValue = "ascending") String orderBy,
+                                            @RequestParam(defaultValue = "descending") String orderBy,
                                             @RequestHeader("Authorization") String token) {
-        System.out.println("카테고리1컨");
-        System.out.println(category);
-        System.out.println(searchType);
-        System.out.println(searchKeyword);
 
         return getResponse(page, category, searchKeyword, searchType, "ascending", token);
     }
@@ -121,13 +115,8 @@ public class MoimController {
                                              @RequestParam(required = false, defaultValue = "전체") String category,
                                              @RequestParam(required = false, defaultValue = "") String searchKeyword,
                                              @RequestParam(required = false, defaultValue = "all") String searchType,
-                                             @RequestParam(defaultValue = "ascending") String orderBy,
+                                             @RequestParam(defaultValue = "descending") String orderBy,
                                              @RequestHeader("Authorization") String token) {
-
-        System.out.println("카테고리1컨");
-        System.out.println(category);
-        System.out.println(searchType);
-        System.out.println(searchKeyword);
 
         return getResponse(page, category, searchKeyword, searchType, "descending", token);
     }
@@ -136,9 +125,8 @@ public class MoimController {
     public ResponseEntity<?> getMyMoim(
             @RequestHeader("Authorization") String token,
             @RequestParam(required = false, defaultValue = "") String keyword,
-            @RequestParam(defaultValue = "ascending") String orderBy,
+            @RequestParam(defaultValue = "descending") String orderBy,
             @RequestParam(defaultValue = "0") int page) {
-        System.out.println("1트");
 
         String loginUser = jwtTokenProvider.validateAndGetUsername(token);
         User checkUser = userRepository.findByUserId(loginUser)
@@ -150,11 +138,9 @@ public class MoimController {
 
         ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
         try {
-            System.out.println("2트");
             List<Map<String, Object>> result = new ArrayList<>();
 
             for (Moim moim : mymoimPage.getContent()) {
-                System.out.println("3트");
                 int moimId = moim.getMoimId();
                 Map<String, Object> returnMap = new HashMap<>();
                 MoimPicture matchingPicture = moim.getMoimPicture();
@@ -174,7 +160,6 @@ public class MoimController {
                 result.add(returnMap);
             }
 
-            System.out.println("4트");
             responseDTO.setItems(result);
             responseDTO.setLastPage(mymoimPage.isLast());
             responseDTO.setStatusCode(HttpStatus.OK.value());
@@ -224,8 +209,6 @@ public class MoimController {
         }
     }
 
-
-
     @PostMapping(value = "/modify-moim/{moimId}")
     public ResponseEntity<?> modifyMoim(@PathVariable int moimId, @RequestBody MoimDTO moimDTO) {
         ResponseDTO<Moim> responseDTO = new ResponseDTO<>();
@@ -233,7 +216,7 @@ public class MoimController {
 
         try {
             Moim moim = moimService.viewMoim(moimId);
-//            카테고리, 소모임 이름, 모임 주소, 현재 가입한 회원 수, 최대 인원, 모임 소개, 그림
+
             moim.setMoimTitle(moimDTO.getMoimTitle());
             moim.setMoimCategory(moimDTO.getMoimCategory());
             moim.setMoimContent(moimDTO.getMoimContent());
@@ -253,7 +236,6 @@ public class MoimController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
-
 
     @PostMapping(value = "/modify-moim-pic/{moimId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> modifyMoim(@PathVariable int moimId,
@@ -286,8 +268,6 @@ public class MoimController {
         }
     }
 
-
-
     @DeleteMapping("/delete-moim/{moimId}")
     public ResponseEntity<?> deleteMoim(@PathVariable int moimId) {
         ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
@@ -306,6 +286,7 @@ public class MoimController {
             returnMap.put("msg", "정상적으로 삭제되었습니다.");
             responseDTO.setItem(returnMap);
             responseDTO.setStatusCode(HttpStatus.OK.value());
+
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
@@ -314,17 +295,11 @@ public class MoimController {
         }
     }
 
-
     private ResponseEntity<?> getResponse(int page, String category, String searchKeyword, String searchType, String orderBy, String token) {
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-
-        System.out.println("카테고리2컨");
-        System.out.println(category);
-        System.out.println(searchType);
-        System.out.println(searchKeyword);
 
         Pageable pageable = PageRequest.of(0, (page + 1) * 3);
 

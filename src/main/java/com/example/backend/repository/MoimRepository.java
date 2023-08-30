@@ -8,17 +8,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-import java.util.Optional;
-
 public interface MoimRepository extends JpaRepository<Moim, Integer> {
-    List<Moim> findByUserId(User user);
-
 
     @Query("SELECT m FROM Moim m WHERE (m.moimTitle LIKE CONCAT('%', :keyword, '%') OR m.moimContent LIKE CONCAT('%', :keyword, '%') OR m.moimNickname LIKE CONCAT('%', :keyword, '%')) AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
     Page<Moim> findByAllAsc(User user, String keyword, Pageable pageable);
     @Query("SELECT m FROM Moim m WHERE (m.moimTitle LIKE CONCAT('%', :keyword, '%') OR m.moimContent LIKE CONCAT('%', :keyword, '%') OR m.moimNickname LIKE CONCAT('%', :keyword, '%')) AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
     Page<Moim> findByAllDesc(User user, String keyword, Pageable pageable);
+
+
 
     /////전체 카테고리일 때,
     //title 기준으로 검색 후 REJECT 상태가 아닌 리스트 호출
@@ -28,7 +25,6 @@ public interface MoimRepository extends JpaRepository<Moim, Integer> {
     Page<Moim> findByAllAndMoimTitleDesc(User user, String keyword, Pageable pageable);
 
     //content 기준으로 검색 후 REJECT 상태가 아닌 리스트 호출
-
     @Query("SELECT m FROM Moim m WHERE m.moimContent LIKE CONCAT('%', :keyword, '%') AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
     Page<Moim> findByAllAndMoimContentAsc(User user, String keyword, Pageable pageable);
     @Query("SELECT m FROM Moim m WHERE m.moimContent LIKE CONCAT('%', :keyword, '%') AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
@@ -41,13 +37,13 @@ public interface MoimRepository extends JpaRepository<Moim, Integer> {
     Page<Moim> findByAllAndMoimNicknameDesc(User user, String keyword, Pageable pageable);
 
 
+
     /////카테고리 내에서,
     //전체 조건으로 검색
     @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND (m.moimTitle LIKE CONCAT('%', :keyword, '%') OR m.moimContent LIKE CONCAT('%', :keyword, '%') OR m.moimNickname LIKE CONCAT('%', :keyword, '%')) AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
     Page<Moim> findByMoimCategoryAndAllAsc(User user, String category, String keyword, Pageable pageable);
     @Query("SELECT m FROM Moim m WHERE m.moimCategory = :category AND (m.moimTitle LIKE CONCAT('%', :keyword, '%') OR m.moimContent LIKE CONCAT('%', :keyword, '%') OR m.moimNickname LIKE CONCAT('%', :keyword, '%')) AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId DESC")
     Page<Moim> findByMoimCategoryAndAllDesc(User user, String category, String keyword, Pageable pageable);
-
 
     /////카테고리 내에서,
     //title 기준으로 검색 후 REJECT 상태가 아닌 리스트 호출
@@ -99,7 +95,6 @@ public interface MoimRepository extends JpaRepository<Moim, Integer> {
             , nativeQuery = true)
     Page<Moim> findmyMoimAsc(@Param("userId") String userId, @Param("keyword") String keyword, Pageable pageable);
 
-
     ////내 모임 내림차순
     @Query(value =
             "SELECT * FROM (" +
@@ -123,5 +118,7 @@ public interface MoimRepository extends JpaRepository<Moim, Integer> {
             ") AS countResults"
             , nativeQuery = true)
     Page<Moim> findmyMoimDesc(@Param("userId") String userId,  @Param("keyword") String keyword, Pageable pageable);
+
+
 
 }

@@ -87,7 +87,6 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
-
     //게시글 당 댓글 리스트
     public Page<Comment> getComment(int moimId, int boardId, Pageable pageable, User loginUser) {
         Moim checkMoim = moimRepository.findById(moimId)
@@ -96,7 +95,8 @@ public class CommentServiceImpl implements CommentService {
         return commentRepository.findByBoardId_BoardIdOrderByCommentRegdateDesc(boardId, pageable);
     }
 
-    public Page<Comment> getMyComment(User loginUser, int moimId, Pageable pageable) {
+    //모임 내 내가 작성한 댓글 리스트
+    public Page<Comment> getMyComment(User loginUser, int moimId, Pageable pageable, String keyword) {
         Moim checkMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new NoSuchElementException("[Comment Service] 모임을 찾을 수 없습니다."));
 
@@ -108,13 +108,12 @@ public class CommentServiceImpl implements CommentService {
         }
 
 
-        return commentRepository.findUserCommentsInMoim(loginUser, moimId, pageable);
+        return commentRepository.findUserCommentsInMoim(loginUser, moimId, keyword, pageable);
     }
 
 
 
-
-
+    //모임원 여부 확인(boolean)
     public boolean verifyMemberRole(User user, Moim moim) {
         Optional<MoimRegistration> optionalRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user);
 
@@ -126,6 +125,7 @@ public class CommentServiceImpl implements CommentService {
         return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED;
     }
 
+    //모임장 여부 확인(boolean)
     public boolean verifyLeaderRole(User user, Moim moim) {
         return user.equals(moim.getUserId());
     }

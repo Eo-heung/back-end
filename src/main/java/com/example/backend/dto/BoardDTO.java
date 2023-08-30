@@ -25,6 +25,7 @@ public class BoardDTO {
     private boolean isPublic;   //공개여부
 
 
+
     public Board DTOToEntity() {
         return Board.builder()
                 .boardId(this.boardId)
@@ -45,5 +46,7 @@ public class BoardDTO {
                 .isPublic(this.isPublic)
                 .build();
     }
+
+
 
 }

@@ -66,6 +66,7 @@ public class Moim {
     private MoimPicture moimPicture;
 
 
+
     // 모임 가입자 수 증가
     public void incrementCurrentMoimUser() {
         if (this.currentMoimUser + 1 > this.maxMoimUser) {
@@ -82,6 +83,8 @@ public class Moim {
         this.currentMoimUser -= 1;
     }
 
+
+
     public MoimDTO EntityToDTO() {
         return MoimDTO.builder()
                 .moimId(this.moimId)
@@ -94,11 +97,12 @@ public class Moim {
                 .onOff(this.onOff)
                 .moimAddr(this.moimAddr)
                 .maxMoimUser(this.maxMoimUser)
-//                .currentMoimUser(this.currentMoimUser)
+                .currentMoimUser(this.currentMoimUser)
                 .isDelete(this.isDelete)
                 .isEnd(this.isEnd)
                 .build();
     }
+
 
 
 }

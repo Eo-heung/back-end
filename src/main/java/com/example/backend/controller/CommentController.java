@@ -1,29 +1,21 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.BoardDTO;
 import com.example.backend.dto.CommentDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.*;
 import com.example.backend.jwt.JwtTokenProvider;
 import com.example.backend.repository.*;
-import com.example.backend.service.BoardPictureService;
-import com.example.backend.service.BoardService;
 import com.example.backend.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -111,6 +103,7 @@ public class CommentController {
             commentService.deleteComment(moimId, boardId, commentId, loginUser);
             responseDTO.setItem("Comment successfully deleted.");
             responseDTO.setStatusCode(HttpStatus.OK.value());
+
             return ResponseEntity.ok(responseDTO);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
@@ -124,6 +117,7 @@ public class CommentController {
     public ResponseEntity<?> getCommentList(@PathVariable("moimId") int moimId,
                                             @PathVariable("boardId") int boardId,
                                             @PageableDefault(size = 20) Pageable pageable,
+                                            @RequestParam(defaultValue = "0") int currentPage,
                                             @RequestHeader("Authorization") String token) {
 
         ResponseDTO<CommentDTO> responseDTO = new ResponseDTO<>();
@@ -131,6 +125,8 @@ public class CommentController {
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        pageable = PageRequest.of(currentPage, 20);
 
         try {
             Page<Comment> commentPage = commentService.getComment(moimId, boardId, pageable, loginUser);
@@ -160,10 +156,11 @@ public class CommentController {
         }
     }
 
-
     @GetMapping("/{moimId}/list-my-co")
     public ResponseEntity<?> getMyComment(@PathVariable("moimId") int moimId,
                                           @PageableDefault(size = 20) Pageable pageable,
+                                          @RequestParam(required = false) String keyword,
+                                          @RequestParam(defaultValue = "0") int currentPage,
                                           @RequestHeader("Authorization") String token) {
 
         ResponseDTO<CommentDTO> responseDTO = new ResponseDTO<>();
@@ -172,8 +169,10 @@ public class CommentController {
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        pageable = PageRequest.of(currentPage, 20);
+
         try {
-            Page<Comment> commentPage = commentService.getMyComment(loginUser, moimId, pageable);
+            Page<Comment> commentPage = commentService.getMyComment(loginUser, moimId, pageable, keyword);
             Page<CommentDTO> commentDtoPage = commentPage.map(Comment::EntityToDTO);
 
             responseDTO.setPageItems(commentDtoPage);
@@ -199,8 +198,9 @@ public class CommentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
         }
 
-
     }
+
+
 
 }
 

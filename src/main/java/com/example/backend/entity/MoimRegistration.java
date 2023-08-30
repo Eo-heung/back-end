@@ -64,6 +64,7 @@ public class MoimRegistration {
     }
 
 
+
     public String applicantUserNickname() {
         if (this.user != null) {
             return this.user.getUserNickname();
@@ -93,7 +94,6 @@ public class MoimRegistration {
                 .build();
     }
 
-
     public MoimRegistrationDTO toDTO() {
         return MoimRegistrationDTO.builder()
                 .moimRegId(this.moimRegId)
@@ -105,5 +105,7 @@ public class MoimRegistration {
                 .applicantUserId(this.user.getUserId())
                 .build();
     }
+
+
 
 }

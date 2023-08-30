@@ -20,4 +20,5 @@ public class BoardPictureDTO {
     private LocalDateTime updateboardPic; //수정일
 
 
+
 }

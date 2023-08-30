@@ -1,6 +1,5 @@
 package com.example.backend.service.impl;
 
-import com.example.backend.dto.BoardAndPictureDTO;
 import com.example.backend.dto.BoardDTO;
 import com.example.backend.entity.*;
 import com.example.backend.repository.*;
@@ -15,7 +14,6 @@ import java.lang.IllegalStateException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -28,6 +26,7 @@ public class BoardServiceImpl implements BoardService {
     private final MoimRepository moimRepository;
     private final CommentRepository commentRepository;
 
+    //게시글 등록
     @Override
     public Board createBoard(User loginUser, Board board, List<BoardPicture> boardPics, int moimId) {
 
@@ -60,7 +59,7 @@ public class BoardServiceImpl implements BoardService {
         return savedBoard;
     }
 
-
+    //공지게시판 리스트
     @Override
     public Page<BoardDTO> getNoticeBoard(User loginUser, Pageable pageable, int moimId, String keyword, String searchType, String orderBy) {
         Moim checkMoim = moimRepository.findById(moimId)
@@ -115,6 +114,7 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
+    //자유게시판 리스트
     @Override
     public Page<BoardDTO> getFreeBoard(User loginUser, Pageable pageable, int moimId, String keyword, String searchType, String orderBy) {
             Moim checkMoim = moimRepository.findById(moimId)
@@ -169,6 +169,35 @@ public class BoardServiceImpl implements BoardService {
             }
     }
 
+    //내 게시글
+    @Override
+    public Page<BoardDTO> getMyBoard(User loginUser, Pageable pageable, String keyword, String searchType) {
+        Page<Board> userBoards;
+
+        switch (searchType) {
+            case "title":
+                userBoards = boardRepository.findByUserIdAndBoardTitleContainingOrderByBoardIdDesc(loginUser, keyword, pageable);
+                break;
+            case "content":
+                userBoards = boardRepository.findByUserIdAndBoardContentContainingOrderByBoardIdDesc(loginUser, keyword, pageable);
+                break;
+            default:
+                userBoards = boardRepository.findByUserIdOrderByBoardIdDesc(loginUser, pageable);
+                break;
+        }
+
+        return userBoards.map(board -> BoardDTO.builder()
+                .boardId(board.getBoardId())
+                .boardType(board.getBoardType())
+                .userId(board.getUserId().getUserId())
+                .userName(board.getUserId().getUserName())
+                .boardTitle(board.getBoardTitle())
+                .boardContent(board.getBoardContent())
+                .boardRegdate(board.getBoardRegdate())
+                .build());
+    }
+
+    //게시글 상세보기
     @Override
     public Board viewboard(User loginUser, int boardId, int moimId) {
         Moim checkMoim = moimRepository.findById(moimId)
@@ -189,6 +218,7 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
+    //게시글 수정
     @Transactional
     @Override
     public Board modifyBoard(int boardId,
@@ -213,8 +243,6 @@ public class BoardServiceImpl implements BoardService {
         Moim checkMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new NoSuchElementException("Moim not found"));
 
-
-
         if (boardType.equals(Board.BoardType.FREE)) {
             if (!isUserAMemberOfMoim(loginUser, checkMoim) && !loginUser.equals(checkMoim.getUserId())) {
                 throw new IllegalStateException("모임원이나 모임장만 수정할 수 있습니다.");
@@ -229,9 +257,7 @@ public class BoardServiceImpl implements BoardService {
         existingBoard.setBoardContent(boardContent);
         existingBoard.setBoardUpdate(LocalDateTime.now());
 
-
         boardRepository.save(existingBoard);
-
 
         // 기존 사진 삭제 및 수정
         if (deletePictureIds != null && updatePictures != null && !deletePictureIds.isEmpty() && !updatePictures.isEmpty()) {
@@ -254,7 +280,7 @@ public class BoardServiceImpl implements BoardService {
             }
         }
 
-// 새로운 사진 추가
+        // 새로운 사진 추가
         if (newPictures != null && !newPictures.isEmpty()) {
             for (MultipartFile file : newPictures) {
                 byte[] picBytes = file.getBytes();
@@ -272,13 +298,11 @@ public class BoardServiceImpl implements BoardService {
         return existingBoard;
     }
 
-
     //게시글 삭제. 반환 메세지 넘기기 위해 String deleteBoard로 받음
     public String deleteBoard(User loginuser, int boardId, Moim moim) throws Exception {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new Exception("게시글을 찾을 수 없습니다"));
 
-        // 게시글 작성자와 로그인한 사용자가 다른 경우
         if (!board.getUserId().equals(loginuser)) {
             throw new IllegalAccessException("게시글 삭제 권한이 없습니다.");
         }
@@ -296,11 +320,10 @@ public class BoardServiceImpl implements BoardService {
 
         // 게시글 작성자와 로그인한 사용자가 같고, 로그인한 사용자가 모임장일 경우
         if (board.getUserId().equals(loginuser) && verifyLeaderRole(loginuser, moim)) {
-            return "모임장이 삭제했습니다.";
+            return "모임장이 게시글을 삭제했습니다.";
         }
-        return "정상적으로 삭제되었습니다.";
+        return "게시글이 정상적으로 삭제되었습니다.";
     }
-
 
 
 

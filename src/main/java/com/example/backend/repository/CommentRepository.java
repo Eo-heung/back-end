@@ -18,9 +18,14 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     Page<Comment> findByBoardId_BoardIdOrderByCommentRegdateDesc(int boardId, Pageable pageable);
 
     //모임 내 댓글 리스트
-    @Query("SELECT c FROM Comment c WHERE c.userId = :user AND c.boardId.moimId.moimId = :moimId ORDER BY c.commentRegdate DESC")
-    Page<Comment> findUserCommentsInMoim(@Param("user") User user, @Param("moimId") int moimId, Pageable pageable);
-
+    @Query("SELECT c FROM Comment c WHERE c.userId = :user " +
+            "AND c.boardId.moimId.moimId = :moimId " +
+            "AND (c.commentContent LIKE CONCAT('%', :search, '%') OR :search IS NULL) " +
+            "ORDER BY c.commentRegdate DESC")
+    Page<Comment> findUserCommentsInMoim(@Param("user") User user, @Param("moimId") int moimId, @Param("search") String search, Pageable pageable);
 
     List<Comment> findByBoardId(Board board);
+
+
+
 }

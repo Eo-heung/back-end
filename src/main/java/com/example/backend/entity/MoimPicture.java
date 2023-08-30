@@ -1,6 +1,5 @@
 package com.example.backend.entity;
 
-import com.example.backend.dto.MoimDTO;
 import com.example.backend.dto.MoimPictureDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,7 +16,6 @@ import java.time.LocalDateTime;
 @Builder
 @Table(name = "MOIM_PICTURE")
 public class MoimPicture {
-
 
     @Id
     @Column(name = "pic_id")
@@ -42,6 +40,8 @@ public class MoimPicture {
     @Column(name = "update_pic")
     private LocalDateTime updatePic; //수정일
 
+
+
     @PrePersist
     public void prePersist() {
         this.createPic = LocalDateTime.now();
@@ -52,6 +52,8 @@ public class MoimPicture {
         this.updatePic = LocalDateTime.now();
     }
 
+
+
     public MoimPictureDTO EntityToDTO() {
         return MoimPictureDTO.builder()
                 .picId(this.picId)
@@ -61,6 +63,7 @@ public class MoimPicture {
                 .updatePic(this.updatePic)
                 .build();
     }
+
 
 
 }

@@ -1,6 +1,5 @@
 package com.example.backend.entity;
 
-import com.example.backend.dto.BoardDTO;
 import com.example.backend.dto.CommentDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,6 +41,7 @@ public class Comment {
     private LocalDateTime commentUpdate;
 
 
+
     @PrePersist
     public void onPrePersist() {
         this.commentRegdate = LocalDateTime.now();
@@ -52,6 +52,8 @@ public class Comment {
     public void onPreUpdate() {
         this.commentUpdate = LocalDateTime.now();
     }
+
+
 
     public CommentDTO EntityToDTO() {
         return CommentDTO.builder()

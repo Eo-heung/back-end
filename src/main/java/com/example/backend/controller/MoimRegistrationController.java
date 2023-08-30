@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -80,7 +79,6 @@ public class MoimRegistrationController {
             throw new RuntimeException("등록 정보를 찾을 수 없습니다");
 
         }
-
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", registration.getRegStatus());
@@ -166,7 +164,6 @@ public class MoimRegistrationController {
 
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
-
         try {
             Pageable pageable = PageRequest.of(0, (page + 1) * 3);
 
@@ -205,7 +202,6 @@ public class MoimRegistrationController {
             return handleException(e);
         }
     }
-
 
     //신청자 상세페이지
     @GetMapping("/get-applicant/{moimId}/{moimRegId}")
@@ -249,9 +245,6 @@ public class MoimRegistrationController {
 
 
 
-
-
-
     private ResponseEntity<?> handleException(Exception e) {
         ResponseDTO<String> responseDTO = new ResponseDTO<>();
 
@@ -271,7 +264,6 @@ public class MoimRegistrationController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
-
 
 
 

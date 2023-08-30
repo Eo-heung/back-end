@@ -43,4 +43,7 @@ public class MoimPictureDTO {
                 .updatePic(this.updatePic)
                 .build();
     }
+
+
+
 }

@@ -33,7 +33,6 @@ public class BoardPicture {
     @Column(name = "board_pic", columnDefinition = "MEDIUMBLOB")
     private byte[] boardPic; //사진저장
 
-
     @Column(name = "create_board_pic", updatable = false)
     private LocalDateTime createBoardPic; //등록일
 
@@ -43,5 +42,7 @@ public class BoardPicture {
     @ManyToOne
     @JoinColumn(name = "board_id")
     private Board board;
+
+
 
 }

@@ -1,6 +1,7 @@
 package com.example.backend.repository;
 
 import com.example.backend.entity.Board;
+import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,6 +39,14 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
     Page<Board> findByBoardTypeAndBoardContentContainingOrderByBoardIdDesc(Board.BoardType boardType, String keyword, Pageable pageable);
     //닉네임
     Page<Board> findByBoardTypeAndUserId_UserNameContainingOrderByBoardIdDesc(Board.BoardType boardType, String keyword, Pageable pageable);
+
+
+
+    ///내가 쓴 게시글
+    Page<Board> findByUserIdOrderByBoardIdDesc(User user, Pageable pageable);
+    Page<Board> findByUserIdAndBoardTitleContainingOrderByBoardIdDesc(User user, String keyword, Pageable pageable);
+    Page<Board> findByUserIdAndBoardContentContainingOrderByBoardIdDesc(User user, String keyword, Pageable pageable);
+
 
 
 }

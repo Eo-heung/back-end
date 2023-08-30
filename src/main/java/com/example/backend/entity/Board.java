@@ -1,7 +1,6 @@
 package com.example.backend.entity;
 
 import com.example.backend.dto.BoardDTO;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,6 +55,7 @@ public class Board {
     }
 
 
+
     public BoardDTO EntityToDTO() {
         return BoardDTO.builder()
                 .boardId(this.boardId)
@@ -69,5 +69,8 @@ public class Board {
                 .isPublic(this.isPublic)
                 .build();
     }
+
+
+
 
 }

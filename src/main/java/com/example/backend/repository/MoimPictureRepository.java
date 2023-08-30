@@ -12,7 +12,9 @@ public interface MoimPictureRepository extends JpaRepository<MoimPicture, Intege
 
     Optional<MoimPicture> findByMoimId(Moim moim);
 
-//    @Modifying
     @Query("SELECT mp FROM MoimPicture mp WHERE mp.moimId = :moim")
     MoimPicture findByMoim(@Param("moim") Moim moim);
+
+
+
 }

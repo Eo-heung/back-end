@@ -1,8 +1,6 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.BoardAndPictureDTO;
 import com.example.backend.dto.BoardDTO;
-import com.example.backend.dto.MoimDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.*;
 import com.example.backend.jwt.JwtTokenProvider;
@@ -22,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,9 +32,6 @@ public class BoardController {
     private final JwtTokenProvider jwtTokenProvider;
     private final MoimRepository moimRepository;
     private final UserRepository userRepository;
-    private final BoardRepository boardRepository;
-    private final BoardPictureRepository boardPictureRepository;
-    private final CommentRepository commentRepository;
 
     @PostMapping(value = "/{moimId}/create-board", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Board> createBoard(@PathVariable("moimId") int moimId,
@@ -102,12 +96,14 @@ public class BoardController {
     public ResponseEntity<?> getFreeList(@PathVariable("moimId") int moimId,
                                          @RequestParam(required = false, defaultValue = "") String keyword,
                                          @RequestParam(required = false, defaultValue = "all") String searchType,
-                                         @RequestParam(defaultValue = "ascending") String orderBy,
+                                         @RequestParam(defaultValue = "descending") String orderBy,
+                                         @RequestParam(defaultValue = "0") int currentPage,
                                          @RequestHeader("Authorization") String token,
                                          @PageableDefault(size = 10) Pageable pageable)  {
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        pageable = PageRequest.of(currentPage, 10);  /
 
         try {
             Page<BoardDTO> freeBoards = boardService.getFreeBoard(loginUser, pageable, moimId, keyword, searchType, orderBy);
@@ -132,13 +128,14 @@ public class BoardController {
     public ResponseEntity<?> getNoticeList(@PathVariable("moimId") int moimId,
                                            @RequestParam(required = false, defaultValue = "") String keyword,
                                            @RequestParam(required = false, defaultValue = "all") String searchType,
-                                           @RequestParam(defaultValue = "ascending") String orderBy,
+                                           @RequestParam(defaultValue = "descending") String orderBy,
+                                           @RequestParam(defaultValue = "0") int currentPage,
                                            @RequestHeader("Authorization") String token,
                                            @PageableDefault(size = 10) Pageable pageable) {
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
+        pageable = PageRequest.of(currentPage, 10);
 
         try {
             Page<BoardDTO> noticeBoards = boardService.getNoticeBoard(loginUser, pageable, moimId, keyword, searchType, orderBy);
@@ -150,6 +147,37 @@ public class BoardController {
 
             ResponseDTO<Page<BoardDTO>> response = new ResponseDTO<>();
             response.setItem(noticeBoards);
+            response.setPaginationInfo(paginationInfo);
+            response.setStatusCode(HttpStatus.OK.value());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (NoSuchElementException | IllegalStateException e) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PostMapping("/{moimId}/my-board")
+    public ResponseEntity<?> getUserBoards(@RequestHeader("Authorization") String token,
+                                           @RequestParam(required = false, defaultValue = "") String keyword,
+                                           @RequestParam(required = false, defaultValue = "all") String searchType,
+                                           @RequestParam(defaultValue = "0") int currentPage,
+                                           @PageableDefault(size = 10) Pageable pageable) {
+        String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+        User loginUser = userRepository.findByUserId(loggedInUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        pageable = PageRequest.of(currentPage, 10);
+
+        try {
+            Page<BoardDTO> userBoards = boardService.getMyBoard(loginUser, pageable, keyword, searchType);
+
+            ResponseDTO.PaginationInfo paginationInfo = new ResponseDTO.PaginationInfo();
+            paginationInfo.setTotalPages(userBoards.getTotalPages());
+            paginationInfo.setCurrentPage(userBoards.getNumber());
+            paginationInfo.setTotalElements(userBoards.getTotalElements());
+
+            ResponseDTO<Page<BoardDTO>> response = new ResponseDTO<>();
+            response.setItem(userBoards);
             response.setPaginationInfo(paginationInfo);
             response.setStatusCode(HttpStatus.OK.value());
 
@@ -201,8 +229,6 @@ public class BoardController {
         }
     }
 
-
-
     @PostMapping("/{moimId}/delete-board/{boardId}")
     public ResponseEntity<?> deleteBoard(@PathVariable int moimId,
                                          @PathVariable int boardId,
@@ -231,7 +257,6 @@ public class BoardController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
-
 
     @PostMapping(value = "/{moimId}/modify-board/{boardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> modifyBoard(
@@ -266,7 +291,6 @@ public class BoardController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
-
 
     @PostMapping(value = "/{moimId}/verify-role")
     public ResponseEntity<?> verifyLeader(

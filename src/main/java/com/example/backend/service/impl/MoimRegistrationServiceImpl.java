@@ -30,6 +30,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
     private final MoimRegistrationRepository moimRegistrationRepository;
     private final ProfileImageRepository profileImageRepository;
 
+    //모임 가입 신청
     @Override
     public MoimRegistration applyToMoim(int moimId, String userId,
                                         MultipartFile moimProfile) {
@@ -59,6 +60,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         }
 
         ProfileImage profileImage = profileImageRepository.findByUserId(user);
+
         if (profileImage == null) {
             throw new EntityNotFoundException("프로필 이미지를 찾을 수 없습니다.");
         }
@@ -86,6 +88,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(moimReg);
     }
 
+    //가입 신청 취소
     @Override
     public MoimRegistration cancelMoim(int moimId, String userId) {
         Moim moim = moimRepository.findById(moimId)
@@ -100,6 +103,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(existingRegistration);
     }
 
+    //(모임장) 가입 승인
     @Override
     public MoimRegistration approveMoim(int moimId, String applicantUserId, String organizerUserId) {
         Moim moim = moimRepository.findById(moimId)
@@ -126,6 +130,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(existingRegistration);
     }
 
+    //(모임장) 가입 거절
     @Override
     public MoimRegistration rejectMoim(int moimId, String applicantUserId, String organizerUserId) {
         Moim moim = moimRepository.findById(moimId)
@@ -146,6 +151,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return existingRegistration;
     }
 
+    //(모임원) 모임 탈퇴
     @Override
     public MoimRegistration quitMoim(int moimId, String applicantUserId) {
         Moim moim = moimRepository.findById(moimId)
@@ -166,6 +172,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(existingRegistration);
     }
 
+    //(모임원) 모임 프로필 수정
     @Override
     public MoimRegistration modifyMoimProfile(int moimId, String userId, MultipartFile moimProfile) {
         Moim moim = moimRepository.findById(moimId)
@@ -192,27 +199,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(moimReg);
     }
 
-//    @Override
-//    public Page<MoimRegistrationDTO> getApplicantList(int moimId,
-//                                                      String organizerUserId,
-//                                                      String orderBy,
-//                                                      String applicantUserNickname,
-//                                                      Pageable pageable) {
-//        Moim moim = moimRepository.findById(moimId)
-//                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
-//
-//        if (!moim.getUserId().getUserId().equals(organizerUserId)) {
-//            throw new AccessDeniedException("모임장만 접근할 수 있습니다.");
-//        }
-//
-//        if (applicantUserNickname == null || applicantUserNickname.trim().isEmpty()) {
-//            applicantUserNickname = "";
-//        }
-//
-//        Page<MoimRegistration> moimRegList = moimRegistrationRepository.findApplicantsByMoimIdAndUserId(moimId, organizerUserId, pageable);
-//        return moimRegList.map(MoimRegistration::toDTO);
-//    }
-
+    //(모임장) 신청자 리스트
     @Override
     public Page<MoimRegistrationDTO> getApplicantList(
                                                       int moimId,
@@ -244,6 +231,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegList.map(MoimRegistration::toDTO);
     }
 
+    //(모임장) 신청자 상세 내용
     @Override
     public MoimRegistrationDTO getApplicant(int moimId, int moimRegId, String organizerUserId) {
         Moim moim = moimRepository.findById(moimId)
@@ -263,5 +251,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
 
         return moimRegistration.toDTO();
     }
+
+
 
 }

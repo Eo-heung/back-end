@@ -2,16 +2,13 @@ package com.example.backend.service.impl;
 
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.User;
-import com.example.backend.repository.MoimPictureRepository;
 import com.example.backend.repository.MoimRepository;
-import com.example.backend.repository.UserRepository;
 import com.example.backend.service.MoimService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
@@ -19,6 +16,21 @@ import java.util.List;
 public class MoimServiceImpl implements MoimService {
     private final MoimRepository moimRepository;
 
+    //모임 생성
+    @Override
+    @Transactional
+    public Moim createMoim(Moim moim) {
+        return moimRepository.save(moim);
+    }
+
+    //모임 수정
+    @Override
+    @Transactional
+    public Moim modifyMoim(Moim moim) {
+        return moimRepository.save(moim);
+    }
+
+    //모임 상세 내용
     @Override
     public Moim viewMoim(int moimId) {
         if (moimRepository.findById(moimId).isEmpty())
@@ -26,31 +38,10 @@ public class MoimServiceImpl implements MoimService {
         else
             return moimRepository.findById(moimId).get();
     }
-
-    @Override
-    @Transactional
-    public Moim createMoim(Moim moim) {
-        return moimRepository.save(moim);
-    }
-
-    @Override
-    @Transactional
-    public Moim modifyMoim(Moim moim) {
-        return moimRepository.save(moim);
-    }
-
-    @Override
-    public List<Moim> getMoimList() {
-        return moimRepository.findAll();
-    }
-
+    
+    //모임 리스트
     @Override
     public Page<Moim> searchMoims(User user, String category, String keyword, String searchType, String orderBy, Pageable pageable) {
-
-        System.out.println("카테고리4컨");
-        System.out.println(category);
-        System.out.println(searchType);
-        System.out.println(keyword);
 
         if ("전체".equalsIgnoreCase(category)) {
             switch (searchType) {
@@ -380,10 +371,9 @@ public class MoimServiceImpl implements MoimService {
         }
     }
 
+    //내가 가입한 모임 리스트
     public Page<Moim> getMyMoim(String userId, String keyword,  String orderBy, Pageable pageable) {
-        System.out.println("5트");
         if ("ascending".equalsIgnoreCase(orderBy)) {
-            System.out.println("6트");
             System.out.println(keyword);
             return moimRepository.findmyMoimAsc(userId, keyword, pageable);
         } else {
@@ -391,4 +381,7 @@ public class MoimServiceImpl implements MoimService {
 
         }
     }
+
+
+
 }
