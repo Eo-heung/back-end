@@ -60,7 +60,7 @@ public class UserDTO {
     private String token;
 
     private Long  totalGam;
-
+    private Integer age;
     private Boolean online;
 
     public User DTOToEntity() {

@@ -60,7 +60,7 @@ public class PaymentController {
 
         PaymentGam paymentGam = paymentGamDTO.DTOToEntity();
         paymentGam.setPayDate(LocalDateTime.now());
-        paymentGam.setGotGam(paymentGam.getValue()/1000);
+        paymentGam.setGotGam(paymentGam.getValue()/100);
         paymentGam.setStatus(true);
         paymentGam.setUserId(userId);
         paymentRepository.save(paymentGam);

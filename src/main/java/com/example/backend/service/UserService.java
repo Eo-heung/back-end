@@ -102,4 +102,10 @@ public class UserService {
             return null;
     }
 
+    public User delete(String userId) {
+        userRepository.deleteById(userId);
+            return null;
+    }
+
+
 }
