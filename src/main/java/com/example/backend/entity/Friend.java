@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.dto.FriendDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,4 +30,12 @@ public class Friend {
     private String toUser;
 
 
+    public FriendDTO EntityToDTO() {
+        return FriendDTO.builder()
+                .id(this.id)
+                .status(this.status)
+                .fromUser(this.fromUser)
+                .toUser(this.toUser)
+                .build();
+    }
 }
