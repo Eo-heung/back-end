@@ -37,6 +37,7 @@ public class BoardController {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
     private final BoardPictureRepository boardPictureRepository;
+    private final CommentRepository commentRepository;
 
     @PostMapping(value = "/{moimId}/create-board", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Board> createBoard(@PathVariable("moimId") int moimId,
@@ -219,6 +220,11 @@ public class BoardController {
                 throw new IllegalStateException("You are not the author of this post.");
             }
 
+            // 게시글에 연관된 댓글들 삭제
+            List<Comment> comments = commentRepository.findByBoardId(board);
+            commentRepository.deleteAll(comments);
+
+            //게시글 연관된 사진 삭제
             List<BoardPicture> boardPictures = boardPictureRepository.findByBoard(board);
 
             for (BoardPicture boardPicture : boardPictures) {
