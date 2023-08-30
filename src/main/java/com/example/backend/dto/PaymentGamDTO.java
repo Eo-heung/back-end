@@ -21,16 +21,18 @@ public class PaymentGamDTO {
     private Long gotGam;
     private LocalDateTime payDate;
     private Boolean status;
+    private Boolean refund;
 
     public PaymentGam DTOToEntity() {
         return PaymentGam.builder()
                 .userId(this.user_id)
-                .imp_uid(this.imp_uid)
+                .impUid(this.imp_uid)
                 .merchant_uid(this.merchant_uid)
                 .value(this.value)
                 .gotGam(this.gotGam)
                 .payDate(this.payDate)
                 .status(this.status)
+                .refund(this.refund)
                 .build();
     }
 }

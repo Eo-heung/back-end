@@ -78,7 +78,7 @@ public class User {
         private String userStatusMessage;
 
         @Column(name = "totalGam")
-        private Long totalGam;
+        private Long totalGam = 0L;
 
         @Column(name = "online")
         private Boolean online;

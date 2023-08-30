@@ -63,6 +63,7 @@ public class PaymentController {
         paymentGam.setGotGam(paymentGam.getValue()/100);
         paymentGam.setStatus(true);
         paymentGam.setUserId(userId);
+        paymentGam.setRefund(true);
         paymentRepository.save(paymentGam);
 
         List<PaymentGam> payments = paymentRepository.findByUserIdOrderByPayDateDesc(userId);
@@ -84,16 +85,57 @@ public class PaymentController {
         responseDTO.setItem(paymentGam.EntityToDTO());
         return ResponseEntity.ok(responseDTO);
     }
-
+    
     @PostMapping("/paymentList")
     public ResponseEntity<?> PaymentList(@RequestHeader("Authorization") String token) {
         ResponseDTO<PaymentGam> responseDTO = new ResponseDTO<>();
         String userId = jwtTokenProvider.validateAndGetUsername(token);
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
 
         List<PaymentGam> payments = paymentRepository.findByUserIdOrderByPayDateDesc(userId);
 
         responseDTO.setItems(payments);
         return ResponseEntity.ok(responseDTO);
+    }
+    @PostMapping("/refundBlock")
+    public ResponseEntity<?> refundBlock(@RequestHeader("Authorization") String token)
+    {
+        String userId = jwtTokenProvider.validateAndGetUsername(token);
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        List<PaymentGam> payments = paymentRepository.findByUserIdAndPayDateBeforeOrderByPayDateDesc(userId, oneWeekAgo);
+
+        for (PaymentGam payment : payments) {
+            payment.setRefund(false);
+        }
+
+        // 변경된 엔티티들을 데이터베이스에 다시 저장
+        paymentRepository.saveAll(payments);
+
+        // 작업이 성공적으로 완료된 경우 적절한 응답 반환 (예: OK 상태)
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/totalGam")
+    public ResponseEntity<?> totalGam(@RequestHeader("Authorization") String token)
+    {
+        String userId = jwtTokenProvider.validateAndGetUsername(token);
+        List<PaymentGam> payments = paymentRepository.findByUserIdOrderByPayDateDesc(userId);
+
+        // gotGam 값들의 합 계산
+        Long totalGotGam = payments.stream()
+                .mapToLong(PaymentGam::getGotGam)
+                .sum();
+        User user = userRepository.findByUserId(userId).get();
+        if (user != null) {
+            user.setTotalGam(totalGotGam); // totalGam 값 업데이트
+            userRepository.save(user); // 변경된 값을 데이터베이스에 저장
+        } else {
+            // 유저가 존재하지 않는 경우, 적절한 예외 처리나 로깅을 해주세요.
+            System.out.println("User with userId " + userId + " not found.");
+        }
+
+        // 작업이 성공적으로 완료된 경우 적절한 응답 반환 (예: OK 상태)
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/totalGotGam")
@@ -133,6 +175,8 @@ public class PaymentController {
 
             if (response.getCode() == 0) {
                 returnMap.put("msg", "취소가 완료되었습니다.");
+                PaymentGam paymentGam = paymentRepository.findByImpUid(id);
+                paymentRepository.delete(paymentGam);
 
                 responseDTO.setItem(returnMap);
                 responseDTO.setStatusCode(HttpStatus.OK.value());
