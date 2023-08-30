@@ -31,6 +31,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -273,6 +275,19 @@ public class UserController {
             user.setUserEmail((String) profile.get("email"));
             user.setUserName((String)profile.get("name"));
             user.setUserNickname((String) profile.get("nickname"));
+            user.setUserRegdate(LocalDateTime.now());
+            if ("M".equals(profile.get("gender"))) {
+                user.setUserGender(1);
+            } else {
+                user.setUserGender(0);
+            }
+            user.setUserTel((String) profile.get("mobile"));
+            int currentYear = LocalDate.now().getYear();
+            String[] ageRange = ((String)profile.get("age")).split("-");
+            int minAge = Integer.parseInt(ageRange[0]);
+            int birthYear = currentYear - minAge;
+            String birthday = ((String)profile.get("birthday")).replace("-", "");
+            user.setUserBirth(birthYear+birthday);
             System.out.println(user);
             if (userService.newKaKao((String) profile.get("email")) == null) {
                 user.setUserPw(
@@ -281,6 +296,7 @@ public class UserController {
                 String token1 = jwtTokenProvider.create(user);
 
                 UserDTO loginUserDTO = user.EntityToDTO();
+                loginUserDTO.setUserName(user.getUserName());
                 loginUserDTO.setUserPw("");
                 loginUserDTO.setToken(token1);
                 responseDTO.setItem(loginUserDTO);
@@ -288,6 +304,7 @@ public class UserController {
                 String token1 = jwtTokenProvider.create(user);
 
                 UserDTO loginUserDTO = user.EntityToDTO();
+                loginUserDTO.setUserName(user.getUserName());
                 loginUserDTO.setUserPw("");
                 loginUserDTO.setToken(token1);
                 responseDTO.setItem(loginUserDTO);
