@@ -30,6 +30,8 @@ public interface BoardService {
                       List<MultipartFile> updatePictures,
                       int moimId) throws IOException;
 
+    String deleteBoard(User loginuser, int boardId, Moim moim) throws Exception;
+
     public boolean verifyMemberRole(User user, Moim moim);
     public boolean verifyLeaderRole(User user, Moim moim);
 

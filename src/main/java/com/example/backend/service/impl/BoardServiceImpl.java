@@ -26,6 +26,7 @@ public class BoardServiceImpl implements BoardService {
     private final BoardPictureRepository boardPictureRepository;
     private final MoimRegistrationRepository moimRegistrationRepository;
     private final MoimRepository moimRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public Board createBoard(User loginUser, Board board, List<BoardPicture> boardPics, int moimId) {
@@ -270,6 +271,36 @@ public class BoardServiceImpl implements BoardService {
 
         return existingBoard;
     }
+
+
+    //게시글 삭제. 반환 메세지 넘기기 위해 String deleteBoard로 받음
+    public String deleteBoard(User loginuser, int boardId, Moim moim) throws Exception {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new Exception("게시글을 찾을 수 없습니다"));
+
+        // 게시글 작성자와 로그인한 사용자가 다른 경우
+        if (!board.getUserId().equals(loginuser)) {
+            throw new IllegalAccessException("게시글 삭제 권한이 없습니다.");
+        }
+
+        // 게시글에 연관된 댓글들 삭제
+        List<Comment> comments = commentRepository.findByBoardId(board);
+        commentRepository.deleteAll(comments);
+
+        // 게시글 연관된 사진 삭제
+        List<BoardPicture> boardPictures = boardPictureRepository.findByBoard(board);
+        boardPictureRepository.deleteAll(boardPictures);
+
+        // 게시글 삭제
+        boardRepository.delete(board);
+
+        // 게시글 작성자와 로그인한 사용자가 같고, 로그인한 사용자가 모임장일 경우
+        if (board.getUserId().equals(loginuser) && verifyLeaderRole(loginuser, moim)) {
+            return "모임장이 삭제했습니다.";
+        }
+        return "정상적으로 삭제되었습니다.";
+    }
+
 
 
 

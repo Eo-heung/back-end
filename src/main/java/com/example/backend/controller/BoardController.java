@@ -206,38 +206,25 @@ public class BoardController {
     @PostMapping("/{moimId}/delete-board/{boardId}")
     public ResponseEntity<?> deleteBoard(@PathVariable int moimId,
                                          @PathVariable int boardId,
-                                         @RequestHeader("Authorization") String token) {
+                                         @RequestHeader("Authorization") String token) throws Exception{
         ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
 
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new Exception("모임을 찾을 수 없습니다"));
+
         try {
-            Board board = boardRepository.findById(boardId)
-                    .orElseThrow(() -> new Exception("게시글을 찾을 수 없습니다"));
-
-            if (!board.getUserId().equals(loginUser)) {
-                throw new IllegalStateException("You are not the author of this post.");
-            }
-
-            // 게시글에 연관된 댓글들 삭제
-            List<Comment> comments = commentRepository.findByBoardId(board);
-            commentRepository.deleteAll(comments);
-
-            //게시글 연관된 사진 삭제
-            List<BoardPicture> boardPictures = boardPictureRepository.findByBoard(board);
-
-            for (BoardPicture boardPicture : boardPictures) {
-                boardPictureRepository.delete(boardPicture);
-            }
-
-            boardRepository.delete(board);
+            String message = boardService.deleteBoard(loginUser, boardId, moim);
 
             Map<String, String> returnMap = new HashMap<>();
-            returnMap.put("msg", "정상적으로 삭제되었습니다.");
+            returnMap.put("msg", message);
             responseDTO.setItem(returnMap);
             responseDTO.setStatusCode(HttpStatus.OK.value());
             return ResponseEntity.ok().body(responseDTO);
+
         } catch (Exception e) {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDTO.setErrorMessage(e.getMessage());
