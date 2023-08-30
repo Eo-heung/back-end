@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.FriendDTO;
+import com.example.backend.dto.PaymentGamDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.Friend;
 import com.example.backend.entity.Hobby;
@@ -27,6 +28,7 @@ public class FriendController {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
+    private final PaymentController paymentController;
 
     @PostMapping("/friendList")
     public ResponseEntity<?> getFriendList(@RequestHeader("Authorization") String token) {
@@ -127,20 +129,44 @@ public class FriendController {
 
     @PostMapping("/makefriend/{id}")
     public ResponseEntity<?> makeFriend(@PathVariable String id, @RequestHeader("Authorization") String token) {
-        ResponseDTO<FriendDTO> responseDTO = new ResponseDTO<>();
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
 
         String fromUser = jwtTokenProvider.validateAndGetUsername(token);
 
+        Map<String, Object> returnMap = new HashMap<>();
+
         try {
-            Friend friend = new Friend();
+            User user = userRepository.findByUserId(fromUser).get();
+            // 친구 여부 확인하기
+            if (friendRepository.findFriendByFromUserAndToUser(fromUser, id) == null && friendRepository.findFriendByFromUserAndToUser(id, fromUser) == null ){
+                // 곶감 수 확인하기
+                if(user.getTotalGam() - 5 > 0) {
 
-            friend.setStatus(false);
-            friend.setFromUser(fromUser);
-            friend.setToUser(id);
+                    Friend friend = new Friend();
 
-            FriendDTO friendDTO = friendRepository.save(friend).EntityToDTO();
+                    friend.setStatus(false);
+                    friend.setFromUser(fromUser);
+                    friend.setToUser(id);
 
-            responseDTO.setItem(friendDTO);
+                    FriendDTO friendDTO = friendRepository.save(friend).EntityToDTO();
+
+                    PaymentGamDTO paymentGamDTO = PaymentGamDTO.builder()
+                            .imp_uid("Friend Request Cost")
+                            .merchant_uid("5 GotGam")
+                            .value((long) -5000)
+                            .build();
+
+                    paymentController.addPayment(token, paymentGamDTO);
+
+                    returnMap.put("msg", "successRequest");
+                } else {
+                    returnMap.put("msg", "notEnoughGam"); // 곶감 수 부족할 때
+                }
+            } else {
+                returnMap.put("msg", "alreadyFriend"); // 친구일 때
+            }
+
+            responseDTO.setItem(returnMap);
             responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok().body(responseDTO);
