@@ -26,7 +26,6 @@ public class BoardServiceImpl implements BoardService {
     private final BoardPictureRepository boardPictureRepository;
     private final MoimRegistrationRepository moimRegistrationRepository;
     private final MoimRepository moimRepository;
-    private final UserRepository userRepository;
 
     @Override
     public Board createBoard(User loginUser, Board board, List<BoardPicture> boardPics, int moimId) {
@@ -275,7 +274,6 @@ public class BoardServiceImpl implements BoardService {
 
 
     private boolean isUserAMemberOfMoim(User user, Moim moim) {
-        System.out.println("dmdkdkdkdkdkdkdkdk");
 
         Optional<MoimRegistration> optionalRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user);
 
@@ -288,7 +286,6 @@ public class BoardServiceImpl implements BoardService {
     }
 
     public boolean verifyMemberRole(User user, Moim moim) {
-        System.out.println("dmdkdkdkdkdkdkdkdk");
 
         Optional<MoimRegistration> optionalRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user);
 

@@ -37,7 +37,6 @@ public class BoardController {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
     private final BoardPictureRepository boardPictureRepository;
-    private final MoimRegistrationRepository moimRegistrationRepository;
 
     @PostMapping(value = "/{moimId}/create-board", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Board> createBoard(@PathVariable("moimId") int moimId,

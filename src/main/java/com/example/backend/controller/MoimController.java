@@ -30,7 +30,6 @@ import java.util.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/moim")
-//@Transactional
 public class MoimController {
 
     private final MoimService moimService;

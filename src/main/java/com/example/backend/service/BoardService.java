@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface BoardService {
-//    FreeBoard viewMoim(int moimId);
-
     Board createBoard(User loginUser, Board board, List<BoardPicture> boardPic, int moimId);
 
     Page<BoardDTO> getNoticeBoard(User loginUser, Pageable pageable, int moimId, String keyword, String searchType, String orderBy);

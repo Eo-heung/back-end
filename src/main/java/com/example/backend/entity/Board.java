@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import com.example.backend.dto.BoardDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
