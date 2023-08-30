@@ -22,7 +22,7 @@ public class Siren{
     private Integer singoId;
 
     @Column(name = "singo_date")
-    private LocalDateTime singoDate;
+    private String singoDate;
 
     @Column(name = "singoza_id")
     private String singozaId;
