@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Data
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "SIREN")
-public class Siren{
+public class Siren {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +23,7 @@ public class Siren{
     private Integer singoId;
 
     @Column(name = "singo_date")
-    private LocalDateTime singoDate;
+    private String singoDate;
 
     @Column(name = "singoza_id")
     private String singozaId;
@@ -37,7 +38,7 @@ public class Siren{
     private String singoContent;
 
     @Column(name = "singo_time")
-    private LocalDateTime singoTime;
+    private String singoTime;
 
     @Column(name = "singo_msg")
     private String singoMsg;
@@ -55,8 +56,10 @@ public class Siren{
     private byte[] singoImg3;
 
 
+
     @PrePersist
     public void onPrePersist() {
-        this.singoTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss");
+        this.singoTime = LocalDateTime.now().format(formatter);
     }
 }

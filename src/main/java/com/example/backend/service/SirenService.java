@@ -37,7 +37,7 @@ public class SirenService {
         siren.setPisingozaId(sirenDTO.getPisingozaId());
         siren.setSingoCategoryCode(sirenDTO.getSingoCategoryCode());
         siren.setSingoContent(sirenDTO.getSingoContent());
-        siren.setSingoMsg(sirenDTO.getSingoMsg());
+        siren.setSingoMsg(sirenDTO.getSingoMsg().toString());
         siren.setSingoImg1(sirenDTO.getSingoImg1());
         siren.setSingoImg2(sirenDTO.getSingoImg2());
         siren.setSingoImg3(sirenDTO.getSingoImg3());
