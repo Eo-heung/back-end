@@ -86,6 +86,9 @@ public class User {
         @Column(name = "last_login") // 마지막 접속 기록
         private LocalDateTime lastHeartbeat;
 
+        @Column(name = "ban")
+        private LocalDateTime ban;
+
     public UserDTO EntityToDTO() {
             return UserDTO.builder()
                 .userId(this.userId)
@@ -110,7 +113,8 @@ public class User {
                 .userStatusMessage(this.userStatusMessage)
                 .lastHeartbeat(this.lastHeartbeat)
                 .totalGam(this.totalGam)
-                    .online(this.online)
+                .online(this.online)
+                .ban(this.ban)
                 .build();
     }
 }

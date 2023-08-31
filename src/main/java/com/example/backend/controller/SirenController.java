@@ -1,13 +1,19 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.ResponseDTO;
 import com.example.backend.dto.SirenDTO;
+import com.example.backend.dto.UserDTO;
+import com.example.backend.entity.User;
 import com.example.backend.service.SirenService;
+import com.example.backend.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,6 +21,7 @@ import java.io.IOException;
 public class SirenController {
 
     private final SirenService sirenService;  // final 키워드 사용
+    private final UserService userService;
 
     @PostMapping("/report")
     public ResponseEntity<String> createSirenReport(
@@ -41,6 +48,24 @@ public class SirenController {
         return ResponseEntity.ok("singo successfully.");
     }
 
+    @PostMapping("/ban")
+    public ResponseEntity<?> ban(@RequestBody String userId, @RequestBody Integer date) {
+        ResponseDTO<UserDTO> responseDTO = new ResponseDTO<>();
+        try {
+            User user = userService.findUserByUserId(userId).get();
+            LocalDateTime banDate = LocalDateTime.now().plusDays(date);
+            user.setBan(banDate);
+
+            userService.join(user);
+
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return null;
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
 
 }
 
