@@ -21,7 +21,7 @@ public interface BoardService {
     Board viewboard(User loginUser, int boardId, int moimId);
 
     Board modifyBoard(int boardId, User loginUser, Board.BoardType boardType, String boardTitle, String boardContent,
-                      List<MultipartFile> newPictures, List<Integer> deletePictureIds, List<MultipartFile> updatePictures, int moimId) throws IOException;
+                       MultipartFile[] updatePictures, int moimId) throws IOException;
 
     String deleteBoard(User loginuser, int boardId, Moim moim) throws Exception;
 

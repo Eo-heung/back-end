@@ -9,6 +9,7 @@ import java.util.List;
 public interface BoardPictureRepository extends JpaRepository<BoardPicture, Integer> {
     List<BoardPicture> findByBoard(Board board);
 
+    void deleteAllByBoard(Board board);
 
 
 }

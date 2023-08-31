@@ -226,9 +226,7 @@ public class BoardServiceImpl implements BoardService {
                              Board.BoardType boardType,
                              String boardTitle,
                              String boardContent,
-                             List<MultipartFile> newPictures,
-                             List<Integer> deletePictureIds,
-                             List<MultipartFile> updatePictures,
+                             MultipartFile[] updatePictures,
                              int moimId) throws IOException {
 
 
@@ -258,31 +256,35 @@ public class BoardServiceImpl implements BoardService {
         existingBoard.setBoardUpdate(LocalDateTime.now());
 
         boardRepository.save(existingBoard);
+//
+//        // 기존 사진 삭제 및 수정
+//        if ( updatePictures != null && !updatePictures.isEmpty()) {
+//            for (int i = 0; i < deletePictureIds.size(); i++) {
+//                Integer boardPicId = deletePictureIds.get(i);
+//                MultipartFile updatedFile = updatePictures.get(i);
+//
+//                // 사진 삭제
+//                boardPictureRepository.deleteById(boardPicId);
+//
+//                // 사진 수정
+//                BoardPicture existingPicture = boardPictureRepository.findById(boardPicId)
+//                        .orElseThrow(() -> new NoSuchElementException("Picture not found"));
+//
+//                byte[] picBytes = updatedFile.getBytes();
+//                existingPicture.setBoardPic(picBytes);
+//                existingPicture.setUpdateBoardPic(LocalDateTime.now());
+//
+//                boardPictureRepository.save(existingPicture);
+//            }
+//        }
 
-        // 기존 사진 삭제 및 수정
-        if (deletePictureIds != null && updatePictures != null && !deletePictureIds.isEmpty() && !updatePictures.isEmpty()) {
-            for (int i = 0; i < deletePictureIds.size(); i++) {
-                Integer boardPicId = deletePictureIds.get(i);
-                MultipartFile updatedFile = updatePictures.get(i);
-
-                // 사진 삭제
-                boardPictureRepository.deleteById(boardPicId);
-
-                // 사진 수정
-                BoardPicture existingPicture = boardPictureRepository.findById(boardPicId)
-                        .orElseThrow(() -> new NoSuchElementException("Picture not found"));
-
-                byte[] picBytes = updatedFile.getBytes();
-                existingPicture.setBoardPic(picBytes);
-                existingPicture.setUpdateBoardPic(LocalDateTime.now());
-
-                boardPictureRepository.save(existingPicture);
-            }
-        }
+        boardPictureRepository.deleteAllByBoard(Board.builder()
+                                                     .boardId(boardId)
+                                                     .build());
 
         // 새로운 사진 추가
-        if (newPictures != null && !newPictures.isEmpty()) {
-            for (MultipartFile file : newPictures) {
+        if (updatePictures != null ) {
+            for (MultipartFile file : updatePictures) {
                 byte[] picBytes = file.getBytes();
                 BoardPicture boardPicture = BoardPicture.builder()
                         .userId(loginUser)

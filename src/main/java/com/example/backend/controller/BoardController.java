@@ -265,9 +265,7 @@ public class BoardController {
             @RequestParam Board.BoardType boardType,
             @RequestParam String boardTitle,
             @RequestParam String boardContent,
-            @RequestParam(required = false) List<MultipartFile> newPictures,
-            @RequestParam(required = false) List<Integer> deletePictureIds,
-            @RequestParam(required = false) List<MultipartFile> updatePictures,
+            @RequestParam(required = false, value = "file") MultipartFile[] updatePictures,
             @RequestHeader("Authorization") String token) {
 
         try {
@@ -277,7 +275,7 @@ public class BoardController {
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             Board updatedBoard = boardService.modifyBoard(boardId, loginUser, boardType,
-                    boardTitle, boardContent, newPictures, deletePictureIds, updatePictures, moimId);
+                    boardTitle, boardContent, updatePictures, moimId);
 
             ResponseDTO<Board> responseDTO = new ResponseDTO<>();
             responseDTO.setItem(updatedBoard);
