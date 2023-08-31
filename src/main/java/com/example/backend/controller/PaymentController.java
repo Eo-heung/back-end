@@ -59,6 +59,7 @@ public class PaymentController {
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
         PaymentGam paymentGam = paymentGamDTO.DTOToEntity();
+        paymentGam.setName("곶감 결제 비용");
         paymentGam.setPayDate(LocalDateTime.now());
         paymentGam.setGotGam(paymentGam.getValue()/100);
         paymentGam.setStatus(true);
@@ -85,7 +86,46 @@ public class PaymentController {
         responseDTO.setItem(paymentGam.EntityToDTO());
         return ResponseEntity.ok(responseDTO);
     }
-    
+
+    @PostMapping("/friendcost")
+    public ResponseEntity<?> friendCost(@RequestHeader("Authorization") String token, @RequestBody PaymentGamDTO paymentGamDTO) {
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+        String userId = jwtTokenProvider.validateAndGetUsername(token);
+
+        try {
+            PaymentGam paymentGam = paymentGamDTO.DTOToEntity();
+            paymentGam.setUserId(userId);
+            paymentGam.setPayDate(LocalDateTime.now());
+            paymentGam.setRefund(false);
+            paymentGam.setStatus(true);
+
+            paymentRepository.save(paymentGam);
+
+            List<PaymentGam> payments = paymentRepository.findByUserIdOrderByPayDateDesc(userId);
+
+            Long totalGotGam = payments.stream()
+                    .mapToLong(PaymentGam::getGotGam)
+                    .sum();
+            User user = userRepository.findByUserId(userId).get();
+
+            user.setTotalGam(totalGotGam);
+            userRepository.save(user);
+
+            Map<String, Object> returnMap = new HashMap<>();
+            returnMap.put("msg", "okValue");
+
+            responseDTO.setItem(returnMap);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
     @PostMapping("/paymentList")
     public ResponseEntity<?> PaymentList(@RequestHeader("Authorization") String token) {
         ResponseDTO<PaymentGam> responseDTO = new ResponseDTO<>();
@@ -97,6 +137,7 @@ public class PaymentController {
         responseDTO.setItems(payments);
         return ResponseEntity.ok(responseDTO);
     }
+
     @PostMapping("/refundBlock")
     public ResponseEntity<?> refundBlock(@RequestHeader("Authorization") String token)
     {

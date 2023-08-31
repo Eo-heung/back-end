@@ -78,13 +78,20 @@ public class User {
         private String userStatusMessage;
 
         @Column(name = "totalGam")
-        private Long totalGam = 0L;
+        private Long totalGam;
 
         @Column(name = "online")
         private Boolean online;
 
         @Column(name = "last_login") // 마지막 접속 기록
         private LocalDateTime lastHeartbeat;
+
+        @PrePersist
+        public void prePersist() {
+                if (totalGam == null) {
+                        totalGam = 0L;
+                }
+        }
 
     public UserDTO EntityToDTO() {
             return UserDTO.builder()

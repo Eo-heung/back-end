@@ -151,12 +151,14 @@ public class FriendController {
                     FriendDTO friendDTO = friendRepository.save(friend).EntityToDTO();
 
                     PaymentGamDTO paymentGamDTO = PaymentGamDTO.builder()
+                            .name("친구 요청 비용")
                             .imp_uid("Friend Request Cost")
                             .merchant_uid("5 GotGam")
-                            .value((long) -5000)
+                            .value(0L)
+                            .gotGam((long) -5)
                             .build();
 
-                    paymentController.addPayment(token, paymentGamDTO);
+                    paymentController.friendCost(token, paymentGamDTO);
 
                     returnMap.put("msg", "successRequest");
                 } else {
