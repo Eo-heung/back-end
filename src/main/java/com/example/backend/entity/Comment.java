@@ -66,7 +66,7 @@ public class Comment {
                 .build();
     }
 
-    public CommentDTO toDTOWithMoim(int moimId) {
+    public CommentDTO toDTOWithMoim(int moimId, String userName) {
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setCommentId(this.commentId);
         commentDTO.setUserId(this.userId.getUserId());
@@ -75,6 +75,7 @@ public class Comment {
         commentDTO.setCommentRegdate(this.commentRegdate);
         commentDTO.setCommentUpdate(this.commentUpdate);
         commentDTO.setMoimId(moimId);
+        commentDTO.setUserName(userName);
         return commentDTO;
     }
 

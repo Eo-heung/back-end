@@ -103,7 +103,7 @@ public class BoardController {
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        pageable = PageRequest.of(currentPage, 10);  /
+        pageable = PageRequest.of(currentPage, 10);
 
         try {
             Page<BoardDTO> freeBoards = boardService.getFreeBoard(loginUser, pageable, moimId, keyword, searchType, orderBy);

@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface MoimRepository extends JpaRepository<Moim, Integer> {
 
     @Query("SELECT m FROM Moim m WHERE (m.moimTitle LIKE CONCAT('%', :keyword, '%') OR m.moimContent LIKE CONCAT('%', :keyword, '%') OR m.moimNickname LIKE CONCAT('%', :keyword, '%')) AND m.moimId NOT IN (SELECT mr.moim.moimId FROM MoimRegistration mr WHERE mr.user = :user AND mr.regStatus = 'REJECTED') ORDER BY m.moimId ASC")
@@ -120,5 +122,5 @@ public interface MoimRepository extends JpaRepository<Moim, Integer> {
     Page<Moim> findmyMoimDesc(@Param("userId") String userId,  @Param("keyword") String keyword, Pageable pageable);
 
 
-
+    List<Moim> findByUserId(User user);
 }

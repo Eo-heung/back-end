@@ -43,7 +43,7 @@ public class CommentController {
                     .orElseThrow(() -> new NoSuchElementException("Board not found"));
 
             Comment comment = commentService.createComment(moimId, boardId, content, loginUser);
-            CommentDTO commentDTO = comment.toDTOWithMoim(moimId);
+            CommentDTO commentDTO = comment.toDTOWithMoim(moimId, loginUser.getUserName());
 
             responseDTO.setItem(commentDTO);
             responseDTO.setStatusCode(HttpStatus.CREATED.value());
@@ -74,7 +74,7 @@ public class CommentController {
 
         try {
             Comment updatedComment = commentService.modifyComment(moimId, boardId, commentId, content, loginUser);
-            CommentDTO commentDTO = updatedComment.toDTOWithMoim(moimId);
+            CommentDTO commentDTO = updatedComment.toDTOWithMoim(moimId, loginUser.getUserName());
 
             responseDTO.setItem(commentDTO);
             responseDTO.setStatusCode(HttpStatus.OK.value());
@@ -130,8 +130,7 @@ public class CommentController {
 
         try {
             Page<Comment> commentPage = commentService.getComment(moimId, boardId, pageable, loginUser);
-            Page<CommentDTO> commentDtoPage = commentPage.map(Comment::EntityToDTO);
-
+            Page<CommentDTO> commentDtoPage = commentPage.map(comment -> comment.toDTOWithMoim(moimId, loginUser.getUserName()));
             responseDTO.setPageItems(commentDtoPage);
             responseDTO.setLastPage(commentDtoPage.isLast());
 
@@ -203,14 +202,3 @@ public class CommentController {
 
 
 }
-
-
-
-
-
-
-
-
-
-
-

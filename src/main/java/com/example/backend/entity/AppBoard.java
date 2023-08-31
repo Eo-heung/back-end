@@ -1,0 +1,72 @@
+package com.example.backend.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "APP_BOARD")
+public class AppBoard {
+
+    @Id
+    @Column(name = "app_board_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int appBoardId; //약속 게시글 Id
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User ownerId; //약속 게시자
+
+    @ManyToOne
+    @JoinColumn(name = "moim_id")
+    private Moim moimId; //모임Id
+
+    @Column(name = "app_regdate")
+    private LocalDateTime AppRegdate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "app_type")
+    private AppType appType;  //온라인, 오프라인
+
+    @Column(name = "app_title")
+    private String appTitle;
+
+    @Column(name = "app_content")
+    private String appContent;
+
+    @Column(name = "app_location")
+    private String appLocation;
+
+    @Column(name = "app_start")
+    private LocalDateTime AppStart;
+
+    @Column(name = "app_end")
+    private LocalDateTime AppEnd;
+
+    @Column(name = "max_app_user")
+    private int maxAppUser; //정원(최대 50명)
+
+    @Column(name = "current_moim_user")
+    private int currentAppUser; //현재 약속 신청 확정 인원
+
+    public enum AppType {
+        ONLINE, OFFLINE
+    }
+
+    @PrePersist
+    public void onPrePersist() {
+        this.AppRegdate = LocalDateTime.now();
+    }
+
+
+
+
+
+
+
+}

@@ -2,9 +2,6 @@ package com.example.backend.service.impl;
 
 import com.example.backend.entity.*;
 import com.example.backend.repository.BoardPictureRepository;
-import com.example.backend.repository.BoardRepository;
-import com.example.backend.repository.MoimRegistrationRepository;
-import com.example.backend.repository.MoimRepository;
 import com.example.backend.service.BoardPictureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
