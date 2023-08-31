@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface PaymentRepository extends JpaRepository<PaymentGam, Integer> {
     List<PaymentGam> findByUserIdOrderByPayDateDesc(String userid);
-
     List<PaymentGam> findByUserIdAndPayDateGreaterThanEqualOrderByPayDateDesc(String userId, LocalDateTime date);
     List<PaymentGam> findByUserIdAndPayDateBeforeOrderByPayDateDesc(String userId, LocalDateTime date);
-
     PaymentGam findByImpUid(String ImpUid);
+
+    List<PaymentGam> findAllByUserIdAndRefundTrueOrderById(String userId);
 
 }

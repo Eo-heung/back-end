@@ -11,7 +11,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,15 +73,8 @@ public class PaymentController {
                 .mapToLong(PaymentGam::getGotGam)
                 .sum();
         User user = userRepository.findByUserId(userId).get();
-        if (user != null) {
-            user.setTotalGam(totalGotGam); // totalGam 값 업데이트
-            userRepository.save(user); // 변경된 값을 데이터베이스에 저장
-        } else {
-            // 유저가 존재하지 않는 경우, 적절한 예외 처리나 로깅을 해주세요.
-            System.out.println("User with userId " + userId + " not found.");
-        }
-        System.out.println("Total gotGam for user " + userId + ": " + totalGotGam);
-        System.out.println(payments);
+        user.setTotalGam(totalGotGam); // totalGam 값 업데이트
+        userRepository.save(user); // 변경된 값을 데이터베이스에 저장
         responseDTO.setItem(paymentGam.EntityToDTO());
         return ResponseEntity.ok(responseDTO);
     }
@@ -111,6 +103,8 @@ public class PaymentController {
             user.setTotalGam(totalGotGam);
             userRepository.save(user);
 
+            checkRefundPayment(userId);
+
             Map<String, Object> returnMap = new HashMap<>();
             returnMap.put("msg", "okValue");
 
@@ -123,6 +117,26 @@ public class PaymentController {
             responseDTO.setErrorMessage(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+    //곶감 환불 가능여부 확인 로직
+    public void checkRefundPayment(String userId) {
+        User user = userRepository.findByUserId(userId).get();
+        int totalGam = Math.toIntExact(user.getTotalGam());
+
+        List<PaymentGam> paymentGamList = paymentRepository.findAllByUserIdAndRefundTrueOrderById(userId);
+
+        int index = 0;
+        int refundableGam = 0;
+        for(PaymentGam paymentGam : paymentGamList) {
+            refundableGam += paymentGam.getGotGam();
+        }
+
+        while (refundableGam > totalGam ) {
+            refundableGam = (int) (refundableGam - paymentGamList.get(index).getGotGam());
+            paymentGamList.get(index).setRefund(false);
+            paymentRepository.save(paymentGamList.get(index));
+            index++;
         }
     }
 
@@ -181,7 +195,6 @@ public class PaymentController {
 
     @PostMapping("/totalGotGam")
     public ResponseEntity<?> totalGotGam(@RequestHeader("Authorization") String token) {
-        System.out.println("#################");
         ResponseDTO<Long> responseDTO = new ResponseDTO<>();
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
@@ -217,7 +230,18 @@ public class PaymentController {
             if (response.getCode() == 0) {
                 returnMap.put("msg", "취소가 완료되었습니다.");
                 PaymentGam paymentGam = paymentRepository.findByImpUid(id);
+                String userId = paymentGam.getUserId();
                 paymentRepository.delete(paymentGam);
+
+                List<PaymentGam> payments = paymentRepository.findByUserIdOrderByPayDateDesc(userId);
+
+                Long totalGotGam = payments.stream()
+                        .mapToLong(PaymentGam::getGotGam)
+                        .sum();
+                User user = userRepository.findByUserId(userId).get();
+
+                user.setTotalGam(totalGotGam);
+                userRepository.save(user);
 
                 responseDTO.setItem(returnMap);
                 responseDTO.setStatusCode(HttpStatus.OK.value());
