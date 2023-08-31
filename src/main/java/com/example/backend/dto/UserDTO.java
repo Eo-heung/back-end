@@ -63,6 +63,9 @@ public class UserDTO {
 
     private Boolean online;
 
+    private LocalDateTime ban;
+
+
     public User DTOToEntity() {
         return User.builder()
                 .userId(userId)
@@ -88,6 +91,7 @@ public class UserDTO {
                 .lastHeartbeat(lastHeartbeat)
                 .totalGam(totalGam)
                 .online(online)
+                .ban(ban)
                 .build();
     }
 
