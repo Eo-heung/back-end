@@ -290,6 +290,8 @@ public class BoardController {
         }
     }
 
+
+
     @PostMapping(value = "/{moimId}/verify-role")
     public ResponseEntity<?> verifyLeader(
             @PathVariable int moimId,

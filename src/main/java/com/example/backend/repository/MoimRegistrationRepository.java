@@ -5,6 +5,7 @@ import com.example.backend.entity.MoimRegistration;
 import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Range;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -23,6 +24,9 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
 
 
     Optional<MoimRegistration> findByMoim(Moim checkMoim);
+
+
+    Optional<MoimRegistration> findByUserAndMoim_MoimId(User user, int moimId);
 }
 
 

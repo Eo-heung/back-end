@@ -275,6 +275,13 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
 
     }
 
+    public Optional<MoimRegistrationDTO> getMyApplyId(int moimId, String loginUser) {
+        User user = userRepository.findById(loginUser)
+                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
+
+        return moimRegistrationRepository.findByUserAndMoim_MoimId(user, moimId).map(MoimRegistration::toDTO);
+    }
+
 
     public boolean verifyMemberRole(User user, Moim moim) {
 

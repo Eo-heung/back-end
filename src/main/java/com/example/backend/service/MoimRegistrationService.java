@@ -3,9 +3,12 @@ package com.example.backend.service;
 import com.example.backend.dto.MoimRegistrationDTO;
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimRegistration;
+import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Optional;
 
 
 public interface MoimRegistrationService {
@@ -27,4 +30,6 @@ public interface MoimRegistrationService {
 
     MoimRegistrationDTO getApplicantByMoimId(int moimId, String loginUser);
 
+
+    Optional<MoimRegistrationDTO> getMyApplyId(int moimId, String loginUser);
 }

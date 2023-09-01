@@ -271,6 +271,30 @@ public class MoimRegistrationController {
         }
     }
 
+    @PostMapping("get-my-apply/{moimId}")
+    public ResponseEntity<?> getMyApplicant(@PathVariable int moimId,
+                                            @RequestHeader("Authorization") String token) {
+        try {
+            // 토큰에서 사용자 정보 가져오기
+            String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+            User loginUser = userRepository.findByUserId(loggedInUsername)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // 해당 사용자가 moimId에 신청을 했는지 확인
+            Optional<MoimRegistrationDTO> moimRegDTO = moimRegistrationService.getMyApplyId(moimId, loggedInUsername);
+            if (!moimRegDTO.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No application found for the given moimId");
+            }
+
+            // 데이터를 클라이언트에게 응답
+            return ResponseEntity.ok(moimRegDTO.get());
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
+    }
 
 
     private ResponseEntity<?> handleException(Exception e) {

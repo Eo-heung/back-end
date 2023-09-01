@@ -197,11 +197,13 @@ public class BoardServiceImpl implements BoardService {
 
         return userBoards.map(board -> {
             int commentCount = commentRepository.countByBoardId_BoardId(board.getBoardId());
+            int currentMoimId = board.getMoimId().getMoimId();
             return BoardDTO.builder()
                     .boardId(board.getBoardId())
                     .boardType(board.getBoardType())
                     .userId(board.getUserId().getUserId())
                     .userName(board.getUserId().getUserName())
+                    .moimId(currentMoimId)
                     .boardTitle(board.getBoardTitle())
                     .boardContent(board.getBoardContent())
                     .boardRegdate(board.getBoardRegdate())
