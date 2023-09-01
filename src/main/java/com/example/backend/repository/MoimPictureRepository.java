@@ -16,5 +16,4 @@ public interface MoimPictureRepository extends JpaRepository<MoimPicture, Intege
     MoimPicture findByMoim(@Param("moim") Moim moim);
 
 
-
 }

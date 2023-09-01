@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.dto.AppBoardDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,7 +28,7 @@ public class AppBoard {
     private Moim moimId; //모임Id
 
     @Column(name = "app_regdate")
-    private LocalDateTime AppRegdate;
+    private LocalDateTime appRegdate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "app_type")
@@ -43,10 +44,10 @@ public class AppBoard {
     private String appLocation;
 
     @Column(name = "app_start")
-    private LocalDateTime AppStart;
+    private LocalDateTime appStart;
 
     @Column(name = "app_end")
-    private LocalDateTime AppEnd;
+    private LocalDateTime appEnd;
 
     @Column(name = "max_app_user")
     private int maxAppUser; //정원(최대 50명)
@@ -60,10 +61,26 @@ public class AppBoard {
 
     @PrePersist
     public void onPrePersist() {
-        this.AppRegdate = LocalDateTime.now();
+        this.appRegdate = LocalDateTime.now();
+        this.currentAppUser = 1;
     }
 
-
+    public AppBoardDTO EntityToDTO(String userName) {
+        return AppBoardDTO.builder()
+                .appBoardId(this.appBoardId)
+                .ownerId(this.ownerId.getUserId())
+                .moimId(this.moimId.getMoimId())
+                .appRegdate(this.appRegdate)
+                .appType(this.appType)
+                .appTitle(this.appTitle)
+                .appLocation(this.appLocation)
+                .appStart(this.appStart)
+                .appEnd(this.appEnd)
+                .maxAppUser(this.maxAppUser)
+                .currentAppUser(this.currentAppUser)
+                .userName(userName)
+                .build();
+    }
 
 
 

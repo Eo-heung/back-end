@@ -20,15 +20,40 @@ public class AppBoardDTO {
     private int appBoardId;
     private String ownerId;
     private int moimId;
-    private LocalDateTime AppRegdate;
+    private LocalDateTime appRegdate;
     private AppBoard.AppType appType;
     private String appTitle;
     private String appContent;
     private String appLocation;
-    private LocalDateTime AppStart;
-    private LocalDateTime AppEnd;
+    private LocalDateTime appStart;
+    private LocalDateTime appEnd;
     private int maxAppUser;
     private int currentAppUser;
+
+    private String userName;
+
+    public AppBoard DTOToEntity() {
+        return AppBoard.builder()
+                .appBoardId(this.appBoardId)
+                .ownerId(
+                        User.builder()
+                                .userId(this.ownerId)
+                                .build()
+                )
+                .moimId(Moim.builder()
+                        .moimId(this.moimId)
+                        .build()
+                )
+                .appRegdate(this.appRegdate)
+                .appType(this.appType)
+                .appTitle(this.appTitle)
+                .appLocation(this.appLocation)
+                .appStart(this.appStart)
+                .appEnd(this.appEnd)
+                .maxAppUser(this.maxAppUser)
+                .currentAppUser(this.currentAppUser)
+                .build();
+    }
 
 
 }

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MoimRegistrationRepository extends JpaRepository<MoimRegistration, Integer> {
@@ -27,6 +28,8 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
 
 
     Optional<MoimRegistration> findByUserAndMoim_MoimId(User user, int moimId);
+
+    List<MoimRegistration> findAllByMoim(Moim moim);
 }
 
 

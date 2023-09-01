@@ -3,13 +3,9 @@ package com.example.backend.controller;
 import com.example.backend.dto.MoimDTO;
 import com.example.backend.dto.MoimPictureDTO;
 import com.example.backend.dto.ResponseDTO;
-import com.example.backend.entity.Moim;
-import com.example.backend.entity.MoimPicture;
-import com.example.backend.entity.User;
+import com.example.backend.entity.*;
 import com.example.backend.jwt.JwtTokenProvider;
-import com.example.backend.repository.MoimPictureRepository;
-import com.example.backend.repository.MoimRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.repository.*;
 import com.example.backend.service.MoimPictureService;
 import com.example.backend.service.MoimService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +32,10 @@ public class MoimController {
     private final MoimPictureRepository moimPictureRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final MoimRegistrationRepository moimRegistrationRepository;
+    private final CommentRepository commentRepository;
+    private final BoardRepository boardRepository;
+    private final BoardPictureRepository boardPictureRepository;
 
     @PostMapping("/create-moim")
     public ResponseEntity<?> createMoim(@RequestBody MoimDTO moimDTO) {
@@ -276,10 +276,27 @@ public class MoimController {
             Moim moim = moimRepository.findById(moimId)
                     .orElseThrow(() -> new Exception("게시글을 찾을 수 없습니다"));
 
-            MoimPicture moimPicture = moimPictureRepository.findByMoim(moim);
+            //댓글 삭제
+            List<Comment> comments = commentRepository.findByBoardIdMoimId(moim);
+            commentRepository.deleteAll(comments);
 
+            // 게시글 사진 삭제
+            List<BoardPicture> boardPictures = boardPictureRepository.findByMoimId(moim);
+            boardPictureRepository.deleteAll(boardPictures);
+
+            //게시글 삭제
+            List<Board> boards = boardRepository.findByMoimId(moim);
+            boardRepository.deleteAll(boards);
+
+            //가입 신청 삭제
+            List<MoimRegistration> registrations = moimRegistrationRepository.findAllByMoim(moim);
+            moimRegistrationRepository.deleteAll(registrations);
+
+            //모임 사진 삭제
+            MoimPicture moimPicture = moimPictureRepository.findByMoim(moim);
             moimPictureRepository.delete(moimPicture);
 
+            //모임 삭제
             moimRepository.delete(moim);
 
             Map<String, String> returnMap = new HashMap<>();

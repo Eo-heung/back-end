@@ -2,6 +2,7 @@ package com.example.backend.repository;
 
 import com.example.backend.entity.Board;
 import com.example.backend.entity.Comment;
+import com.example.backend.entity.Moim;
 import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,4 +29,5 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
     int countByBoardId_BoardId(int boardId);
 
+    List<Comment> findByBoardIdMoimId(Moim moim);
 }

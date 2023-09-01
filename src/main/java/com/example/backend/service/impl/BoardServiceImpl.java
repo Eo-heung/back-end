@@ -71,30 +71,30 @@ public class BoardServiceImpl implements BoardService {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        noticeList = boardRepository.findByBoardTypeAndBoardTitleContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, keyword, pageable);
+                        noticeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndBoardTitleContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, moimId, keyword, pageable);
                     } else {
-                        noticeList = boardRepository.findByBoardTypeAndBoardTitleContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, keyword, pageable);
+                        noticeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndBoardTitleContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, moimId, keyword, pageable);
                     }
                     break;
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        noticeList = boardRepository.findByBoardTypeAndBoardContentContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, keyword, pageable);
+                        noticeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndBoardContentContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, moimId, keyword, pageable);
                     } else {
-                        noticeList = boardRepository.findByBoardTypeAndBoardContentContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, keyword, pageable);
+                        noticeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndBoardContentContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, moimId, keyword, pageable);
                     }
                     break;
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        noticeList = boardRepository.findByBoardTypeAndUserId_UserNameContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, keyword, pageable);
+                        noticeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndUserId_UserNameContainingOrderByBoardIdAsc(Board.BoardType.NOTICE, moimId, keyword, pageable);
                     } else {
-                        noticeList = boardRepository.findByBoardTypeAndUserId_UserNameContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, keyword, pageable);
+                        noticeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndUserId_UserNameContainingOrderByBoardIdDesc(Board.BoardType.NOTICE, moimId, keyword, pageable);
                     }
                     break;
                 default:
                     if ("ascending".equals(orderBy)) {
-                        noticeList = boardRepository.searchByBoardTypeAndKeywordAsc(Board.BoardType.NOTICE, keyword, pageable);
+                        noticeList = boardRepository.searchByBoardTypeAndKeywordAsc(Board.BoardType.NOTICE, moimId, keyword, pageable);
                     } else {
-                        noticeList = boardRepository.searchByBoardTypeAndKeywordDesc(Board.BoardType.NOTICE, keyword, pageable);
+                        noticeList = boardRepository.searchByBoardTypeAndKeywordDesc(Board.BoardType.NOTICE, moimId, keyword, pageable);
                     }
                     break;
             }
@@ -131,30 +131,30 @@ public class BoardServiceImpl implements BoardService {
                 switch (searchType) {
                     case "title":
                         if ("ascending".equals(orderBy)) {
-                            freeList = boardRepository.findByBoardTypeAndBoardTitleContainingOrderByBoardIdAsc(Board.BoardType.FREE, keyword, pageable);
+                            freeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndBoardTitleContainingOrderByBoardIdAsc(Board.BoardType.FREE, moimId, keyword, pageable);
                         } else {
-                            freeList = boardRepository.findByBoardTypeAndBoardTitleContainingOrderByBoardIdDesc(Board.BoardType.FREE, keyword, pageable);
+                            freeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndBoardTitleContainingOrderByBoardIdDesc(Board.BoardType.FREE, moimId, keyword, pageable);
                         }
                         break;
                     case "content":
                         if ("ascending".equals(orderBy)) {
-                            freeList = boardRepository.findByBoardTypeAndBoardContentContainingOrderByBoardIdAsc(Board.BoardType.FREE, keyword, pageable);
+                            freeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndBoardContentContainingOrderByBoardIdAsc(Board.BoardType.FREE, moimId, keyword, pageable);
                         } else {
-                            freeList = boardRepository.findByBoardTypeAndBoardContentContainingOrderByBoardIdDesc(Board.BoardType.FREE, keyword, pageable);
+                            freeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndBoardContentContainingOrderByBoardIdDesc(Board.BoardType.FREE, moimId, keyword, pageable);
                         }
                         break;
                     case "nickname":
                         if ("ascending".equals(orderBy)) {
-                            freeList = boardRepository.findByBoardTypeAndUserId_UserNameContainingOrderByBoardIdAsc(Board.BoardType.FREE, keyword, pageable);
+                            freeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndUserId_UserNameContainingOrderByBoardIdAsc(Board.BoardType.FREE, moimId, keyword, pageable);
                         } else {
-                            freeList = boardRepository.findByBoardTypeAndUserId_UserNameContainingOrderByBoardIdDesc(Board.BoardType.FREE, keyword, pageable);
+                            freeList = boardRepository.findByBoardTypeAndMoimId_MoimIdAndUserId_UserNameContainingOrderByBoardIdDesc(Board.BoardType.FREE, moimId, keyword, pageable);
                         }
                         break;
                     default:
                         if ("ascending".equals(orderBy)) {
-                            freeList = boardRepository.searchByBoardTypeAndKeywordAsc(Board.BoardType.FREE, keyword, pageable);
+                            freeList = boardRepository.searchByBoardTypeAndKeywordAsc(Board.BoardType.FREE, moimId, keyword, pageable);
                         } else {
-                            freeList = boardRepository.searchByBoardTypeAndKeywordDesc(Board.BoardType.FREE, keyword, pageable);
+                            freeList = boardRepository.searchByBoardTypeAndKeywordDesc(Board.BoardType.FREE, moimId, keyword, pageable);
                         }
                         break;
                 }

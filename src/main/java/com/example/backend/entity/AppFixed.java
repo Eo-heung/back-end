@@ -17,7 +17,7 @@ public class AppFixed {
 
     @ManyToOne
     @JoinColumn(name = "app_board_id")
-    private AppBoard appBoardId;
+    private AppBoard appBoard;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
