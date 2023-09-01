@@ -58,6 +58,7 @@ public class MoimRegistration {
     private int regAlarm; //알림 읽음 여부 (0: 읽지 않음, 1: 읽음)
 
     public enum RegStatus {
+        LEADER, //모임장 가입시 자동 연동
         APPROVED, // 승인(모임장)
         WAITING,  // 대기(모임장)
         REJECTED,  // 거절(모임장)

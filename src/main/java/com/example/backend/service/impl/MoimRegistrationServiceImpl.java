@@ -183,9 +183,12 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         //모임 가입여부 확인
         Optional<MoimRegistration> moimChk = moimRegistrationRepository.findByMoimAndUser(moim, user);
 
-        if (!moimChk.isPresent()) {
+
+        if (!verifyMemberRole(user, moim) || !verifyLeaderRole(user, moim)) {
             throw new IllegalArgumentException("모임에 가입하지 않은 사용자입니다.");
         }
+
+
 
         MoimRegistration moimReg = moimChk.get();
 

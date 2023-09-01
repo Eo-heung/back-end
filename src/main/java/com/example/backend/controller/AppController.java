@@ -54,9 +54,28 @@ public class AppController {
 
     }
 
+    //===    /appointment/{moimId}/list
+    //리스트 불러오는건
+    //모임제목, 온/오프라인, 날짜, 모임시작시간, 페이지네이션,
+    //now 기준으로 시작시간 전이면 (모집중), 시작 시간 지났으면(진행중), 종료시간 지났으면 (약속종료+클릭금지)
+
+    //===    /appointment/{moimId}/list/{appBoardId}
+    //=== POST   /appointment/{moimId}/list/{appBoardId}/apply
+    //상세 약속 겸 신청
+    //사진은 신청할 떄는 필요 없고, 조회할 때
+
+    //===    /appointment/{moimId}/list/{appBoardId}/delete
+    //삭제  > appfixed 랑 appboard
+
+    //===    /appointment/{moimId}/list/{appBoardId}/member-list
+    //신청자 확인 리스트 >  닉네임, 프로필사진(모임사진 끌어올거니까), 지역
+    //(상세는 X)
 
 
+    //내 약속은 봐서 ㅇㅇ
+    //사진첩 뺴자
 
+    //모임장이 모임 내보내기 => 모임가입한 사람들 조회 리스트 필요
 
 
 
