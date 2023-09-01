@@ -18,8 +18,8 @@ import java.time.LocalDateTime;
 public class AppBoardDTO {
 
     private int appBoardId;
-    private String ownerId;
-    private int moimId;
+    private String user;
+    private int moim;
     private LocalDateTime appRegdate;
     private AppBoard.AppType appType;
     private String appTitle;
@@ -35,13 +35,13 @@ public class AppBoardDTO {
     public AppBoard DTOToEntity() {
         return AppBoard.builder()
                 .appBoardId(this.appBoardId)
-                .ownerId(
+                .user(
                         User.builder()
-                                .userId(this.ownerId)
+                                .userId(this.user)
                                 .build()
                 )
-                .moimId(Moim.builder()
-                        .moimId(this.moimId)
+                .moim(Moim.builder()
+                        .moimId(this.moim)
                         .build()
                 )
                 .appRegdate(this.appRegdate)

@@ -21,11 +21,11 @@ public class AppBoard {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User ownerId; //약속 게시자
+    private User user; //약속 게시자
 
     @ManyToOne
     @JoinColumn(name = "moim_id")
-    private Moim moimId; //모임Id
+    private Moim moim; //모임Id
 
     @Column(name = "app_regdate")
     private LocalDateTime appRegdate;
@@ -68,8 +68,8 @@ public class AppBoard {
     public AppBoardDTO EntityToDTO(String userName) {
         return AppBoardDTO.builder()
                 .appBoardId(this.appBoardId)
-                .ownerId(this.ownerId.getUserId())
-                .moimId(this.moimId.getMoimId())
+                .user(this.user.getUserId())
+                .moim(this.moim.getMoimId())
                 .appRegdate(this.appRegdate)
                 .appType(this.appType)
                 .appTitle(this.appTitle)

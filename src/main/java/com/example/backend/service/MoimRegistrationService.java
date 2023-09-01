@@ -32,4 +32,7 @@ public interface MoimRegistrationService {
 
 
     Optional<MoimRegistrationDTO> getMyApplyId(int moimId, String loginUser);
+
+    boolean verifyMemberRole(User user, Moim moim);
+    boolean verifyLeaderRole(User user, Moim moim);
 }

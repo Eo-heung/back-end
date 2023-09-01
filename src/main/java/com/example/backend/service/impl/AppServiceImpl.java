@@ -5,13 +5,17 @@ import com.example.backend.entity.*;
 import com.example.backend.repository.AppBoardRepository;
 import com.example.backend.repository.AppFixedRepository;
 import com.example.backend.repository.MoimRepository;
+import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AppService;
 import com.example.backend.service.BoardService;
+import com.example.backend.service.MoimRegistrationService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,8 +26,10 @@ import java.util.Optional;
 public class AppServiceImpl implements AppService {
     private final AppBoardRepository appBoardRepository;
     private final AppFixedRepository appFixedRepository;
+    private final UserRepository userRepository;
     private final MoimRepository moimRepository;
     private final BoardService boardService;
+    private final MoimRegistrationService moimRegistrationService;
 
     @Transactional
     @Override
@@ -38,8 +44,8 @@ public class AppServiceImpl implements AppService {
                 throw new IllegalStateException("이미 해당 시간에 다른 약속이 있거나 신청되어 있습니다.");
             }
 
-            appBoard.setOwnerId(loginUser);
-            appBoard.setMoimId(checkMoim);
+            appBoard.setUser(loginUser);
+            appBoard.setMoim(checkMoim);
             AppBoard savedAppBoard = appBoardRepository.save(appBoard);
 
             AppFixed appFixed = new AppFixed();
@@ -55,6 +61,45 @@ public class AppServiceImpl implements AppService {
         }
 
     }
+
+    public Page<AppBoard> appBoarList(int moimId, String onOff,
+                                      String searchType, String keyword,
+                                      String loginUser,
+                                      Pageable pageable) {
+        Moim checkMoim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+
+        User user = userRepository.findById(loginUser)
+                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
+
+        System.out.println("1111111111111111111");
+        System.out.println(checkMoim);
+        System.out.println(user);
+
+        if(!moimRegistrationService.verifyMemberRole(user, checkMoim) && !moimRegistrationService.verifyLeaderRole(user, checkMoim)) {
+        } else {
+            throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
+        }
+
+        AppBoard.AppType appTypeValue;
+        if ("all".equals(onOff)) {
+            appTypeValue = null;
+        } else {
+            appTypeValue = AppBoard.AppType.valueOf(onOff.toUpperCase());
+        }
+
+        return appBoardRepository.findByUserAndMoimWithConditions(loginUser, moimId, appTypeValue, searchType, keyword, pageable);
+    }
+
+
+
+
+
+
+
+
+
+
 
     @Override
     public boolean hasOverlappingAppointments(User user, LocalDateTime appStart, LocalDateTime appEnd) {

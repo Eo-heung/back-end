@@ -10,9 +10,16 @@ import com.example.backend.repository.AppFixedRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AppService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -54,10 +61,54 @@ public class AppController {
 
     }
 
-    //===    /appointment/{moimId}/list
-    //리스트 불러오는건
+    //약속 모집글 리스트
     //모임제목, 온/오프라인, 날짜, 모임시작시간, 페이지네이션,
-    //now 기준으로 시작시간 전이면 (모집중), 시작 시간 지났으면(진행중), 종료시간 지났으면 (약속종료+클릭금지)
+    //[앞단] now 기준으로 시작시간 전이면 (모집중), 시작 시간 지났으면(진행중), 종료시간 지났으면 (약속종료+클릭금지)
+    @GetMapping("/{moimId}/list")
+    public ResponseEntity<?> getAppList(
+            @PathVariable("moimId") int moimId,
+            @RequestParam(required = false, defaultValue = "all") String onOff,
+            @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam(required = false, defaultValue = "all") String searchType,
+            @RequestParam(defaultValue = "descending") String orderBy,
+            @RequestParam(defaultValue = "0") int currentPage,
+            @RequestHeader("Authorization") String token,
+            @PageableDefault(size = 10) Pageable pageable) {
+
+        String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+        User loginUser = userRepository.findByUserId(loggedInUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (orderBy.equals("ascending")) {
+            pageable = PageRequest.of(currentPage, 10, Sort.by("appRegdate").ascending());
+        } else {
+            pageable = PageRequest.of(currentPage, 10, Sort.by("appRegdate").descending());
+        }
+
+        ResponseDTO<Page<AppBoardDTO>> response = new ResponseDTO<>();
+
+        try {
+            Page<AppBoard> appPage = appService.appBoarList(moimId, onOff, searchType, keyword, loggedInUsername, pageable);
+
+            Page<AppBoardDTO> appBoardDTOPage = appPage.map(app -> app.EntityToDTO(loginUser.getUserName()));
+
+            ResponseDTO.PaginationInfo paginationInfo = new ResponseDTO.PaginationInfo();
+            paginationInfo.setTotalPages(appBoardDTOPage.getTotalPages());
+            paginationInfo.setCurrentPage(appBoardDTOPage.getNumber());
+            paginationInfo.setTotalElements(appBoardDTOPage.getTotalElements());
+
+            response.setItem(appBoardDTOPage);
+            response.setPaginationInfo(paginationInfo);
+            response.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(response);
+        } catch (NoSuchElementException | IllegalStateException e) {
+            response.setStatusCode(HttpStatus.FORBIDDEN.value());
+            response.setErrorMessage(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
+    }
+
 
     //===    /appointment/{moimId}/list/{appBoardId}
     //=== POST   /appointment/{moimId}/list/{appBoardId}/apply
