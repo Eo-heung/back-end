@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.AppBoardDTO;
 import com.example.backend.entity.AppBoard;
 import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,10 @@ public interface AppService {
                                String searchType, String keyword,
                                String loginUser,
                                Pageable pageable);
+
+    AppBoardDTO viewAppBoard(int moimId, int appBoardId, String loginUser);
+
+
 
     boolean hasOverlappingAppointments(User user, LocalDateTime appStart, LocalDateTime appEnd);
 }

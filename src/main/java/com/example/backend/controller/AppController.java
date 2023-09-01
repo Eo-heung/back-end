@@ -19,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -109,6 +111,32 @@ public class AppController {
         }
     }
 
+    @GetMapping("/{moimId}/list/{appBoardId}")
+    public ResponseEntity<?> viewAppBoard(@PathVariable int moimId,
+                                      @PathVariable int appBoardId,
+                                          @RequestHeader("Authorization") String token) {
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+        String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+        User loginUser = userRepository.findByUserId(loggedInUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        try {
+            AppBoardDTO appBoardDTO = appService.viewAppBoard(moimId, appBoardId, loginUser.getUserId());
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("appBoardDetail", appBoardDTO);
+
+            responseDTO.setItem(responseData);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok(responseDTO);
+
+        } catch (Exception e) {
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
 
     //===    /appointment/{moimId}/list/{appBoardId}
     //=== POST   /appointment/{moimId}/list/{appBoardId}/apply

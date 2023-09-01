@@ -1,5 +1,6 @@
 package com.example.backend.service.impl;
 
+import com.example.backend.dto.AppBoardDTO;
 import com.example.backend.dto.BoardDTO;
 import com.example.backend.entity.*;
 import com.example.backend.repository.AppBoardRepository;
@@ -72,10 +73,6 @@ public class AppServiceImpl implements AppService {
         User user = userRepository.findById(loginUser)
                 .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
 
-        System.out.println("1111111111111111111");
-        System.out.println(checkMoim);
-        System.out.println(user);
-
         if(!moimRegistrationService.verifyMemberRole(user, checkMoim) && !moimRegistrationService.verifyLeaderRole(user, checkMoim)) {
         } else {
             throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
@@ -89,6 +86,25 @@ public class AppServiceImpl implements AppService {
         }
 
         return appBoardRepository.findByUserAndMoimWithConditions(loginUser, moimId, appTypeValue, searchType, keyword, pageable);
+    }
+
+
+    public AppBoardDTO viewAppBoard(int moimId, int appBoardId, String loginUser) {
+        AppBoard appBoard = appBoardRepository.findById(appBoardId)
+                .orElseThrow(() -> new RuntimeException("App Board not found"));
+
+        Moim checkMoim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다."));
+
+        User user = userRepository.findById(loginUser)
+                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
+
+        if(!moimRegistrationService.verifyMemberRole(user, checkMoim) && !moimRegistrationService.verifyLeaderRole(user, checkMoim)) {
+        } else {
+            throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
+        }
+
+        return appBoard.EntityToDTO(user.getUserName());
     }
 
 

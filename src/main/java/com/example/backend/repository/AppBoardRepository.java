@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface AppBoardRepository extends JpaRepository<AppBoard, Integer> {
 
     @Query("SELECT ab FROM AppBoard ab " +
