@@ -180,18 +180,22 @@ public class BoardServiceImpl implements BoardService {
 
     //내 게시글
     @Override
-    public Page<BoardDTO> getMyBoard(User loginUser, Pageable pageable, String keyword, String searchType) {
+    public Page<BoardDTO> getMyBoard(int moimId, User loginUser, Pageable pageable, String keyword, String searchType) {
+
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new NoSuchElementException("Moim not found"));
+
         Page<Board> userBoards;
 
         switch (searchType) {
             case "title":
-                userBoards = boardRepository.findByUserIdAndBoardTitleContainingOrderByBoardIdDesc(loginUser, keyword, pageable);
+                userBoards = boardRepository.findByUserIdAndMoimIdAndBoardTitleContainingOrderByBoardIdDesc(moim, loginUser, keyword, pageable);
                 break;
             case "content":
-                userBoards = boardRepository.findByUserIdAndBoardContentContainingOrderByBoardIdDesc(loginUser, keyword, pageable);
+                userBoards = boardRepository.findByUserIdAndMoimIdAndBoardContentContainingOrderByBoardIdDesc(moim, loginUser, keyword, pageable);
                 break;
             default:
-                userBoards = boardRepository.findByUserIdOrderByBoardIdDesc(loginUser, pageable);
+                userBoards = boardRepository.findByUserIdAndMoimIdOrderByBoardIdDesc(moim, loginUser, pageable);
                 break;
         }
 

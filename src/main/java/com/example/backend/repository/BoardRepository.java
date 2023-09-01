@@ -63,9 +63,9 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 
 
     ///내가 쓴 게시글
-    Page<Board> findByUserIdOrderByBoardIdDesc(User user, Pageable pageable);
-    Page<Board> findByUserIdAndBoardTitleContainingOrderByBoardIdDesc(User user, String keyword, Pageable pageable);
-    Page<Board> findByUserIdAndBoardContentContainingOrderByBoardIdDesc(User user, String keyword, Pageable pageable);
+    Page<Board> findByUserIdAndMoimIdOrderByBoardIdDesc(Moim moim, User user, Pageable pageable);
+    Page<Board> findByUserIdAndMoimIdAndBoardTitleContainingOrderByBoardIdDesc(Moim moim, User user, String keyword, Pageable pageable);
+    Page<Board> findByUserIdAndMoimIdAndBoardContentContainingOrderByBoardIdDesc(Moim moim, User user, String keyword, Pageable pageable);
 
 
     List<Board> findByMoimId(Moim moim);

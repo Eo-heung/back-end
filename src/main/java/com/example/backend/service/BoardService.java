@@ -16,7 +16,7 @@ public interface BoardService {
 
     Page<BoardDTO> getFreeBoard(User loginUser, Pageable pageable, int moimId, String keyword, String searchType, String orderBy);
 
-    Page<BoardDTO> getMyBoard(User loginUser, Pageable pageable, String keyword, String searchType);
+    Page<BoardDTO> getMyBoard(int moimId, User loginUser, Pageable pageable, String keyword, String searchType);
 
     Board viewboard(User loginUser, int boardId, int moimId);
 

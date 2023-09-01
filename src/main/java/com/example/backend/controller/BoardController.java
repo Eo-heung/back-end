@@ -157,7 +157,8 @@ public class BoardController {
     }
 
     @PostMapping("/{moimId}/my-board")
-    public ResponseEntity<?> getUserBoards(@RequestHeader("Authorization") String token,
+    public ResponseEntity<?> getUserBoards(@PathVariable("moimId") int moimId,
+                                           @RequestHeader("Authorization") String token,
                                            @RequestParam(required = false, defaultValue = "") String keyword,
                                            @RequestParam(required = false, defaultValue = "all") String searchType,
                                            @RequestParam(defaultValue = "0") int currentPage,
@@ -169,7 +170,7 @@ public class BoardController {
         pageable = PageRequest.of(currentPage, 10);
 
         try {
-            Page<BoardDTO> userBoards = boardService.getMyBoard(loginUser, pageable, keyword, searchType);
+            Page<BoardDTO> userBoards = boardService.getMyBoard(moimId, loginUser, pageable, keyword, searchType);
 
             ResponseDTO.PaginationInfo paginationInfo = new ResponseDTO.PaginationInfo();
             paginationInfo.setTotalPages(userBoards.getTotalPages());
