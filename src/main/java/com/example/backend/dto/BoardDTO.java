@@ -24,6 +24,8 @@ public class BoardDTO {
     private LocalDateTime boardUpdate;
     private boolean isPublic;   //공개여부
 
+    private int commentCnt; //댓글 수
+
 
 
     public Board DTOToEntity() {

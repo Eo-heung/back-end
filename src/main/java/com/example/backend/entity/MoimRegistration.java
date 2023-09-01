@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -80,6 +82,18 @@ public class MoimRegistration {
     }
 
 
+    @PrePersist
+    public void onPrePersist() {
+        this.createMoimProfile = LocalDateTime.now();
+        this.updateMoimProfile = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        this.updateMoimProfile = LocalDateTime.now();
+    }
+
+
 
     public MoimRegistrationDTO EntityToDTO() {
         return MoimRegistrationDTO.builder()
@@ -106,6 +120,18 @@ public class MoimRegistration {
                 .build();
     }
 
+    public MoimRegistrationDTO toDTOforBase64() {
+        return MoimRegistrationDTO.builder()
+                .moimRegId(this.moimRegId)
+                .moimProfileBase64(Base64.getEncoder().encodeToString(this.moimProfile))
+                .regStatus(this.regStatus)
+                .applicationDate(this.applicationDate)
+                .subscribeDate(this.subscribeDate)
+                .regAlarm(this.regAlarm)
+                .applicantUserNickname(this.getUser().getUserNickname())
+                .applicantUserAddr(this.getUser().getUserAddr3())
+                .build();
+    }
 
 
 }

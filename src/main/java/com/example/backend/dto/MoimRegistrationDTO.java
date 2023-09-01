@@ -29,6 +29,8 @@ public class MoimRegistrationDTO {
     private String applicantUserAddr;
     private String applicantUserId;
 
+    private String moimProfileBase64;
+
 
 
     public MoimRegistrationDTO EntityToDTO() {
@@ -45,6 +47,8 @@ public class MoimRegistrationDTO {
                 .applicantUserAddr(this.getUser().getUserAddr3())
                 .build();
     }
+
+
 
 
 

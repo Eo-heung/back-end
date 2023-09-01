@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.MoimRegistrationDTO;
+import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimRegistration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,6 @@ public interface MoimRegistrationService {
 
     MoimRegistrationDTO getApplicant(int moimId, int moimRegId, String organizerUserId);
 
-
+    MoimRegistrationDTO getApplicantByMoimId(int moimId, String loginUser);
 
 }

@@ -252,6 +252,45 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistration.toDTO();
     }
 
+    //모임프로필 사진 및 정보 받아오기(moimID로)
+    @Override
+    public MoimRegistrationDTO getApplicantByMoimId(int moimId, String loginUser) {
+        Moim checkMoim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+
+        User user = userRepository.findById(loginUser)
+                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
+
+        if (verifyLeaderRole(user, checkMoim) || verifyMemberRole(user, checkMoim)) {
+            // 모임ID에 해당하는 신청서 찾기
+            MoimRegistration moimRegistration = moimRegistrationRepository.findByMoim(checkMoim)
+                    .orElseThrow(() -> new EntityNotFoundException("신청자 정보를 찾을 수 없습니다."));
+
+            return moimRegistration.toDTOforBase64();
+        } else {
+            throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
+        }
+
+
+
+    }
+
+
+    public boolean verifyMemberRole(User user, Moim moim) {
+
+        Optional<MoimRegistration> optionalRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user);
+
+        if (!optionalRegistration.isPresent()) {
+            return false; // 모임에 등록되지 않은 사용자
+        }
+
+        MoimRegistration registration = optionalRegistration.get();
+        return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED;
+    }
+
+    public boolean verifyLeaderRole(User user, Moim moim) {
+        return user.equals(moim.getUserId());
+    }
 
 
 }

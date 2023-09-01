@@ -99,16 +99,21 @@ public class BoardServiceImpl implements BoardService {
                     break;
             }
 
-            return noticeList.map(board -> BoardDTO.builder()
-                    .boardId(board.getBoardId())
-                    .boardType(board.getBoardType())
-                    .userId(board.getUserId().getUserId())
-                    .userName(board.getUserId().getUserName())
-                    .moimId(moimId)
-                    .boardTitle(board.getBoardTitle())
-                    .boardContent(board.getBoardContent())
-                    .boardRegdate(board.getBoardRegdate())
-                    .build());
+            return noticeList.map(board -> {
+                int commentCount = commentRepository.countByBoardId_BoardId(board.getBoardId());
+                return BoardDTO.builder()
+                        .boardId(board.getBoardId())
+                        .boardType(board.getBoardType())
+                        .userId(board.getUserId().getUserId())
+                        .userName(board.getUserId().getUserName())
+                        .moimId(moimId)
+                        .boardTitle(board.getBoardTitle())
+                        .boardContent(board.getBoardContent())
+                        .boardRegdate(board.getBoardRegdate())
+                        .commentCnt(commentCount)  // 댓글 갯수 추가
+                        .build();
+            });
+
         } else {
             throw new IllegalStateException("이 사용자는 이 모임에 승인되지 않았습니다.");
         }
@@ -154,16 +159,20 @@ public class BoardServiceImpl implements BoardService {
                         break;
                 }
 
-                return freeList.map(board -> BoardDTO.builder()
-                        .boardId(board.getBoardId())
-                        .boardType(board.getBoardType())
-                        .userId(board.getUserId().getUserId())
-                        .userName(board.getUserId().getUserName())
-                        .moimId(moimId)
-                        .boardTitle(board.getBoardTitle())
-                        .boardContent(board.getBoardContent())
-                        .boardRegdate(board.getBoardRegdate())
-                        .build());
+                return freeList.map(board -> {
+                    int commentCount = commentRepository.countByBoardId_BoardId(board.getBoardId());
+                    return BoardDTO.builder()
+                            .boardId(board.getBoardId())
+                            .boardType(board.getBoardType())
+                            .userId(board.getUserId().getUserId())
+                            .userName(board.getUserId().getUserName())
+                            .moimId(moimId)
+                            .boardTitle(board.getBoardTitle())
+                            .boardContent(board.getBoardContent())
+                            .boardRegdate(board.getBoardRegdate())
+                            .commentCnt(commentCount)  // 댓글 갯수 추가
+                            .build();
+                });
             } else {
                 throw new IllegalStateException("이 사용자는 이 모임에 승인되지 않았습니다.");
             }
@@ -186,15 +195,20 @@ public class BoardServiceImpl implements BoardService {
                 break;
         }
 
-        return userBoards.map(board -> BoardDTO.builder()
-                .boardId(board.getBoardId())
-                .boardType(board.getBoardType())
-                .userId(board.getUserId().getUserId())
-                .userName(board.getUserId().getUserName())
-                .boardTitle(board.getBoardTitle())
-                .boardContent(board.getBoardContent())
-                .boardRegdate(board.getBoardRegdate())
-                .build());
+        return userBoards.map(board -> {
+            int commentCount = commentRepository.countByBoardId_BoardId(board.getBoardId());
+            return BoardDTO.builder()
+                    .boardId(board.getBoardId())
+                    .boardType(board.getBoardType())
+                    .userId(board.getUserId().getUserId())
+                    .userName(board.getUserId().getUserName())
+                    .boardTitle(board.getBoardTitle())
+                    .boardContent(board.getBoardContent())
+                    .boardRegdate(board.getBoardRegdate())
+                    .commentCnt(commentCount)  // 댓글 갯수 추가
+                    .build();
+        });
+
     }
 
     //게시글 상세보기
@@ -256,27 +270,7 @@ public class BoardServiceImpl implements BoardService {
         existingBoard.setBoardUpdate(LocalDateTime.now());
 
         boardRepository.save(existingBoard);
-//
-//        // 기존 사진 삭제 및 수정
-//        if ( updatePictures != null && !updatePictures.isEmpty()) {
-//            for (int i = 0; i < deletePictureIds.size(); i++) {
-//                Integer boardPicId = deletePictureIds.get(i);
-//                MultipartFile updatedFile = updatePictures.get(i);
-//
-//                // 사진 삭제
-//                boardPictureRepository.deleteById(boardPicId);
-//
-//                // 사진 수정
-//                BoardPicture existingPicture = boardPictureRepository.findById(boardPicId)
-//                        .orElseThrow(() -> new NoSuchElementException("Picture not found"));
-//
-//                byte[] picBytes = updatedFile.getBytes();
-//                existingPicture.setBoardPic(picBytes);
-//                existingPicture.setUpdateBoardPic(LocalDateTime.now());
-//
-//                boardPictureRepository.save(existingPicture);
-//            }
-//        }
+
 
         boardPictureRepository.deleteAllByBoard(Board.builder()
                                                      .boardId(boardId)

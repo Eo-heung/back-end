@@ -49,6 +49,8 @@ public class Board {
     @Column(name="is_Public")
     private boolean isPublic;   //공개여부
 
+
+
     public enum BoardType {
         FREE, //자유
         NOTICE  // 공지

@@ -1,8 +1,10 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.MoimDTO;
 import com.example.backend.dto.MoimRegistrationDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.Moim;
+import com.example.backend.entity.MoimPicture;
 import com.example.backend.entity.MoimRegistration;
 import com.example.backend.entity.User;
 import com.example.backend.jwt.JwtTokenProvider;
@@ -240,6 +242,32 @@ public class MoimRegistrationController {
 
         } catch (Exception e) {
             return handleException(e);
+        }
+    }
+
+    //모임 유저 프로필 확인
+    @GetMapping("/view-moim-profile/{moimId}")
+    public ResponseEntity<?> viewMoimProfile(@PathVariable int moimId,
+                                             @AuthenticationPrincipal UserDetails userDetails) {
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+        String loginUserId = userDetails.getUsername();
+
+        try {
+            // moimId에 해당하는 신청자의 상세 내용 가져오기
+            MoimRegistrationDTO moimRegistrationDTO =
+                    moimRegistrationService.getApplicantByMoimId(moimId, loginUserId);
+
+            Map<String, Object> returnMap = new HashMap<>();
+            returnMap.put("applicantDetails", moimRegistrationDTO);
+
+            responseDTO.setItem(returnMap);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(responseDTO);
         }
     }
 

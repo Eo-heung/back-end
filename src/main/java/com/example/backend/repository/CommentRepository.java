@@ -26,6 +26,6 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
     List<Comment> findByBoardId(Board board);
 
-
+    int countByBoardId_BoardId(int boardId);
 
 }
