@@ -295,7 +295,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         }
 
         MoimRegistration registration = optionalRegistration.get();
-        return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED;
+        return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED || registration.getRegStatus() == MoimRegistration.RegStatus.LEADER;
     }
 
     public boolean verifyLeaderRole(User user, Moim moim) {

@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface MoimService {
 
-    Moim createMoim(Moim moim);
+    Moim createMoim(Moim moim, User currentUser);
 
     Moim modifyMoim(Moim moim);
 

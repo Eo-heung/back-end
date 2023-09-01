@@ -72,55 +72,65 @@ public interface MoimRepository extends JpaRepository<Moim, Integer> {
 
 
     ////내 모임 오름차순
-    @Query(value =
-            "SELECT * FROM (" +
-                    "   ( " +
-                    "   SELECT m.*, m.moim_regdate AS sort_date " +
-                    "   FROM MOIM m " +
-                    "   WHERE m.user_id = :userId " +
-                    "   AND m.moim_title LIKE CONCAT('%', :keyword, '%') " +
-                    "   ) " +
-                    "   UNION " +
-                    "   (" +
-                    "   SELECT m.*, mr.subscribe_date AS sort_date " +
-                    "   FROM MOIM m JOIN MOIM_REGISTRATION mr ON m.moim_id = mr.moim_id " +
-                    "   WHERE mr.user_id = :userId AND mr.reg_status = 'APPROVED' " +
-                    "   AND m.moim_title LIKE CONCAT('%', :keyword, '%') " +
-                    "   ) " +
-                    ") AS results " +
-                    "ORDER BY sort_date ASC",
-            countQuery = "SELECT COUNT(*) FROM (" +
-            "   (SELECT m.moim_id FROM MOIM m WHERE m.user_id = :userId AND m.moim_title LIKE CONCAT('%', :keyword, '%')) " +
-            "   UNION " +
-            "   (SELECT m.moim_id FROM MOIM m JOIN MOIM_REGISTRATION mr ON m.moim_id = mr.moim_id WHERE mr.user_id = :userId AND mr.reg_status = 'APPROVED' AND m.moim_title LIKE CONCAT('%', :keyword, '%')) " +
-            ") AS countResults"
-            , nativeQuery = true)
+
+    @Query("SELECT m FROM Moim m JOIN MoimRegistration r ON m = r.moim WHERE r.user.userId = :userId " +
+            "AND (r.regStatus = 'LEADER' OR r.regStatus = 'APPROVED') " +
+            "AND m.moimTitle LIKE CONCAT('%', :keyword, '%') ORDER BY r.subscribeDate ASC ")
     Page<Moim> findmyMoimAsc(@Param("userId") String userId, @Param("keyword") String keyword, Pageable pageable);
+//    @Query(value =
+//            "SELECT * FROM (" +
+//                    "   ( " +
+//                    "   SELECT m.*, m.moim_regdate AS sort_date " +
+//                    "   FROM MOIM m " +
+//                    "   WHERE m.user_id = :userId " +
+//                    "   AND m.moim_title LIKE CONCAT('%', :keyword, '%') " +
+//                    "   ) " +
+//                    "   UNION " +
+//                    "   (" +
+//                    "   SELECT m.*, mr.subscribe_date AS sort_date " +
+//                    "   FROM MOIM m JOIN MOIM_REGISTRATION mr ON m.moim_id = mr.moim_id " +
+//                    "   WHERE mr.user_id = :userId AND mr.reg_status = 'APPROVED' " +
+//                    "   AND m.moim_title LIKE CONCAT('%', :keyword, '%') " +
+//                    "   ) " +
+//                    ") AS results " +
+//                    "ORDER BY sort_date ASC",
+//            countQuery = "SELECT COUNT(*) FROM (" +
+//                    "   (SELECT m.moim_id FROM MOIM m WHERE m.user_id = :userId AND m.moim_title LIKE CONCAT('%', :keyword, '%')) " +
+//                    "   UNION " +
+//                    "   (SELECT m.moim_id FROM MOIM m JOIN MOIM_REGISTRATION mr ON m.moim_id = mr.moim_id WHERE mr.user_id = :userId AND mr.reg_status = 'APPROVED' AND m.moim_title LIKE CONCAT('%', :keyword, '%')) " +
+//                    ") AS countResults"
+//            , nativeQuery = true)
+//    Page<Moim> findmyMoimAsc(@Param("userId") String userId, @Param("keyword") String keyword, Pageable pageable);
 
     ////내 모임 내림차순
-    @Query(value =
-            "SELECT * FROM (" +
-                    "   (SELECT m.*, m.moim_regdate AS sort_date " +
-                    "   FROM MOIM m " +
-                    "   WHERE m.user_id = :userId " +
-                    "   AND m.moim_title LIKE CONCAT('%', :keyword, '%') " +
-                    "   ) " +
-                    "   UNION " +
-                    "   (SELECT m.*, mr.subscribe_date AS sort_date " +
-                    "   FROM MOIM m JOIN MOIM_REGISTRATION mr ON m.moim_id = mr.moim_id " +
-                    "   WHERE mr.user_id = :userId AND mr.reg_status = 'APPROVED' " +
-                    "   AND m.moim_title LIKE CONCAT('%', :keyword, '%') " +
-                    "   ) " +
-                    ") AS results " +
-                    "ORDER BY sort_date DESC",
-            countQuery = "SELECT COUNT(*) FROM (" +
-            "   (SELECT m.moim_id FROM MOIM m WHERE m.user_id = :userId) " +
-            "   UNION " +
-            "   (SELECT m.moim_id FROM MOIM m JOIN MOIM_REGISTRATION mr ON m.moim_id = mr.moim_id WHERE mr.user_id = :userId AND mr.reg_status = 'APPROVED') " +
-            ") AS countResults"
-            , nativeQuery = true)
+    @Query("SELECT m FROM Moim m JOIN MoimRegistration r ON m = r.moim WHERE r.user.userId = :userId " +
+            "AND (r.regStatus = 'LEADER' OR r.regStatus = 'APPROVED') " +
+            "AND m.moimTitle LIKE CONCAT('%', :keyword, '%') ORDER BY r.subscribeDate DESC ")
     Page<Moim> findmyMoimDesc(@Param("userId") String userId,  @Param("keyword") String keyword, Pageable pageable);
 
+//    @Query(value =
+//            "SELECT * FROM (" +
+//                    "   (SELECT m.*, m.moim_regdate AS sort_date " +
+//                    "   FROM MOIM m " +
+//                    "   WHERE m.user_id = :userId " +
+//                    "   AND m.moim_title LIKE CONCAT('%', :keyword, '%') " +
+//                    "   ) " +
+//                    "   UNION " +
+//                    "   (SELECT m.*, mr.subscribe_date AS sort_date " +
+//                    "   FROM MOIM m JOIN MOIM_REGISTRATION mr ON m.moim_id = mr.moim_id " +
+//                    "   WHERE mr.user_id = :userId AND mr.reg_status = 'APPROVED' " +
+//                    "   AND m.moim_title LIKE CONCAT('%', :keyword, '%') " +
+//                    "   ) " +
+//                    ") AS results " +
+//                    "ORDER BY sort_ date DESC",
+//            countQuery = "SELECT COUNT(*) FROM (" +
+//                    "   (SELECT m.moim_id FROM MOIM m WHERE m.user_id = :userId) " +
+//                    "   UNION " +
+//                    "   (SELECT m.moim_id FROM MOIM m JOIN MOIM_REGISTRATION mr ON m.moim_id = mr.moim_id WHERE mr.user_id = :userId AND mr.reg_status = 'APPROVED') " +
+//                    ") AS countResults"
+//            , nativeQuery = true)
+//    Page<Moim> findmyMoimDesc(@Param("userId") String userId,  @Param("keyword") String keyword, Pageable pageable);
+//
 
     List<Moim> findByUserId(User user);
 }

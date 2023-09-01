@@ -1,26 +1,56 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.entity.Moim;
+import com.example.backend.entity.MoimRegistration;
+import com.example.backend.entity.ProfileImage;
 import com.example.backend.entity.User;
+import com.example.backend.repository.MoimRegistrationRepository;
 import com.example.backend.repository.MoimRepository;
+import com.example.backend.repository.ProfileImageRepository;
 import com.example.backend.service.MoimService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MoimServiceImpl implements MoimService {
     private final MoimRepository moimRepository;
-
+    private final MoimRegistrationRepository moimRegistrationRepository;
+    private final ProfileImageRepository profileImageRepository;
     //모임 생성
     @Override
     @Transactional
-    public Moim createMoim(Moim moim) {
-        return moimRepository.save(moim);
+    public Moim createMoim(Moim moim, User currentUser) {
+        Moim savedMoim = moimRepository.save(moim);
+
+        ProfileImage leaderProfile = profileImageRepository.findByUserId(currentUser);
+        // 가정: ProfileImageRepository에 findByUserId 메서드가 정의되어 있습니다.
+
+        System.out.println("111111111111111111111111");
+        System.out.println(currentUser);
+
+        byte[] leaderProfileImage = (leaderProfile != null) ? leaderProfile.getFileData() : null;
+
+        MoimRegistration leaderReg = MoimRegistration.builder()
+                .moim(savedMoim)
+                .user(currentUser)
+                .moimProfile(leaderProfileImage)
+                .createMoimProfile(LocalDateTime.now())
+                .updateMoimProfile(LocalDateTime.now())
+                .regStatus(MoimRegistration.RegStatus.LEADER)
+                .applicationDate(LocalDateTime.now())
+                .subscribeDate(LocalDateTime.now())
+                .build();
+
+        moimRegistrationRepository.save(leaderReg); // 가정: MoimRegistration의 레포지토리 이름이 moimRegistrationRepository
+
+        return savedMoim;
     }
 
     //모임 수정

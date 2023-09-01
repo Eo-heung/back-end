@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,13 +39,20 @@ public class MoimController {
     private final BoardPictureRepository boardPictureRepository;
 
     @PostMapping("/create-moim")
-    public ResponseEntity<?> createMoim(@RequestBody MoimDTO moimDTO) {
+    public ResponseEntity<?> createMoim(@RequestBody MoimDTO moimDTO,
+                                        @RequestHeader("Authorization") String token) {
         ResponseDTO<MoimDTO> responseDTO = new ResponseDTO<>();
+
+        String loginUser = jwtTokenProvider.validateAndGetUsername(token);
+        User checkUser = userRepository.findByUserId(loginUser)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
             moimDTO.setMoimRegdate(LocalDateTime.now());
+            Moim moim = moimService.createMoim(moimDTO.DTOToEntity(), checkUser);
+            // currentUser를 모임장으로 전달
 
-            Moim moim = moimService.createMoim(moimDTO.DTOToEntity());
+
 
             responseDTO.setItem(moim.EntityToDTO());
             responseDTO.setStatusCode(HttpStatus.OK.value());
