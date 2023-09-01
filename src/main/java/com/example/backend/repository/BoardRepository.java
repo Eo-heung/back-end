@@ -15,7 +15,7 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 
     ////오름차순
     //전체조건
-    @Query("SELECT b FROM Board b WHERE b.boardType = :boardType AND b.moimId = :moimId " +
+    @Query("SELECT b FROM Board b WHERE b.boardType = :boardType AND b.moimId.moimId = :moimId " +
             "AND (b.boardTitle LIKE CONCAT('%', :keyword, '%') OR b.boardContent LIKE CONCAT('%', :keyword, '%') " +
             "OR b.userId.userName LIKE CONCAT('%', :keyword, '%')) ORDER BY b.boardId ASC")
     Page<Board> searchByBoardTypeAndKeywordAsc(@Param("boardType") Board.BoardType boardType,
@@ -39,7 +39,7 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 
     ////내림차순
     //전체조건
-    @Query("SELECT b FROM Board b WHERE b.boardType = :boardType AND b.moimId = :moimId " +
+    @Query("SELECT b FROM Board b WHERE b.boardType = :boardType AND b.moimId.moimId  = :moimId " +
             "AND (b.boardTitle LIKE CONCAT('%', :keyword, '%') OR b.boardContent LIKE CONCAT('%', :keyword, '%') " +
             "OR b.userId.userName LIKE CONCAT('%', :keyword, '%')) ORDER BY b.boardId DESC")
     Page<Board> searchByBoardTypeAndKeywordDesc(@Param("boardType") Board.BoardType boardType,
