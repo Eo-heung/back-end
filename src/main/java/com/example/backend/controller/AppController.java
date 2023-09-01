@@ -1,8 +1,10 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.AppBoardDTO;
+import com.example.backend.dto.AppFixedDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.AppBoard;
+import com.example.backend.entity.AppFixed;
 import com.example.backend.entity.User;
 import com.example.backend.jwt.JwtTokenProvider;
 import com.example.backend.repository.AppBoardRepository;
@@ -18,6 +20,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -111,6 +114,7 @@ public class AppController {
         }
     }
 
+    //상세 게시글 확인
     @GetMapping("/{moimId}/list/{appBoardId}")
     public ResponseEntity<?> viewAppBoard(@PathVariable int moimId,
                                       @PathVariable int appBoardId,
@@ -130,6 +134,31 @@ public class AppController {
 
             return ResponseEntity.ok(responseDTO);
 
+        } catch (Exception e) {
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+
+    @PostMapping("/{moimId}/list/{appBoardId}/apply")
+    public ResponseEntity<?> applyToApp(@PathVariable int moimId,
+                                           @PathVariable int appBoardId,
+                                           @RequestHeader("Authorization") String token) {
+        ResponseDTO<AppFixedDTO> responseDTO = new ResponseDTO<>();
+        String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+        User loginUser = userRepository.findByUserId(loggedInUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        try {
+            AppFixedDTO appFixedDTO = appService.applyToApp(moimId, appBoardId, loginUser.getUserId());
+
+            responseDTO.setItem(appFixedDTO);
+            responseDTO.setStatusCode(HttpStatus.CREATED.value());
+
+            return ResponseEntity.ok(responseDTO);
         } catch (Exception e) {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDTO.setErrorMessage(e.getMessage());

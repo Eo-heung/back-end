@@ -2,6 +2,8 @@ package com.example.backend.service;
 
 import com.example.backend.dto.AppBoardDTO;
 import com.example.backend.entity.AppBoard;
+import com.example.backend.entity.AppFixed;
+import com.example.backend.dto.AppFixedDTO;
 import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,8 @@ public interface AppService {
                                Pageable pageable);
 
     AppBoardDTO viewAppBoard(int moimId, int appBoardId, String loginUser);
+
+    AppFixedDTO applyToApp(int moimId, int appBoardId, String loginUser);
 
 
 

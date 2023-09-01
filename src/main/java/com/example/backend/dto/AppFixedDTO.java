@@ -21,6 +21,8 @@ public class AppFixedDTO {
     private String appFixedUser;
     private AppFixed.AppSort appSort;
     private AppFixed.AppState appState;
+    private String useName;
+    private int moimId;
 
     //앞단 보낼 땐 moimIds도 넣어서 넘기기
 }

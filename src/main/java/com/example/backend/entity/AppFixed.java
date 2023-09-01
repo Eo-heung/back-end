@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.dto.AppFixedDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,6 +39,18 @@ public class AppFixed {
 
     public enum AppState {
         CONFIRM, REJECT, CANCEL, WAIT
+    }
+
+    public AppFixedDTO entityToDto() {
+        return AppFixedDTO.builder()
+                .appFixedId(this.getAppFixedId())
+                .appBoardId(this.getAppBoard().getAppBoardId())
+                .appFixedUser(this.getAppFixedUser().getUserId())
+                .useName(this.getAppFixedUser().getUserName())
+                .appSort(this.appSort)
+                .appState(this.appState)
+                .moimId(this.getAppBoard().getMoim().getMoimId())
+                .build();
     }
 
 

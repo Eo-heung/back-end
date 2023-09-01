@@ -1,14 +1,13 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.dto.AppBoardDTO;
+import com.example.backend.dto.AppFixedDTO;
 import com.example.backend.dto.BoardDTO;
 import com.example.backend.entity.*;
-import com.example.backend.repository.AppBoardRepository;
-import com.example.backend.repository.AppFixedRepository;
-import com.example.backend.repository.MoimRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.repository.*;
 import com.example.backend.service.AppService;
 import com.example.backend.service.BoardService;
+import com.example.backend.service.CommentService;
 import com.example.backend.service.MoimRegistrationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +28,11 @@ public class AppServiceImpl implements AppService {
     private final AppFixedRepository appFixedRepository;
     private final UserRepository userRepository;
     private final MoimRepository moimRepository;
+    private final MoimRegistrationRepository moimRegistrationRepository;
     private final BoardService boardService;
     private final MoimRegistrationService moimRegistrationService;
 
+    //약속 생성
     @Transactional
     @Override
     public AppBoard createApp(int moimId, AppBoard appBoard, User loginUser) {
@@ -63,6 +64,7 @@ public class AppServiceImpl implements AppService {
 
     }
 
+    //약속 리스트
     public Page<AppBoard> appBoarList(int moimId, String onOff,
                                       String searchType, String keyword,
                                       String loginUser,
@@ -73,8 +75,7 @@ public class AppServiceImpl implements AppService {
         User user = userRepository.findById(loginUser)
                 .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
 
-        if(!moimRegistrationService.verifyMemberRole(user, checkMoim) && !moimRegistrationService.verifyLeaderRole(user, checkMoim)) {
-        } else {
+        if(!moimRegistrationService.verifyMemberRole(user, checkMoim)) {
             throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
         }
 
@@ -88,7 +89,7 @@ public class AppServiceImpl implements AppService {
         return appBoardRepository.findByUserAndMoimWithConditions(loginUser, moimId, appTypeValue, searchType, keyword, pageable);
     }
 
-
+    //약속 상세보기
     public AppBoardDTO viewAppBoard(int moimId, int appBoardId, String loginUser) {
         AppBoard appBoard = appBoardRepository.findById(appBoardId)
                 .orElseThrow(() -> new RuntimeException("App Board not found"));
@@ -99,15 +100,42 @@ public class AppServiceImpl implements AppService {
         User user = userRepository.findById(loginUser)
                 .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
 
-        if(!moimRegistrationService.verifyMemberRole(user, checkMoim) && !moimRegistrationService.verifyLeaderRole(user, checkMoim)) {
-        } else {
+        if(!moimRegistrationService.verifyMemberRole(user, checkMoim)) {
             throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
         }
 
         return appBoard.EntityToDTO(user.getUserName());
     }
 
+    //약속 신청하기
+    public AppFixedDTO applyToApp(int moimId, int appBoardId, String loginUser) {
+        AppBoard appBoard = appBoardRepository.findById(appBoardId)
+                .orElseThrow(() -> new RuntimeException("App Board not found"));
 
+        Moim checkMoim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다."));
+
+        User user = userRepository.findById(loginUser)
+                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
+
+        if(!moimRegistrationService.verifyMemberRole(user, checkMoim)) {
+            throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
+        }
+
+        if (appBoard.getUser().equals(user)) {
+            throw new IllegalStateException("약속 게시자는 본인 약속에 참가할 수 없습니다");
+        }
+
+        AppFixed appFixed = new AppFixed();
+        appFixed.setAppBoard(appBoard);
+        appFixed.setAppFixedUser(user);
+        appFixed.setAppSort(AppFixed.AppSort.GUEST);
+        appFixed.setAppState(AppFixed.AppState.CONFIRM);
+
+        AppFixed savedAppFixed = appFixedRepository.save(appFixed);
+
+        return savedAppFixed.entityToDto();
+    }
 
 
 
