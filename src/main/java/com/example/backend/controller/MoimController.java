@@ -37,6 +37,8 @@ public class MoimController {
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
     private final BoardPictureRepository boardPictureRepository;
+    private final AppBoardRepository appBoardRepository;
+    private final AppFixedRepository appFixedRepository;
 
     @PostMapping("/create-moim")
     public ResponseEntity<?> createMoim(@RequestBody MoimDTO moimDTO,
@@ -296,6 +298,14 @@ public class MoimController {
             List<Board> boards = boardRepository.findByMoimId(moim);
             boardRepository.deleteAll(boards);
 
+            //모임 약속 상태 삭제
+            List<AppFixed> appFixeds = appFixedRepository.findByAppBoard_Moim(moim);
+            appFixedRepository.deleteAll(appFixeds);
+
+            //모임 약속 게시글 삭제
+            List<AppBoard> appBoards = appBoardRepository.findByMoim(moim);
+            appBoardRepository.deleteAll(appBoards);
+
             //가입 신청 삭제
             List<MoimRegistration> registrations = moimRegistrationRepository.findAllByMoim(moim);
             moimRegistrationRepository.deleteAll(registrations);
@@ -306,6 +316,8 @@ public class MoimController {
 
             //모임 삭제
             moimRepository.delete(moim);
+
+
 
             Map<String, String> returnMap = new HashMap<>();
             returnMap.put("msg", "정상적으로 삭제되었습니다.");

@@ -36,7 +36,7 @@ public class AppController {
     private final AppBoardRepository appBoardRepository;
     private final AppFixedRepository appFixedRepository;
 
-    //약속 만들기
+    //약속 생성
     @PostMapping("/{moimId}/create-app")
     public ResponseEntity<?> createApp(@PathVariable("moimId") int moimId,
                                        @RequestBody AppBoard appBoard,
@@ -114,7 +114,7 @@ public class AppController {
         }
     }
 
-    //상세 게시글 확인
+    //약속글 상세보기
     @GetMapping("/{moimId}/list/{appBoardId}")
     public ResponseEntity<?> viewAppBoard(@PathVariable int moimId,
                                       @PathVariable int appBoardId,
@@ -143,6 +143,7 @@ public class AppController {
     }
 
 
+    //약속 신청
     @PostMapping("/{moimId}/list/{appBoardId}/apply")
     public ResponseEntity<?> applyToApp(@PathVariable int moimId,
                                            @PathVariable int appBoardId,
@@ -166,6 +167,31 @@ public class AppController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+
+    //약속 모집글 삭제
+    @DeleteMapping("/{moimId}/list/{appBoardId}/delete")
+    public ResponseEntity<?> deleteApp(@PathVariable("moimId") int moimId,
+                                       @PathVariable("appBoardId") int appBoardId,
+                                       @RequestHeader("Authorization") String token) {
+        ResponseDTO<String> responseDTO = new ResponseDTO<>();
+        String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+
+        try {
+            appService.deleteApp(moimId, appBoardId, loggedInUsername);
+            responseDTO.setItem("약속 모집글을 성공적으로 삭제했습니다.");
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok(responseDTO);
+        } catch (Exception e) {
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+
+
 
     //===    /appointment/{moimId}/list/{appBoardId}
     //=== POST   /appointment/{moimId}/list/{appBoardId}/apply

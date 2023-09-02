@@ -64,7 +64,7 @@ public class AppServiceImpl implements AppService {
 
     }
 
-    //약속 리스트
+    //약속 모집글  리스트
     public Page<AppBoard> appBoarList(int moimId, String onOff,
                                       String searchType, String keyword,
                                       String loginUser,
@@ -89,7 +89,7 @@ public class AppServiceImpl implements AppService {
         return appBoardRepository.findByUserAndMoimWithConditions(loginUser, moimId, appTypeValue, searchType, keyword, pageable);
     }
 
-    //약속 상세보기
+    //약속글 상세보기
     public AppBoardDTO viewAppBoard(int moimId, int appBoardId, String loginUser) {
         AppBoard appBoard = appBoardRepository.findById(appBoardId)
                 .orElseThrow(() -> new RuntimeException("App Board not found"));
@@ -107,7 +107,7 @@ public class AppServiceImpl implements AppService {
         return appBoard.EntityToDTO(user.getUserName());
     }
 
-    //약속 신청하기
+    //약속 신청
     public AppFixedDTO applyToApp(int moimId, int appBoardId, String loginUser) {
         AppBoard appBoard = appBoardRepository.findById(appBoardId)
                 .orElseThrow(() -> new RuntimeException("App Board not found"));
@@ -118,13 +118,25 @@ public class AppServiceImpl implements AppService {
         User user = userRepository.findById(loginUser)
                 .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
 
-        if(!moimRegistrationService.verifyMemberRole(user, checkMoim)) {
+        if(!moimRegistrationService.canAccessMoim(user, checkMoim)) {
             throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
         }
 
         if (appBoard.getUser().equals(user)) {
             throw new IllegalStateException("약속 게시자는 본인 약속에 참가할 수 없습니다");
         }
+
+        if (hasAlreadyAppliedToAppointment(user, appBoard)) {
+            throw new IllegalStateException("이미 해당 약속에 신청한 사용자입니다.");
+        }
+
+        LocalDateTime appStart = appBoard.getAppStart();
+        LocalDateTime appEnd = appBoard.getAppEnd();
+
+        if (hasOverlappingAppointments(user, appStart, appEnd)) {
+            throw new IllegalStateException("해당 시간에 이미 다른 약속에 참여 중입니다.");
+        }
+
 
         AppFixed appFixed = new AppFixed();
         appFixed.setAppBoard(appBoard);
@@ -137,6 +149,37 @@ public class AppServiceImpl implements AppService {
         return savedAppFixed.entityToDto();
     }
 
+    //약속 모집글 삭제
+    @Transactional
+    @Override
+    public void deleteApp(int moimId, int appBoardId, String loggedInUsername) {
+        AppBoard appBoard = appBoardRepository.findById(appBoardId)
+                .orElseThrow(() -> new RuntimeException("App Board not found"));
+
+        Moim checkMoim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다."));
+
+        User user = userRepository.findByUserId(loggedInUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if(!moimRegistrationService.canAccessMoim(user, checkMoim)) {
+            throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
+        }
+        Moim associatedMoim = appBoard.getMoim();
+
+        boolean isWriter = appBoard.getUser().equals(user);
+        boolean isLeader = boardService.verifyLeaderRole(user, associatedMoim);
+
+        if (!isWriter && !isLeader) {
+            throw new IllegalStateException("작성자 또는 모임장만 게시글을 삭제할 수 있습니다.");
+        }
+
+        // AppFixed 지우기
+        appFixedRepository.deleteByAppBoard(appBoard);
+
+        // AppBoard 지우기
+        appBoardRepository.deleteById(appBoardId);
+    }
 
 
 
@@ -145,11 +188,27 @@ public class AppServiceImpl implements AppService {
 
 
 
+
+
+
+
+    //동일시간대 약속 체크
     @Override
     public boolean hasOverlappingAppointments(User user, LocalDateTime appStart, LocalDateTime appEnd) {
         List<AppFixed> overlappingAppointments = appFixedRepository.findOverlappingAppointments(user, appStart, appEnd);
             return !overlappingAppointments.isEmpty();
     }
+
+    //해당 약속에 참석 여부 체크
+    private boolean hasAlreadyAppliedToAppointment(User user, AppBoard appBoard) {
+        return appFixedRepository.existsByAppBoardAndAppFixedUser(appBoard, user);
+    }
+
+
+
+
+
+
 
 
 }

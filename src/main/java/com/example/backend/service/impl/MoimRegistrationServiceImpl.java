@@ -303,4 +303,15 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
     }
 
 
+    //모임 가입여부 확인(모임장, 모임원 구분 없이)
+    public boolean canAccessMoim(User user, Moim moim) {
+        Optional<MoimRegistration> registration = moimRegistrationRepository.findByMoimAndUser(moim, user);
+
+        if (!registration.isPresent()) {
+            return false;
+        }
+
+        MoimRegistration.RegStatus status = registration.get().getRegStatus();
+        return status == MoimRegistration.RegStatus.LEADER || status == MoimRegistration.RegStatus.APPROVED;
+    }
 }

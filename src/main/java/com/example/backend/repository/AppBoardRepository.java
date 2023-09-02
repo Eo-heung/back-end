@@ -2,6 +2,7 @@ package com.example.backend.repository;
 
 import com.example.backend.entity.AppBoard;
 import com.example.backend.entity.Board;
+import com.example.backend.entity.Moim;
 import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface AppBoardRepository extends JpaRepository<AppBoard, Integer> {
@@ -26,4 +28,5 @@ public interface AppBoardRepository extends JpaRepository<AppBoard, Integer> {
     Page<AppBoard> findByUserAndMoimWithConditions(String loginUser, int moimId, AppBoard.AppType appType, String searchType,
                                                    String keyword, Pageable pageable);
 
+    List<AppBoard> findByMoim(Moim moim);
 }

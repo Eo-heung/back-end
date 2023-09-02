@@ -73,6 +73,7 @@ public class AppBoard {
                 .appRegdate(this.appRegdate)
                 .appType(this.appType)
                 .appTitle(this.appTitle)
+                .appContent(this.appContent)
                 .appLocation(this.appLocation)
                 .appStart(this.appStart)
                 .appEnd(this.appEnd)
@@ -81,6 +82,7 @@ public class AppBoard {
                 .userName(userName)
                 .build();
     }
+
 
 
 

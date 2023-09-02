@@ -47,12 +47,14 @@ public class AppBoardDTO {
                 .appRegdate(this.appRegdate)
                 .appType(this.appType)
                 .appTitle(this.appTitle)
+                .appContent(this.appContent)
                 .appLocation(this.appLocation)
                 .appStart(this.appStart)
                 .appEnd(this.appEnd)
                 .maxAppUser(this.maxAppUser)
                 .currentAppUser(this.currentAppUser)
                 .build();
+
     }
 
 

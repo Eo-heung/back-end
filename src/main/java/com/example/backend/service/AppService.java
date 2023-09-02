@@ -22,7 +22,7 @@ public interface AppService {
 
     AppFixedDTO applyToApp(int moimId, int appBoardId, String loginUser);
 
-
+    void deleteApp(int moimId, int appBoardId, String loggedInUsername);
 
     boolean hasOverlappingAppointments(User user, LocalDateTime appStart, LocalDateTime appEnd);
 }

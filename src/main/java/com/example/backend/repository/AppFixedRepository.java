@@ -1,6 +1,8 @@
 package com.example.backend.repository;
 
+import com.example.backend.entity.AppBoard;
 import com.example.backend.entity.AppFixed;
+import com.example.backend.entity.Moim;
 import com.example.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +17,9 @@ public interface AppFixedRepository extends JpaRepository<AppFixed, Integer> {
             "(a.appBoard.appStart BETWEEN :appStart AND :appEnd OR a.appBoard.appEnd BETWEEN :appStart AND :appEnd)")
     List<AppFixed> findOverlappingAppointments(@Param("user") User user, @Param("appStart") LocalDateTime appStart, @Param("appEnd") LocalDateTime appEnd);
 
+    boolean existsByAppBoardAndAppFixedUser(AppBoard appBoard, User user);
+
+    void deleteByAppBoard(AppBoard appBoard);
+
+    List<AppFixed> findByAppBoard_Moim(Moim moim);
 }
