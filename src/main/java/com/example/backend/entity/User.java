@@ -85,7 +85,8 @@ public class User {
 
         @Column(name = "last_login") // 마지막 접속 기록
         private LocalDateTime lastHeartbeat;
-
+        @Column(name = "ban") // 마지막 접속 기록
+        private LocalDateTime ban;
         @PrePersist
         public void prePersist() {
                 if (totalGam == null) {
@@ -118,6 +119,7 @@ public class User {
                 .lastHeartbeat(this.lastHeartbeat)
                 .totalGam(this.totalGam)
                     .online(this.online)
+                    .ban(this.ban)
                 .build();
     }
 }
