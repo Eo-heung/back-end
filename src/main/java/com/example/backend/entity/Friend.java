@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -28,6 +29,10 @@ public class Friend {
 
     @Column(name = "to_friend_user")
     private String toUser;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "chatting_room_name_id")
+    private ChattingRoomName chattingRoomName;
 
 
     public FriendDTO EntityToDTO() {

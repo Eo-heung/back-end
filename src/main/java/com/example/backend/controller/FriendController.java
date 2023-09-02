@@ -3,6 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.dto.FriendDTO;
 import com.example.backend.dto.PaymentGamDTO;
 import com.example.backend.dto.ResponseDTO;
+import com.example.backend.entity.ChattingRoomName;
 import com.example.backend.entity.Friend;
 import com.example.backend.entity.Hobby;
 import com.example.backend.entity.User;
@@ -15,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.example.backend.repository.ChattingRoomNameRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,7 @@ public class FriendController {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
     private final PaymentController paymentController;
+    private final ChattingRoomNameRepository chattingRoomNameRepository;
 
     @PostMapping("/friendList")
     public ResponseEntity<?> getFriendList(@RequestHeader("Authorization") String token) {
@@ -110,6 +112,24 @@ public class FriendController {
                 friend.setStatus(true);
 
                 friend = friendService.saveFriend(friend);
+
+                // 사용자 ID를 알파벳순으로 정렬
+                String fromUser = friend.getFromUser();
+                String toUser = friend.getToUser();
+                String roomName;
+
+                if (fromUser.compareTo(toUser) > 0) {
+                    roomName = toUser + "-" + fromUser;
+                } else {
+                    roomName = fromUser + "-" + toUser;
+                }
+
+                // 고유한 채팅방 이름을 생성합니다.
+                ChattingRoomName chattingRoomName = new ChattingRoomName();
+                chattingRoomName.setRoomName(roomName);
+                friend.setChattingRoomName(chattingRoomName); // 친구에게 채팅방 이름 설정
+
+                friend = friendService.saveFriend(friend); // 연관된 채팅방 이름도 함께 저장됩니다.
             }
             else {
                 friendRepository.deleteById(id);
@@ -182,19 +202,22 @@ public class FriendController {
     @PostMapping("/deleteFriend/{id}")
     public ResponseEntity<?> deleteFriend(@PathVariable Long id) {
         ResponseDTO<Friend> responseDTO = new ResponseDTO<>();
-        /* fromUser먼저*/
         try {
-//            String toUser = jwtTokenProvider.validateAndGetUsername(token);
+            // Friend 엔터티를 조회합니다.
+            Optional<Friend> optionalFriend = friendRepository.findById(id);
 
-            Friend friend = new Friend();
+            if (optionalFriend.isPresent()) {
+                Friend friend = optionalFriend.get();
+                // Friend 엔터티와 연관된 ChattingRoomName 엔터티도 함께 삭제됩니다.
+                friendRepository.delete(friend);
 
-                friendRepository.deleteById(id);
+                responseDTO.setStatusCode(HttpStatus.OK.value());
+                responseDTO.setItem(friend);
 
-            responseDTO.setStatusCode(HttpStatus.OK.value());
-            responseDTO.setItem(friend);
-
-            return ResponseEntity.ok().body(responseDTO);
-
+                return ResponseEntity.ok().body(responseDTO);
+            } else {
+                throw new Exception("Friend not found with ID: " + id);
+            }
         } catch (Exception e) {
             responseDTO.setErrorMessage(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
