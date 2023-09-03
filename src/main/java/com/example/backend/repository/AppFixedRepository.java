@@ -26,6 +26,10 @@ public interface AppFixedRepository extends JpaRepository<AppFixed, Integer> {
     List<AppFixed> findByAppBoard_Moim(Moim moim);
 
 
-    @Query("SELECT a FROM AppFixed a where a.appBoard.appBoardId= :appBoardId AND a.appState = :state")
+    @Query("SELECT a FROM AppFixed a WHERE a.appBoard.appBoardId= :appBoardId AND a.appState = :state ORDER BY CASE WHEN a.appSort = 'HOST' THEN 1 ELSE 2 END, a.appFixedId DESC")
+
     Page<AppFixed> findAllByAppBoardIdAndAppState(@Param("appBoardId") int appBoardId,  @Param("state") AppFixed.AppState state, Pageable pageable);
+
+
+
 }

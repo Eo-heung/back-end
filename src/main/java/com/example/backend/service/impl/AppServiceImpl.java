@@ -183,6 +183,7 @@ public class AppServiceImpl implements AppService {
     }
 
 
+    //약속 확정 리스트 불러오기
     @Override
     public Page<AppFixedDTO> getAppMemberList(int moimId, int appBoardId, User user, Pageable pageable) {
         AppBoard appBoard = appBoardRepository.findById(appBoardId)

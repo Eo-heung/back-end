@@ -202,27 +202,39 @@ public class AppController {
     //약속 모집글 삭제
     //신청자 확인 리스트 >  닉네임, 프로필사진(모임사진 끌어올거니까), 지역
     //(상세는 X)
-
-
     @GetMapping("/{moimId}/list/{appBoardId}/member-list")
-    public ResponseEntity<Page<AppFixedDTO>> getAppMemberList(@PathVariable(required = false,value ="moimId") int moimId,
+    public ResponseEntity<?> getAppMemberList(@PathVariable(required = false,value ="moimId") int moimId,
                                                               @PathVariable(required = false,value = "appBoardId") int appBoardId,
                                                               Pageable pageable,
-                                                              @RequestHeader("Authorization") String token) {
-        System.out.println(moimId+"appBoardId"+appBoardId+"token"+token);
+                                                              @RequestHeader("Authorization") String token,
+                                              @RequestParam(defaultValue = "0") int currentPage) {
+
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
-        System.out.println(loggedInUsername);
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        System.out.println(loginUser);
-        return ResponseEntity.ok(appService.getAppMemberList(moimId, appBoardId, loginUser, pageable));
+
+        pageable = PageRequest.of(currentPage, 10);
+
+        try {
+            Page<AppFixedDTO> result = appService.getAppMemberList(moimId, appBoardId, loginUser, pageable);
+
+            ResponseDTO.PaginationInfo paginationInfo = new ResponseDTO.PaginationInfo();
+            paginationInfo.setTotalPages(result.getTotalPages());
+            paginationInfo.setCurrentPage(result.getNumber());
+            paginationInfo.setTotalElements(result.getTotalElements());
+
+            ResponseDTO<Page<AppFixedDTO>> response = new ResponseDTO<>();
+            response.setItem(result);
+            response.setPaginationInfo(paginationInfo);
+            response.setLastPage(result.isLast());
+            response.setStatusCode(HttpStatus.OK.value());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
     }
 
-
-    //===    /appointment/{moimId}/list/{appBoardId}
-    //=== POST   /appointment/{moimId}/list/{appBoardId}/apply
-    //상세 약속 겸 신청
-    //사진은 신청할 떄는 필요 없고, 조회할 때
 
 
 

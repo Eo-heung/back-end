@@ -48,7 +48,7 @@ public class MoimServiceImpl implements MoimService {
                 .subscribeDate(LocalDateTime.now())
                 .build();
 
-        moimRegistrationRepository.save(leaderReg); // 가정: MoimRegistration의 레포지토리 이름이 moimRegistrationRepository
+        moimRegistrationRepository.save(leaderReg);
 
         return savedMoim;
     }
