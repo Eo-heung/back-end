@@ -4,6 +4,8 @@ import com.example.backend.entity.AppBoard;
 import com.example.backend.entity.AppFixed;
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,4 +24,8 @@ public interface AppFixedRepository extends JpaRepository<AppFixed, Integer> {
     void deleteByAppBoard(AppBoard appBoard);
 
     List<AppFixed> findByAppBoard_Moim(Moim moim);
+
+
+    @Query("SELECT a FROM AppFixed a where a.appBoard.appBoardId= :appBoardId AND a.appState = :state")
+    Page<AppFixed> findAllByAppBoardIdAndAppState(@Param("appBoardId") int appBoardId,  @Param("state") AppFixed.AppState state, Pageable pageable);
 }

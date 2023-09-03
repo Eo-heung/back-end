@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -102,6 +103,7 @@ public class AppController {
             paginationInfo.setTotalElements(appBoardDTOPage.getTotalElements());
 
             response.setItem(appBoardDTOPage);
+            response.setLastPage(appBoardDTOPage.isLast());
             response.setPaginationInfo(paginationInfo);
             response.setStatusCode(HttpStatus.OK.value());
 
@@ -116,28 +118,34 @@ public class AppController {
 
     //약속글 상세보기
     @GetMapping("/{moimId}/list/{appBoardId}")
-    public ResponseEntity<?> viewAppBoard(@PathVariable int moimId,
-                                      @PathVariable int appBoardId,
-                                          @RequestHeader("Authorization") String token) {
-        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
-        String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
-        User loginUser = userRepository.findByUserId(loggedInUsername)
+    public ResponseEntity<?> getAppMemberList(
+            @PathVariable int moimId,
+            @PathVariable int appBoardId,
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page) {
+
+        String loginUser = jwtTokenProvider.validateAndGetUsername(token);
+        User checkUser = userRepository.findByUserId(loginUser)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+
+        Pageable pageable = PageRequest.of(0, (page + 1) * 3);
+        Page<AppFixedDTO> appMemberListPage = appService.getAppMemberList(moimId, appBoardId,checkUser ,pageable);
+        System.out.println(appMemberListPage);
+
+        ResponseDTO<AppFixedDTO> responseDTO = new ResponseDTO<>();
         try {
-            AppBoardDTO appBoardDTO = appService.viewAppBoard(moimId, appBoardId, loginUser.getUserId());
-            Map<String, Object> responseData = new HashMap<>();
-            responseData.put("appBoardDetail", appBoardDTO);
+            List<AppFixedDTO> result = appMemberListPage.getContent();
 
-            responseDTO.setItem(responseData);
+            responseDTO.setItems(result);
+            responseDTO.setLastPage(appMemberListPage.isLast());
             responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
 
-            return ResponseEntity.ok(responseDTO);
-
-        } catch (Exception e) {
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDTO.setErrorMessage(e.getMessage());
-
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
@@ -150,6 +158,7 @@ public class AppController {
                                            @RequestHeader("Authorization") String token) {
         ResponseDTO<AppFixedDTO> responseDTO = new ResponseDTO<>();
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -175,7 +184,7 @@ public class AppController {
                                        @RequestHeader("Authorization") String token) {
         ResponseDTO<String> responseDTO = new ResponseDTO<>();
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
-
+        System.out.println(loggedInUsername);
         try {
             appService.deleteApp(moimId, appBoardId, loggedInUsername);
             responseDTO.setItem("약속 모집글을 성공적으로 삭제했습니다.");
@@ -190,7 +199,24 @@ public class AppController {
         }
     }
 
+    //약속 모집글 삭제
+    //신청자 확인 리스트 >  닉네임, 프로필사진(모임사진 끌어올거니까), 지역
+    //(상세는 X)
 
+
+    @GetMapping("/{moimId}/list/{appBoardId}/member-list")
+    public ResponseEntity<Page<AppFixedDTO>> getAppMemberList(@PathVariable(required = false,value ="moimId") int moimId,
+                                                              @PathVariable(required = false,value = "appBoardId") int appBoardId,
+                                                              Pageable pageable,
+                                                              @RequestHeader("Authorization") String token) {
+        System.out.println(moimId+"appBoardId"+appBoardId+"token"+token);
+        String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+        System.out.println(loggedInUsername);
+        User loginUser = userRepository.findByUserId(loggedInUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        System.out.println(loginUser);
+        return ResponseEntity.ok(appService.getAppMemberList(moimId, appBoardId, loginUser, pageable));
+    }
 
 
     //===    /appointment/{moimId}/list/{appBoardId}
@@ -198,12 +224,6 @@ public class AppController {
     //상세 약속 겸 신청
     //사진은 신청할 떄는 필요 없고, 조회할 때
 
-    //===    /appointment/{moimId}/list/{appBoardId}/delete
-    //삭제  > appfixed 랑 appboard
-
-    //===    /appointment/{moimId}/list/{appBoardId}/member-list
-    //신청자 확인 리스트 >  닉네임, 프로필사진(모임사진 끌어올거니까), 지역
-    //(상세는 X)
 
 
     //내 약속은 봐서 ㅇㅇ

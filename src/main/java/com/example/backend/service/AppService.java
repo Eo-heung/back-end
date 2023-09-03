@@ -17,12 +17,14 @@ public interface AppService {
                                String searchType, String keyword,
                                String loginUser,
                                Pageable pageable);
-
+    Page<AppFixedDTO> getAppMemberList(int moimId, int appBoardId, User user, Pageable pageable);
     AppBoardDTO viewAppBoard(int moimId, int appBoardId, String loginUser);
 
     AppFixedDTO applyToApp(int moimId, int appBoardId, String loginUser);
 
     void deleteApp(int moimId, int appBoardId, String loggedInUsername);
+
+
 
     boolean hasOverlappingAppointments(User user, LocalDateTime appStart, LocalDateTime appEnd);
 }

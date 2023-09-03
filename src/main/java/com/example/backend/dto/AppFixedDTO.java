@@ -24,5 +24,6 @@ public class AppFixedDTO {
     private String useName;
     private int moimId;
 
+    private String moimProfileBase64;
     //앞단 보낼 땐 moimIds도 넣어서 넘기기
 }

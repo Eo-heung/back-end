@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -182,10 +183,31 @@ public class AppServiceImpl implements AppService {
     }
 
 
+    @Override
+    public Page<AppFixedDTO> getAppMemberList(int moimId, int appBoardId, User user, Pageable pageable) {
+        AppBoard appBoard = appBoardRepository.findById(appBoardId)
+                .orElseThrow(() -> new RuntimeException("App Board not found"));
 
+        Moim checkMoim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다."));
 
+        if (!moimRegistrationService.canAccessMoim(user, checkMoim)) {
+            throw new RuntimeException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
+        }
 
+        Page<AppFixed> confirmedAppFixedEntities = appFixedRepository.findAllByAppBoardIdAndAppState(appBoardId, AppFixed.AppState.CONFIRM, pageable);
 
+        return confirmedAppFixedEntities.map(appFixed -> {
+            AppFixedDTO dto = appFixed.entityToDto();
+            MoimRegistration moimRegistration = moimRegistrationRepository.findByMoim_MoimIdAndUser_UserId(moimId, appFixed.getAppFixedUser().getUserId());
+            if (moimRegistration != null && moimRegistration.getMoimProfile() != null) {
+                String base64Image = Base64.getEncoder().encodeToString(moimRegistration.getMoimProfile());
+                dto.setMoimProfileBase64(base64Image);
+            }
+            return dto;
+        });
+
+    }
 
 
 

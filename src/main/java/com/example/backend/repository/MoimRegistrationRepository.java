@@ -31,6 +31,9 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
 
     List<MoimRegistration> findAllByMoim(Moim moim);
 
+    MoimRegistration findByMoim_MoimIdAndUser_UserId(int moimId, String userId);
+
+
 }
 
 
