@@ -63,7 +63,8 @@ public class MoimRegistration {
         WAITING,  // 대기(모임장)
         REJECTED,  // 거절(모임장)
         CANCELED, // 취소(신청자)
-        QUIT //탈퇴(신청자)
+        QUIT, //탈퇴(신청자)
+        KICKOUT //추방
     }
 
 

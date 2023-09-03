@@ -202,6 +202,7 @@ public class AppController {
     //약속 모집글 삭제
     //신청자 확인 리스트 >  닉네임, 프로필사진(모임사진 끌어올거니까), 지역
     //(상세는 X)
+
     @GetMapping("/{moimId}/list/{appBoardId}/member-list")
     public ResponseEntity<?> getAppMemberList(@PathVariable(required = false,value ="moimId") int moimId,
                                                               @PathVariable(required = false,value = "appBoardId") int appBoardId,
