@@ -10,12 +10,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@Transactional
 public interface MoimRegistrationRepository extends JpaRepository<MoimRegistration, Integer> {
     Optional<MoimRegistration> findByMoimAndUser(Moim moim, User user);
+
+
+    @Query("select mr from MoimRegistration mr where mr.moim.moimId = :moimId and mr.moim.userId = :userId")
+    Optional<MoimRegistration> findByMoimAndUser2(@Param("moimId") Moim moim, @Param("userId")User user);
 
     @Query("SELECT mr FROM MoimRegistration mr INNER JOIN mr.moim m WHERE m.userId.userId = :userId AND mr.regStatus = 'WAITING' AND m.moimId = :moimId  order by m.moimId asc")
     Page<MoimRegistration> findApplicantsByMoimIdAndUserIdOrderByMoimIdAsc(@Param("moimId") int moimId, @Param("userId") String userId, Pageable pageable);

@@ -30,10 +30,6 @@ public class MoimServiceImpl implements MoimService {
         Moim savedMoim = moimRepository.save(moim);
 
         ProfileImage leaderProfile = profileImageRepository.findByUserId(currentUser);
-        // 가정: ProfileImageRepository에 findByUserId 메서드가 정의되어 있습니다.
-
-        System.out.println("111111111111111111111111");
-        System.out.println(currentUser);
 
         byte[] leaderProfileImage = (leaderProfile != null) ? leaderProfile.getFileData() : null;
 

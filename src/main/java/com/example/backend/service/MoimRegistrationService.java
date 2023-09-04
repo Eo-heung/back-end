@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -28,7 +29,7 @@ public interface MoimRegistrationService {
 
     MoimRegistrationDTO getApplicant(int moimId, int moimRegId, String organizerUserId);
 
-    MoimRegistrationDTO getApplicantByMoimId(int moimId, String loginUser);
+    Map<String, Object> getApplicantByMoimId(int moimId, String loginUser);
 
 
     //(모임장)모임 추방

@@ -262,23 +262,29 @@ public class MoimRegistrationController {
     //모임 유저 프로필 확인
     @GetMapping("/view-moim-profile/{moimId}")
     public ResponseEntity<?> viewMoimProfile(@PathVariable int moimId,
-                                             @AuthenticationPrincipal UserDetails userDetails) {
+                                             @RequestHeader("Authorization") String token) {
         ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
-        String loginUserId = userDetails.getUsername();
+        String loginUserId = jwtTokenProvider.validateAndGetUsername(token);
+        Map<String, Object> returnMap = new HashMap<>();
 
         try {
             // moimId에 해당하는 신청자의 상세 내용 가져오기
-            MoimRegistrationDTO moimRegistrationDTO =
-                    moimRegistrationService.getApplicantByMoimId(moimId, loginUserId);
+            Map<String, Object> checkMap = moimRegistrationService.getApplicantByMoimId(moimId, loginUserId);
 
-            Map<String, Object> returnMap = new HashMap<>();
-            returnMap.put("applicantDetails", moimRegistrationDTO);
+            if(checkMap.get("msg") == null) {
+                returnMap.put("msg", "okValue");
+                returnMap.put("applicantDetails", checkMap.get("moimRegistration"));
+            } else {
+                returnMap.put("msg", checkMap.get("msg"));
+            }
 
             responseDTO.setItem(returnMap);
             responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
+            System.out.println("---------------============-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+            System.out.println(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDTO.setErrorMessage(e.getMessage());
             return ResponseEntity.badRequest().body(responseDTO);

@@ -124,38 +124,31 @@ public class AppController {
 
     //약속글 상세보기
     @GetMapping("/{moimId}/list/{appBoardId}")
-    public ResponseEntity<?> getAppMemberList(
-            @PathVariable int moimId,
-            @PathVariable int appBoardId,
-            @RequestHeader("Authorization") String token,
-            @RequestParam(defaultValue = "0") int page) {
-
-        String loginUser = jwtTokenProvider.validateAndGetUsername(token);
-        User checkUser = userRepository.findByUserId(loginUser)
+    public ResponseEntity<?> viewAppBoard(@PathVariable int moimId,
+                                          @PathVariable int appBoardId,
+                                          @RequestHeader("Authorization") String token) {
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+        String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+        User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-
-        Pageable pageable = PageRequest.of(0, (page + 1) * 3);
-        Page<AppFixedDTO> appMemberListPage = appService.getAppMemberList(moimId, appBoardId,checkUser ,pageable);
-        System.out.println(appMemberListPage);
-
-        ResponseDTO<AppFixedDTO> responseDTO = new ResponseDTO<>();
         try {
-            List<AppFixedDTO> result = appMemberListPage.getContent();
+            AppBoardDTO appBoardDTO = appService.viewAppBoard(moimId, appBoardId, loginUser.getUserId());
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("appBoardDetail", appBoardDTO);
 
-            responseDTO.setItems(result);
-            responseDTO.setLastPage(appMemberListPage.isLast());
+            responseDTO.setItem(responseData);
             responseDTO.setStatusCode(HttpStatus.OK.value());
-            return ResponseEntity.ok().body(responseDTO);
 
-        } catch(Exception e) {
-            System.out.println(e.getMessage());
+            return ResponseEntity.ok(responseDTO);
+
+        } catch (Exception e) {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDTO.setErrorMessage(e.getMessage());
+
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
-
 
     //약속 신청
     @PostMapping("/{moimId}/list/{appBoardId}/apply")

@@ -52,7 +52,6 @@ public class MoimController {
         try {
             moimDTO.setMoimRegdate(LocalDateTime.now());
             Moim moim = moimService.createMoim(moimDTO.DTOToEntity(), checkUser);
-            // currentUser를 모임장으로 전달
 
 
 
@@ -213,6 +212,8 @@ public class MoimController {
 
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
+            System.out.println("+++++++++++++++++++++++++++++++++++++++");
+            System.out.println(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDTO.setErrorMessage(e.getMessage());
             return ResponseEntity.badRequest().body(responseDTO);
