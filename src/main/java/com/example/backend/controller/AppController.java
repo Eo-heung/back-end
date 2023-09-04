@@ -42,21 +42,27 @@ public class AppController {
     public ResponseEntity<?> createApp(@PathVariable("moimId") int moimId,
                                        @RequestBody AppBoard appBoard,
                                        @RequestHeader("Authorization") String token) {
-        ResponseDTO<AppBoardDTO> responseDTO = new ResponseDTO<>();
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
 
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
-            AppBoard createdAppBoard = appService.createApp(moimId, appBoard, loginUser);
-            AppBoardDTO appBoardDTO = createdAppBoard.EntityToDTO(loginUser.getUserName());
+            Map<String, Object> checkMap = appService.createApp(moimId, appBoard, loginUser);
+            Map<String, Object> returnMap = new HashMap<>();
 
-            responseDTO.setItem(appBoardDTO);
-            responseDTO.setStatusCode(HttpStatus.CREATED.value());
+            if(checkMap.get("msg") == null) {
+                returnMap.put("msg", "okValue");
+                returnMap.put("appBoardDTO", checkMap.get("savedAppBoard"));
+
+            } else {
+                returnMap.put("msg", checkMap.get("msg"));
+            }
+                responseDTO.setItem(returnMap);
+                responseDTO.setStatusCode(HttpStatus.CREATED.value());
 
             return ResponseEntity.ok().body(responseDTO);
-
 
         } catch (Exception e) {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
@@ -156,16 +162,25 @@ public class AppController {
     public ResponseEntity<?> applyToApp(@PathVariable int moimId,
                                            @PathVariable int appBoardId,
                                            @RequestHeader("Authorization") String token) {
-        ResponseDTO<AppFixedDTO> responseDTO = new ResponseDTO<>();
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
         String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
 
         User loginUser = userRepository.findByUserId(loggedInUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
-            AppFixedDTO appFixedDTO = appService.applyToApp(moimId, appBoardId, loginUser.getUserId());
+            Map<String, Object> checkMap = appService.applyToApp(moimId, appBoardId, loginUser.getUserId());
+            Map<String, Object> returnMap = new HashMap<>();
 
-            responseDTO.setItem(appFixedDTO);
+            if(checkMap.get("msg") == null) {
+                returnMap.put("msg", "okValue");
+                returnMap.put("appFixedDTO", checkMap.get("savedAppFixed"));
+            } else {
+                returnMap.put("msg", checkMap.get("msg"));
+
+            }
+
+            responseDTO.setItem(returnMap);
             responseDTO.setStatusCode(HttpStatus.CREATED.value());
 
             return ResponseEntity.ok(responseDTO);

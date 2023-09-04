@@ -17,10 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Base64;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,15 +33,18 @@ public class AppServiceImpl implements AppService {
     //약속 생성
     @Transactional
     @Override
-    public AppBoard createApp(int moimId, AppBoard appBoard, User loginUser) {
+    public Map<String, Object> createApp(int moimId, AppBoard appBoard, User loginUser) {
         //모임 유무 확인
         Moim checkMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new NoSuchElementException("Moim not found"));
 
+        Map<String, Object> returnMap = new HashMap<>();
+
         //모임장, 모임원여부 구분
         if (boardService.verifyMemberRole(loginUser, checkMoim) || boardService.verifyLeaderRole(loginUser, checkMoim)) {
             if (hasOverlappingAppointments(loginUser, appBoard.getAppStart(), appBoard.getAppEnd())) {
-                throw new IllegalStateException("이미 해당 시간에 다른 약속이 있거나 신청되어 있습니다.");
+                returnMap.put("msg", "이미 해당 시간에 다른 약속이 있거나 신청되어 있습니다.");
+                return returnMap;
             }
 
             appBoard.setUser(loginUser);
@@ -57,10 +57,12 @@ public class AppServiceImpl implements AppService {
             appFixed.setAppSort(AppFixed.AppSort.HOST);
             appFixed.setAppState(AppFixed.AppState.CONFIRM);
             appFixedRepository.save(appFixed);
+            returnMap.put("savedAppBoard", savedAppBoard);
 
-            return savedAppBoard;
+            return returnMap;
         } else {
-            throw new IllegalStateException("이 사용자는 이 모임에 승인되지 않았습니다.");
+            returnMap.put("msg", "이 사용자는 이 모임에 승인되지 않았습니다.");
+            return returnMap;
         }
 
     }
@@ -109,7 +111,9 @@ public class AppServiceImpl implements AppService {
     }
 
     //약속 신청
-    public AppFixedDTO applyToApp(int moimId, int appBoardId, String loginUser) {
+    public Map<String, Object> applyToApp(int moimId, int appBoardId, String loginUser) {
+        Map<String, Object> returnMap = new HashMap<>();
+
         AppBoard appBoard = appBoardRepository.findById(appBoardId)
                 .orElseThrow(() -> new RuntimeException("App Board not found"));
 
@@ -120,22 +124,22 @@ public class AppServiceImpl implements AppService {
                 .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
 
         if(!moimRegistrationService.canAccessMoim(user, checkMoim)) {
-            throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
+            returnMap.put("msg", "이 사용자는 이 게시물을 보는 권한이 없습니다.");
         }
 
         if (appBoard.getUser().equals(user)) {
-            throw new IllegalStateException("약속 게시자는 본인 약속에 참가할 수 없습니다");
+            returnMap.put("msg", "약속 게시자는 본인 약속에 참가할 수 없습니다");
         }
 
         if (hasAlreadyAppliedToAppointment(user, appBoard)) {
-            throw new IllegalStateException("이미 해당 약속에 신청한 사용자입니다.");
+            returnMap.put("msg", "이미 해당 약속에 신청한 사용자입니다.");
         }
 
         LocalDateTime appStart = appBoard.getAppStart();
         LocalDateTime appEnd = appBoard.getAppEnd();
 
         if (hasOverlappingAppointments(user, appStart, appEnd)) {
-            throw new IllegalStateException("해당 시간에 이미 다른 약속에 참여 중입니다.");
+            returnMap.put("msg", "해당 시간에 이미 다른 약속에 참여 중입니다.");
         }
 
 
@@ -146,8 +150,9 @@ public class AppServiceImpl implements AppService {
         appFixed.setAppState(AppFixed.AppState.CONFIRM);
 
         AppFixed savedAppFixed = appFixedRepository.save(appFixed);
+        returnMap.put("savedAppFixed", savedAppFixed.entityToDto());
 
-        return savedAppFixed.entityToDto();
+        return returnMap;
     }
 
     //약속 모집글 삭제

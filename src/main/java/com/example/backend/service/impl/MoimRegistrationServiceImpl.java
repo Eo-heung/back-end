@@ -274,9 +274,33 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             throw new IllegalStateException("이 사용자는 이 게시물을 보는 권한이 없습니다.");
         }
 
-
-
     }
+
+    //(모임장)모임 추방
+    @Override
+    public MoimRegistration kickoutMoim(int moimId, String applicantUserId, String organizerUserId) {
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+        User applicant = userRepository.findById(applicantUserId)
+                .orElseThrow(() -> new EntityNotFoundException("신청자를 찾을 수 없습니다."));
+
+        if (!moim.getUserId().getUserId().equals(organizerUserId)) {
+            throw new AccessDeniedException("모임장만 거절할 수 있습니다.");
+        }
+
+        MoimRegistration existingRegistration = moimRegistrationRepository.findByMoimAndUser(moim, applicant)
+                .orElseThrow(() -> new IllegalArgumentException("가입 신청하지 않은 모임입니다."));
+
+        existingRegistration.setRegStatus(MoimRegistration.RegStatus.KICKOUT); // 거절 상태로 변경
+        moimRegistrationRepository.save(existingRegistration);
+
+        return existingRegistration;
+    }
+
+
+
+
+
 
     public Optional<MoimRegistrationDTO> getMyApplyId(int moimId, String loginUser) {
         User user = userRepository.findById(loginUser)

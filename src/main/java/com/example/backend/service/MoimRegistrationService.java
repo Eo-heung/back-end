@@ -31,6 +31,9 @@ public interface MoimRegistrationService {
     MoimRegistrationDTO getApplicantByMoimId(int moimId, String loginUser);
 
 
+    //(모임장)모임 추방
+    MoimRegistration kickoutMoim(int moimId, String applicantUserId, String organizerUserId);
+
     Optional<MoimRegistrationDTO> getMyApplyId(int moimId, String loginUser);
 
     boolean verifyMemberRole(User user, Moim moim);

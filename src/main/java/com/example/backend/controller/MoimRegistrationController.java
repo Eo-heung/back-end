@@ -139,6 +139,20 @@ public class MoimRegistrationController {
                         moimRegistrationService.rejectMoim(currentMoimId, applicantUserId, organizerUserId);
                     }
                     break;
+                case KICKOUT:
+                    if (body == null || !body.containsKey("applicantUserId")) {
+                        throw new IllegalArgumentException("request body에서 applicantUserId를 전달받지 못했습니다.");
+                    }
+
+                    applicantUserId = body.get("applicantUserId");
+                    organizerUserId = body.get("organizerUserId");
+
+                    if (nowStatus == MoimRegistration.RegStatus.APPROVED) {
+                        moimRegistrationService.approveMoim(currentMoimId, applicantUserId, organizerUserId);
+                    } else {
+                        moimRegistrationService.kickoutMoim(currentMoimId, applicantUserId, organizerUserId);
+                    }
+                    break;
                 default:
                     throw new IllegalArgumentException("유효한 모입 가입 신청 내역이 없습니다.");
             }
