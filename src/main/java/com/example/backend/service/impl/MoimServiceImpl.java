@@ -1,10 +1,12 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.entity.Moim;
+import com.example.backend.entity.MoimRegistration;
+import com.example.backend.entity.ProfileImage;
 import com.example.backend.entity.User;
-import com.example.backend.repository.MoimPictureRepository;
+import com.example.backend.repository.MoimRegistrationRepository;
 import com.example.backend.repository.MoimRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.repository.ProfileImageRepository;
 import com.example.backend.service.MoimService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,13 +14,49 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MoimServiceImpl implements MoimService {
     private final MoimRepository moimRepository;
+    private final MoimRegistrationRepository moimRegistrationRepository;
+    private final ProfileImageRepository profileImageRepository;
+    //모임 생성
+    @Override
+    @Transactional
+    public Moim createMoim(Moim moim, User currentUser) {
+        Moim savedMoim = moimRepository.save(moim);
 
+        ProfileImage leaderProfile = profileImageRepository.findByUserId(currentUser);
+
+        byte[] leaderProfileImage = (leaderProfile != null) ? leaderProfile.getFileData() : null;
+
+        MoimRegistration leaderReg = MoimRegistration.builder()
+                .moim(savedMoim)
+                .user(currentUser)
+                .moimProfile(leaderProfileImage)
+                .createMoimProfile(LocalDateTime.now())
+                .updateMoimProfile(LocalDateTime.now())
+                .regStatus(MoimRegistration.RegStatus.LEADER)
+                .applicationDate(LocalDateTime.now())
+                .subscribeDate(LocalDateTime.now())
+                .build();
+
+        moimRegistrationRepository.save(leaderReg);
+
+        return savedMoim;
+    }
+
+    //모임 수정
+    @Override
+    @Transactional
+    public Moim modifyMoim(Moim moim) {
+        return moimRepository.save(moim);
+    }
+
+    //모임 상세 내용
     @Override
     public Moim viewMoim(int moimId) {
         if (moimRepository.findById(moimId).isEmpty())
@@ -26,367 +64,350 @@ public class MoimServiceImpl implements MoimService {
         else
             return moimRepository.findById(moimId).get();
     }
-
-    @Override
-    @Transactional
-    public Moim createMoim(Moim moim) {
-        return moimRepository.save(moim);
-    }
-
-    @Override
-    @Transactional
-    public Moim modifyMoim(Moim moim) {
-        return moimRepository.save(moim);
-    }
-
-    @Override
-    public List<Moim> getMoimList() {
-        return moimRepository.findAll();
-    }
-
+    
+    //모임 리스트
     @Override
     public Page<Moim> searchMoims(User user, String category, String keyword, String searchType, String orderBy, Pageable pageable) {
-
-        System.out.println("카테고리3컨");
-        System.out.println(category);
-        if ("전체".equalsIgnoreCase(category) && "all".equalsIgnoreCase(searchType)) {
-            if ("ascending".equals(orderBy)) {
-                return moimRepository.findAllByOrderByMoimIdAsc(user, pageable);
-            } else {
-                return moimRepository.findAllByOrderByMoimIdDesc(user, pageable);
-            }
-        }
-
-        System.out.println("카테고리4컨");
-        System.out.println(category);
 
         if ("전체".equalsIgnoreCase(category)) {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimTitleAsc(user, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimTitleDesc(user, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimContentAsc(user, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimContentDesc(user, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimNicknameAsc(user, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimNicknameDesc(user, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByAllAsc(user, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByAllDesc(user, keyword, pageable);
                     }
             }
         } else if ("인문학/책".equalsIgnoreCase(category)) {
+
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleDesc(user, category, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentDesc(user, category, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameDesc(user, category, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllDesc(user, category, keyword, pageable);
                     }
             }
         }else if ("운동".equalsIgnoreCase(category)) {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleDesc(user, category, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentDesc(user, category, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameDesc(user, category, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllDesc(user, category, keyword, pageable);
                     }
             }
         }else if ("요리/맛집".equalsIgnoreCase(category)) {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleDesc(user, category, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentDesc(user, category, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameDesc(user, category, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllDesc(user, category, keyword, pageable);
                     }
             }
         }else if ("공예/만들기".equalsIgnoreCase(category)) {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleDesc(user, category, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentDesc(user, category, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameDesc(user, category, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllDesc(user, category, keyword, pageable);
                     }
             }
         }else if ("원예".equalsIgnoreCase(category)) {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleDesc(user, category, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentDesc(user, category, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameDesc(user, category, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllDesc(user, category, keyword, pageable);
                     }
             }
         }else if ("동네친구".equalsIgnoreCase(category)) {
-            System.out.println(category);
-
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleDesc(user, category, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentDesc(user, category, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameDesc(user, category, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllDesc(user, category, keyword, pageable);
                     }
             }
         }else if ("음악/악기".equalsIgnoreCase(category)) {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleDesc(user, category, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentDesc(user, category, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameDesc(user, category, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllDesc(user, category, keyword, pageable);
                     }
             }
         }else if ("반려동물".equalsIgnoreCase(category)) {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleDesc(user, category, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentDesc(user, category, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameDesc(user, category, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllDesc(user, category, keyword, pageable);
                     }
             }
         }else if ("여행".equalsIgnoreCase(category)) {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleDesc(user, category, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentDesc(user, category, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameDesc(user, category, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllDesc(user, category, keyword, pageable);
                     }
             }
         }else if ("문화/여가".equalsIgnoreCase(category)) {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimTitleDesc(user, category, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimContentDesc(user, category, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByCategoryAndMoimNicknameDesc(user, category, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllAsc(user, category, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByMoimCategoryAndAllDesc(user, category, keyword, pageable);
                     }
             }
         }else {
             switch (searchType) {
                 case "title":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryAndMoimTitleContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimTitleAsc(user, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryAndMoimTitleContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimTitleDesc(user, keyword, pageable);
                     }
                 case "content":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryAndMoimContentContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimContentAsc(user, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryAndMoimContentContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimContentDesc(user, keyword, pageable);
                     }
                 case "nickname":
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryAndMoimNicknameContainingOrderByMoimIdAsc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimNicknameAsc(user, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryAndMoimNicknameContainingOrderByMoimIdDesc(user, category, keyword, pageable);
+                        return moimRepository.findByAllAndMoimNicknameDesc(user, keyword, pageable);
                     }
                 default:
                     if ("ascending".equals(orderBy)) {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdAsc(user, category, pageable);
+                        return moimRepository.findByAllAsc(user, keyword, pageable);
                     } else {
-                        return moimRepository.findByMoimCategoryOrderByMoimIdDesc(user, category, pageable);
+                        return moimRepository.findByAllDesc(user, keyword, pageable);
                     }
             }
         }
     }
+
+    //내가 가입한 모임 리스트
+    public Page<Moim> getMyMoim(String userId, String keyword,  String orderBy, Pageable pageable) {
+        if ("ascending".equalsIgnoreCase(orderBy)) {
+            System.out.println(keyword);
+            return moimRepository.findmyMoimAsc(userId, keyword, pageable);
+        } else {
+            return moimRepository.findmyMoimDesc(userId, keyword, pageable);
+
+        }
+    }
+
+
 
 }

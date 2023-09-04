@@ -2,7 +2,6 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.MoimRegistration;
-import com.example.backend.entity.ProfileImage;
 import com.example.backend.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +29,10 @@ public class MoimRegistrationDTO {
     private String applicantUserAddr;
     private String applicantUserId;
 
+    private String moimProfileBase64;
+
+
+
     public MoimRegistrationDTO EntityToDTO() {
         return MoimRegistrationDTO.builder()
                 .moimRegId(this.moimRegId)
@@ -44,6 +47,9 @@ public class MoimRegistrationDTO {
                 .applicantUserAddr(this.getUser().getUserAddr3())
                 .build();
     }
+
+
+
 
 
 }

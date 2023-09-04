@@ -16,5 +16,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     boolean existsByUserId(String userId);
 
+
     List<User> findAllByOnlineTrueAndLastHeartbeatBefore(LocalDateTime threshold);
+
 }

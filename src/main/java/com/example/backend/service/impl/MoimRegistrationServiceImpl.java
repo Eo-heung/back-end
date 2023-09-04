@@ -14,12 +14,15 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -30,6 +33,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
     private final MoimRegistrationRepository moimRegistrationRepository;
     private final ProfileImageRepository profileImageRepository;
 
+    //모임 가입 신청
     @Override
     public MoimRegistration applyToMoim(int moimId, String userId,
                                         MultipartFile moimProfile) {
@@ -59,6 +63,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         }
 
         ProfileImage profileImage = profileImageRepository.findByUserId(user);
+
         if (profileImage == null) {
             throw new EntityNotFoundException("프로필 이미지를 찾을 수 없습니다.");
         }
@@ -86,6 +91,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(moimReg);
     }
 
+    //가입 신청 취소
     @Override
     public MoimRegistration cancelMoim(int moimId, String userId) {
         Moim moim = moimRepository.findById(moimId)
@@ -100,6 +106,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(existingRegistration);
     }
 
+    //(모임장) 가입 승인
     @Override
     public MoimRegistration approveMoim(int moimId, String applicantUserId, String organizerUserId) {
         Moim moim = moimRepository.findById(moimId)
@@ -126,6 +133,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(existingRegistration);
     }
 
+    //(모임장) 가입 거절
     @Override
     public MoimRegistration rejectMoim(int moimId, String applicantUserId, String organizerUserId) {
         Moim moim = moimRepository.findById(moimId)
@@ -146,6 +154,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return existingRegistration;
     }
 
+    //(모임원) 모임 탈퇴
     @Override
     public MoimRegistration quitMoim(int moimId, String applicantUserId) {
         Moim moim = moimRepository.findById(moimId)
@@ -166,7 +175,9 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(existingRegistration);
     }
 
+    //(모임원) 모임 프로필 수정
     @Override
+    @Modifying
     public MoimRegistration modifyMoimProfile(int moimId, String userId, MultipartFile moimProfile) {
         Moim moim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
@@ -176,13 +187,17 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         //모임 가입여부 확인
         Optional<MoimRegistration> moimChk = moimRegistrationRepository.findByMoimAndUser(moim, user);
 
-        if (!moimChk.isPresent()) {
+
+        if (!canAccessMoim(user, moim)) {
             throw new IllegalArgumentException("모임에 가입하지 않은 사용자입니다.");
         }
+
+
 
         MoimRegistration moimReg = moimChk.get();
 
         try {
+            System.out.println(moimProfile.getBytes());
             moimReg.setMoimProfile(moimProfile.getBytes());
             moimReg.setUpdateMoimProfile(LocalDateTime.now());
         } catch (IOException ioe) {
@@ -192,27 +207,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistrationRepository.save(moimReg);
     }
 
-//    @Override
-//    public Page<MoimRegistrationDTO> getApplicantList(int moimId,
-//                                                      String organizerUserId,
-//                                                      String orderBy,
-//                                                      String applicantUserNickname,
-//                                                      Pageable pageable) {
-//        Moim moim = moimRepository.findById(moimId)
-//                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
-//
-//        if (!moim.getUserId().getUserId().equals(organizerUserId)) {
-//            throw new AccessDeniedException("모임장만 접근할 수 있습니다.");
-//        }
-//
-//        if (applicantUserNickname == null || applicantUserNickname.trim().isEmpty()) {
-//            applicantUserNickname = "";
-//        }
-//
-//        Page<MoimRegistration> moimRegList = moimRegistrationRepository.findApplicantsByMoimIdAndUserId(moimId, organizerUserId, pageable);
-//        return moimRegList.map(MoimRegistration::toDTO);
-//    }
-
+    //(모임장) 신청자 리스트
     @Override
     public Page<MoimRegistrationDTO> getApplicantList(
                                                       int moimId,
@@ -244,6 +239,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegList.map(MoimRegistration::toDTO);
     }
 
+    //(모임장) 신청자 상세 내용
     @Override
     public MoimRegistrationDTO getApplicant(int moimId, int moimRegId, String organizerUserId) {
         Moim moim = moimRepository.findById(moimId)
@@ -264,4 +260,111 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimRegistration.toDTO();
     }
 
+    //모임프로필 사진 및 정보 받아오기(moimID로)
+    @Override
+    public Map<String, Object> getApplicantByMoimId(int moimId, String loginUser) {
+        Map<String, Object> returnMap = new HashMap<>();
+        System.out.println("요기");
+
+        if(moimRepository.findById(moimId).isEmpty() ) {
+            returnMap.put("msg", "모임을 찾을 수 없습니다.");
+
+            return returnMap;
+        }
+
+        if(userRepository.findById(loginUser).isEmpty()) {
+            returnMap.put("msg", "유저를 찾을 수 없습니다.");
+
+            return returnMap;
+        }
+        User user = userRepository.findByUserId(loginUser).get();
+//        Moim checkMoim = moimRepository.findById(moimId).get();
+        Moim checkMoim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+        System.out.println("user");
+        System.out.println(user);
+        System.out.println("checkmoim");
+        System.out.println(checkMoim);
+
+        if(canAccessMoim(user, checkMoim) == false){
+            returnMap.put("msg", "이 사용자는 이 게시물을 보는 권한이 없습니다.");
+
+            return returnMap;
+        }
+
+
+
+//        MoimRegistrationDTO moimRegistrationDTO = moimRegistrationRepository.findByMoimAndUser(checkMoim, user).get().toDTOforBase64();
+        MoimRegistrationDTO moimRegistrationDTO = moimRegistrationRepository.findByMoimAndUser2(checkMoim, user).get().toDTOforBase64();
+        System.out.println("해치웠나?");
+        System.out.println(moimRegistrationDTO);
+        returnMap.put("moimRegistrationDTO", moimRegistrationDTO);
+
+        return returnMap;
+    }
+
+    //(모임장)모임 추방
+    @Override
+    public MoimRegistration kickoutMoim(int moimId, String applicantUserId, String organizerUserId) {
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
+        User applicant = userRepository.findById(applicantUserId)
+                .orElseThrow(() -> new EntityNotFoundException("신청자를 찾을 수 없습니다."));
+
+        if (!moim.getUserId().getUserId().equals(organizerUserId)) {
+            throw new AccessDeniedException("모임장만 거절할 수 있습니다.");
+        }
+
+        MoimRegistration existingRegistration = moimRegistrationRepository.findByMoimAndUser(moim, applicant)
+                .orElseThrow(() -> new IllegalArgumentException("가입 신청하지 않은 모임입니다."));
+
+        existingRegistration.setRegStatus(MoimRegistration.RegStatus.KICKOUT); // 거절 상태로 변경
+        moimRegistrationRepository.save(existingRegistration);
+
+        return existingRegistration;
+    }
+
+
+
+
+
+
+    public Optional<MoimRegistrationDTO> getMyApplyId(int moimId, String loginUser) {
+        User user = userRepository.findById(loginUser)
+                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
+
+        return moimRegistrationRepository.findByUserAndMoim_MoimId(user, moimId).map(MoimRegistration::toDTO);
+    }
+
+
+    public boolean verifyMemberRole(User user, Moim moim) {
+
+        Optional<MoimRegistration> optionalRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user);
+
+        if (!optionalRegistration.isPresent()) {
+            return false; // 모임에 등록되지 않은 사용자
+        }
+
+        MoimRegistration registration = optionalRegistration.get();
+        return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED || registration.getRegStatus() == MoimRegistration.RegStatus.LEADER;
+    }
+
+    public boolean verifyLeaderRole(User user, Moim moim) {
+        return user.equals(moim.getUserId());
+    }
+
+
+    //모임 가입여부 확인(모임장, 모임원 구분 없이)
+    public boolean canAccessMoim(User user, Moim moim) {
+        System.out.println("-0-----------------------------------------------------------");
+        System.out.println(user);
+        Optional<MoimRegistration> registration = moimRegistrationRepository.findByMoimAndUser(moim, user);
+
+        if (!registration.isPresent()) {
+            return false;
+        }
+
+        MoimRegistration.RegStatus status = registration.get().getRegStatus();
+        return status == MoimRegistration.RegStatus.LEADER || status == MoimRegistration.RegStatus.APPROVED;
+    }
 }

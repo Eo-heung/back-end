@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -56,12 +58,15 @@ public class MoimRegistration {
     private int regAlarm; //알림 읽음 여부 (0: 읽지 않음, 1: 읽음)
 
     public enum RegStatus {
+        LEADER, //모임장 가입시 자동 연동
         APPROVED, // 승인(모임장)
         WAITING,  // 대기(모임장)
         REJECTED,  // 거절(모임장)
         CANCELED, // 취소(신청자)
-        QUIT //탈퇴(신청자)
+        QUIT, //탈퇴(신청자)
+        KICKOUT //추방
     }
+
 
 
     public String applicantUserNickname() {
@@ -79,6 +84,18 @@ public class MoimRegistration {
     }
 
 
+    @PrePersist
+    public void onPrePersist() {
+        this.createMoimProfile = LocalDateTime.now();
+        this.updateMoimProfile = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        this.updateMoimProfile = LocalDateTime.now();
+    }
+
+
 
     public MoimRegistrationDTO EntityToDTO() {
         return MoimRegistrationDTO.builder()
@@ -93,7 +110,6 @@ public class MoimRegistration {
                 .build();
     }
 
-
     public MoimRegistrationDTO toDTO() {
         return MoimRegistrationDTO.builder()
                 .moimRegId(this.moimRegId)
@@ -105,5 +121,19 @@ public class MoimRegistration {
                 .applicantUserId(this.user.getUserId())
                 .build();
     }
+
+    public MoimRegistrationDTO toDTOforBase64() {
+        return MoimRegistrationDTO.builder()
+                .moimRegId(this.moimRegId)
+                .moimProfileBase64(Base64.getEncoder().encodeToString(this.moimProfile))
+                .regStatus(this.regStatus)
+                .applicationDate(this.applicationDate)
+                .subscribeDate(this.subscribeDate)
+                .regAlarm(this.regAlarm)
+                .applicantUserNickname(this.getUser().getUserNickname())
+                .applicantUserAddr(this.getUser().getUserAddr3())
+                .build();
+    }
+
 
 }

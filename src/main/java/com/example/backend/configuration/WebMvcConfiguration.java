@@ -17,7 +17,6 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .allowedMethods("*")
                 //허용될 요청 헤더
                 .allowedHeaders("*")
-                //인증에 관한 정보 허용
                 //타임아웃 시간 설정
                 .maxAge(3600);
     }

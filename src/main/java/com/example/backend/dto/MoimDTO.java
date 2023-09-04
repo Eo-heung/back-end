@@ -2,9 +2,7 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.Moim;
 import com.example.backend.entity.User;
-import com.example.backend.repository.UserRepository;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 
@@ -51,6 +49,7 @@ public class MoimDTO {
                 .isEnd(this.isEnd)
                 .build();
     }
+
 
 
 }

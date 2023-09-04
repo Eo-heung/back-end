@@ -3,13 +3,9 @@ package com.example.backend.controller;
 import com.example.backend.dto.MoimDTO;
 import com.example.backend.dto.MoimPictureDTO;
 import com.example.backend.dto.ResponseDTO;
-import com.example.backend.entity.Moim;
-import com.example.backend.entity.MoimPicture;
-import com.example.backend.entity.User;
+import com.example.backend.entity.*;
 import com.example.backend.jwt.JwtTokenProvider;
-import com.example.backend.repository.MoimPictureRepository;
-import com.example.backend.repository.MoimRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.repository.*;
 import com.example.backend.service.MoimPictureService;
 import com.example.backend.service.MoimService;
 import lombok.RequiredArgsConstructor;
@@ -19,18 +15,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/moim")
-//@Transactional
 public class MoimController {
 
     private final MoimService moimService;
@@ -39,15 +33,27 @@ public class MoimController {
     private final MoimPictureRepository moimPictureRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final MoimRegistrationRepository moimRegistrationRepository;
+    private final CommentRepository commentRepository;
+    private final BoardRepository boardRepository;
+    private final BoardPictureRepository boardPictureRepository;
+    private final AppBoardRepository appBoardRepository;
+    private final AppFixedRepository appFixedRepository;
 
     @PostMapping("/create-moim")
-    public ResponseEntity<?> createMoim(@RequestBody MoimDTO moimDTO) {
+    public ResponseEntity<?> createMoim(@RequestBody MoimDTO moimDTO,
+                                        @RequestHeader("Authorization") String token) {
         ResponseDTO<MoimDTO> responseDTO = new ResponseDTO<>();
+
+        String loginUser = jwtTokenProvider.validateAndGetUsername(token);
+        User checkUser = userRepository.findByUserId(loginUser)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
             moimDTO.setMoimRegdate(LocalDateTime.now());
+            Moim moim = moimService.createMoim(moimDTO.DTOToEntity(), checkUser);
 
-            Moim moim = moimService.createMoim(moimDTO.DTOToEntity());
+
 
             responseDTO.setItem(moim.EntityToDTO());
             responseDTO.setStatusCode(HttpStatus.OK.value());
@@ -66,7 +72,6 @@ public class MoimController {
     public ResponseEntity<?> createMoimPic(@RequestParam("moimPic") MultipartFile file,
                                            @RequestParam("moimId") Integer moimId) {
         ResponseDTO<MoimPictureDTO> responseDTO = new ResponseDTO<>();
-
 
         try {
             System.out.println(moimId);
@@ -102,15 +107,14 @@ public class MoimController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
+
     @PostMapping("/list-moim/asc")
     public ResponseEntity<?> getMoimListAsc(@RequestParam(defaultValue = "0") int page,
                                             @RequestParam(required = false, defaultValue = "전체") String category,
                                             @RequestParam(required = false) String searchKeyword,
                                             @RequestParam(required = false, defaultValue = "all") String searchType,
-                                            @RequestParam(defaultValue = "ascending") String orderBy,
+                                            @RequestParam(defaultValue = "descending") String orderBy,
                                             @RequestHeader("Authorization") String token) {
-        System.out.println("카테고리1컨");
-        System.out.println(category);
 
         return getResponse(page, category, searchKeyword, searchType, "ascending", token);
     }
@@ -118,15 +122,65 @@ public class MoimController {
     @PostMapping("/list-moim/desc")
     public ResponseEntity<?> getMoimListDesc(@RequestParam(defaultValue = "0") int page,
                                              @RequestParam(required = false, defaultValue = "전체") String category,
-                                             @RequestParam(required = false) String searchKeyword,
+                                             @RequestParam(required = false, defaultValue = "") String searchKeyword,
                                              @RequestParam(required = false, defaultValue = "all") String searchType,
-                                             @RequestParam(defaultValue = "ascending") String orderBy,
+                                             @RequestParam(defaultValue = "descending") String orderBy,
                                              @RequestHeader("Authorization") String token) {
 
-        System.out.println("카테고리1컨");
-        System.out.println(category);
-
         return getResponse(page, category, searchKeyword, searchType, "descending", token);
+    }
+
+    @PostMapping(value ="/my-moim-list")
+    public ResponseEntity<?> getMyMoim(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "descending") String orderBy,
+            @RequestParam(defaultValue = "0") int page) {
+
+        String loginUser = jwtTokenProvider.validateAndGetUsername(token);
+        User checkUser = userRepository.findByUserId(loginUser)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Pageable pageable = PageRequest.of(0, (page + 1) * 3);
+
+        Page<Moim> mymoimPage = moimService.getMyMoim(loginUser, keyword, orderBy, pageable);
+
+        ResponseDTO<Map<String, Object>> responseDTO = new ResponseDTO<>();
+        try {
+            List<Map<String, Object>> result = new ArrayList<>();
+
+            for (Moim moim : mymoimPage.getContent()) {
+                int moimId = moim.getMoimId();
+                Map<String, Object> returnMap = new HashMap<>();
+                MoimPicture matchingPicture = moim.getMoimPicture();
+
+                if (matchingPicture != null) {
+                    String base64Encoded = Base64.getEncoder().encodeToString(matchingPicture.getMoimPic());
+                    returnMap.put("moimPic", base64Encoded);
+                }
+
+                returnMap.put("moimId", moim.getMoimId());
+                returnMap.put("moimCategory", moim.getMoimCategory());
+                returnMap.put("moimTitle", moim.getMoimTitle());
+                returnMap.put("moimAddr", moim.getMoimAddr());
+                returnMap.put("maxMoimUser", moim.getMaxMoimUser());
+                returnMap.put("currentMoimUser", moim.getCurrentMoimUser());
+                returnMap.put("moimContent", moim.getMoimContent());
+                result.add(returnMap);
+            }
+
+            responseDTO.setItems(result);
+            responseDTO.setLastPage(mymoimPage.isLast());
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            return ResponseEntity.ok().body(responseDTO);
+
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+
     }
 
     @GetMapping("/view-moim/{moimId}")
@@ -158,13 +212,13 @@ public class MoimController {
 
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
+            System.out.println("+++++++++++++++++++++++++++++++++++++++");
+            System.out.println(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDTO.setErrorMessage(e.getMessage());
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
-
-
 
     @PostMapping(value = "/modify-moim/{moimId}")
     public ResponseEntity<?> modifyMoim(@PathVariable int moimId, @RequestBody MoimDTO moimDTO) {
@@ -173,7 +227,7 @@ public class MoimController {
 
         try {
             Moim moim = moimService.viewMoim(moimId);
-//            카테고리, 소모임 이름, 모임 주소, 현재 가입한 회원 수, 최대 인원, 모임 소개, 그림
+
             moim.setMoimTitle(moimDTO.getMoimTitle());
             moim.setMoimCategory(moimDTO.getMoimCategory());
             moim.setMoimContent(moimDTO.getMoimContent());
@@ -193,7 +247,6 @@ public class MoimController {
             return ResponseEntity.badRequest().body(responseDTO);
         }
     }
-
 
     @PostMapping(value = "/modify-moim-pic/{moimId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> modifyMoim(@PathVariable int moimId,
@@ -226,8 +279,6 @@ public class MoimController {
         }
     }
 
-
-
     @DeleteMapping("/delete-moim/{moimId}")
     public ResponseEntity<?> deleteMoim(@PathVariable int moimId) {
         ResponseDTO<Map<String, String>> responseDTO = new ResponseDTO<>();
@@ -236,16 +287,44 @@ public class MoimController {
             Moim moim = moimRepository.findById(moimId)
                     .orElseThrow(() -> new Exception("게시글을 찾을 수 없습니다"));
 
-            MoimPicture moimPicture = moimPictureRepository.findByMoim(moim);
+            //댓글 삭제
+            List<Comment> comments = commentRepository.findByBoardIdMoimId(moim);
+            commentRepository.deleteAll(comments);
 
+            // 게시글 사진 삭제
+            List<BoardPicture> boardPictures = boardPictureRepository.findByMoimId(moim);
+            boardPictureRepository.deleteAll(boardPictures);
+
+            //게시글 삭제
+            List<Board> boards = boardRepository.findByMoimId(moim);
+            boardRepository.deleteAll(boards);
+
+            //모임 약속 상태 삭제
+            List<AppFixed> appFixeds = appFixedRepository.findByAppBoard_Moim(moim);
+            appFixedRepository.deleteAll(appFixeds);
+
+            //모임 약속 게시글 삭제
+            List<AppBoard> appBoards = appBoardRepository.findByMoim(moim);
+            appBoardRepository.deleteAll(appBoards);
+
+            //가입 신청 삭제
+            List<MoimRegistration> registrations = moimRegistrationRepository.findAllByMoim(moim);
+            moimRegistrationRepository.deleteAll(registrations);
+
+            //모임 사진 삭제
+            MoimPicture moimPicture = moimPictureRepository.findByMoim(moim);
             moimPictureRepository.delete(moimPicture);
 
+            //모임 삭제
             moimRepository.delete(moim);
+
+
 
             Map<String, String> returnMap = new HashMap<>();
             returnMap.put("msg", "정상적으로 삭제되었습니다.");
             responseDTO.setItem(returnMap);
             responseDTO.setStatusCode(HttpStatus.OK.value());
+
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
@@ -254,15 +333,11 @@ public class MoimController {
         }
     }
 
-
     private ResponseEntity<?> getResponse(int page, String category, String searchKeyword, String searchType, String orderBy, String token) {
         String userId = jwtTokenProvider.validateAndGetUsername(token);
 
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-
-        System.out.println("카테고리2컨");
-        System.out.println(category);
 
         Pageable pageable = PageRequest.of(0, (page + 1) * 3);
 
@@ -300,6 +375,7 @@ public class MoimController {
                 result.add(returnMap);
             }
             responseDTO.setItems(result);
+            responseDTO.setLastPage(moimPage.isLast());
             responseDTO.setStatusCode(HttpStatus.OK.value());
 
             return ResponseEntity.ok().body(responseDTO);

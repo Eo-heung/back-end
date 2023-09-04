@@ -3,15 +3,13 @@ package com.example.backend.entity;
 import com.example.backend.dto.MoimDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -66,6 +64,7 @@ public class Moim {
     private MoimPicture moimPicture;
 
 
+
     // 모임 가입자 수 증가
     public void incrementCurrentMoimUser() {
         if (this.currentMoimUser + 1 > this.maxMoimUser) {
@@ -82,6 +81,8 @@ public class Moim {
         this.currentMoimUser -= 1;
     }
 
+
+
     public MoimDTO EntityToDTO() {
         return MoimDTO.builder()
                 .moimId(this.moimId)
@@ -94,11 +95,12 @@ public class Moim {
                 .onOff(this.onOff)
                 .moimAddr(this.moimAddr)
                 .maxMoimUser(this.maxMoimUser)
-//                .currentMoimUser(this.currentMoimUser)
+                .currentMoimUser(this.currentMoimUser)
                 .isDelete(this.isDelete)
                 .isEnd(this.isEnd)
                 .build();
     }
+
 
 
 }
