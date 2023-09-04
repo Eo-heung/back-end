@@ -1,6 +1,5 @@
 package com.example.backend.controller;
 
-
 import com.example.backend.api.GeoLocation;
 import com.example.backend.api.SmsService;
 import com.example.backend.dto.GeoLocationResponse;
@@ -17,13 +16,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +30,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
 
 @RestController
 @RequiredArgsConstructor
@@ -101,6 +96,68 @@ public class UserController {
                 return ResponseEntity.badRequest().body(responseDTO);
             }
         } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+//    @Autowired
+//    private AuthService authService;
+//
+//    @PostMapping("/logout")
+//    public ResponseEntity<?> logout(HttpServletRequest request) {
+//        String token = request.getHeader("Authorization").split(" ")[1];
+//        authService.invalidateToken(token);
+//        return ResponseEntity.ok().body("Logged out successfully");
+//    }
+
+    @PostMapping("/checkuser")
+    public  ResponseEntity<?> checkUser(@RequestBody UserDTO userDTO) {
+        ResponseDTO<Map<String,Object>> responseDTO = new ResponseDTO<>();
+        try {
+            String id = userDTO.getUserId();
+            Map<String, Object> returnMap =  new HashMap<>();
+
+            // 아이디를 확인했을 때, null이면 에러로 return 시킴.
+            if (id == null || id == "") {
+
+                returnMap.put("msg", "nullIdValue");
+                responseDTO.setItem(returnMap);
+                responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+
+                return ResponseEntity.badRequest().body(responseDTO);
+            } else {
+
+                UserDTO userDTO1 = userService.getUserInfo(id);
+
+                if (userDTO1 == null) {
+                    returnMap.put("msg", "canJoin");
+                } else {
+                    returnMap.put("msg", "canNotJoin");
+                }
+
+                responseDTO.setItem(returnMap);
+                responseDTO.setStatusCode(HttpStatus.OK.value());
+                return ResponseEntity.ok().body(responseDTO);
+            }
+
+        } catch (Exception e) {
+            responseDTO.setErrorMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
+    @PostMapping("/register")
+    public  ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
+        ResponseDTO<User> responseDTO = new ResponseDTO<>();
+        try {
+            User registeredUser = userService.registerUser(userDTO);
+            responseDTO.setStatusCode(HttpStatus.CREATED.value());
+            responseDTO.setItem(registeredUser);
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (RuntimeException e) {
             responseDTO.setErrorMessage(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(responseDTO);

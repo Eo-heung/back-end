@@ -66,22 +66,33 @@ public class User {
         private Boolean userAuthentication;
 
         @Column(name = "user_hobby1")
-        private String userHobby1;
+        private Integer userHobby1;
 
         @Column(name = "user_hobby2")
-        private String userHobby2;
+        private Integer userHobby2;
 
         @Column(name = "user_hobby3")
-        private String userHobby3;
+        private Integer userHobby3;
 
         @Column(name = "user_status_message")
         private String userStatusMessage;
 
-        @Column(name = "create_datetime")
-        private LocalDateTime createDatetime;
+        @Column(name = "totalGam")
+        private Long totalGam;
 
-        @Column(name = "update_datetime")
-        private LocalDateTime updateDatetime;
+        @Column(name = "online")
+        private Boolean online;
+
+        @Column(name = "last_login") // 마지막 접속 기록
+        private LocalDateTime lastHeartbeat;
+        @Column(name = "ban") // 마지막 접속 기록
+        private LocalDateTime ban;
+        @PrePersist
+        public void prePersist() {
+                if (totalGam == null) {
+                        totalGam = 0L;
+                }
+        }
 
     public UserDTO EntityToDTO() {
             return UserDTO.builder()
@@ -105,8 +116,10 @@ public class User {
                 .userHobby2(this.userHobby2)
                 .userHobby3(this.userHobby3)
                 .userStatusMessage(this.userStatusMessage)
-                .createDatetime(this.createDatetime)
-                .updateDatetime(this.updateDatetime)
+                .lastHeartbeat(this.lastHeartbeat)
+                .totalGam(this.totalGam)
+                    .online(this.online)
+                    .ban(this.ban)
                 .build();
     }
 }
