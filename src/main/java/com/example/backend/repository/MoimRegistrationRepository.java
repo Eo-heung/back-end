@@ -20,8 +20,8 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
     Optional<MoimRegistration> findByMoimAndUser(Moim moim, User user);
 
 
-    @Query("select mr from MoimRegistration mr where mr.moim.moimId = :moimId and mr.moim.userId = :userId")
-    Optional<MoimRegistration> findByMoimAndUser2(@Param("moimId") Moim moim, @Param("userId")User user);
+    @Query("select mr from MoimRegistration mr where mr.moim.moimId = :moimId and mr.user.userId = :userId")
+    Optional<MoimRegistration> findByMoimAndUser2(@Param("moimId") int moimId, @Param("userId")String userId);
 
     @Query("SELECT mr FROM MoimRegistration mr INNER JOIN mr.moim m WHERE m.userId.userId = :userId AND mr.regStatus = 'WAITING' AND m.moimId = :moimId  order by m.moimId asc")
     Page<MoimRegistration> findApplicantsByMoimIdAndUserIdOrderByMoimIdAsc(@Param("moimId") int moimId, @Param("userId") String userId, Pageable pageable);

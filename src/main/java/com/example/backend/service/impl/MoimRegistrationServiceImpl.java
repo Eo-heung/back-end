@@ -278,13 +278,12 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             return returnMap;
         }
         User user = userRepository.findByUserId(loginUser).get();
-//        Moim checkMoim = moimRepository.findById(moimId).get();
         Moim checkMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
         System.out.println("user");
-        System.out.println(user);
+        System.out.println(user.getUserId());
         System.out.println("checkmoim");
-        System.out.println(checkMoim);
+        System.out.println(checkMoim.getMoimId());
 
         if(canAccessMoim(user, checkMoim) == false){
             returnMap.put("msg", "이 사용자는 이 게시물을 보는 권한이 없습니다.");
@@ -295,10 +294,10 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
 
 
 //        MoimRegistrationDTO moimRegistrationDTO = moimRegistrationRepository.findByMoimAndUser(checkMoim, user).get().toDTOforBase64();
-        MoimRegistrationDTO moimRegistrationDTO = moimRegistrationRepository.findByMoimAndUser2(checkMoim, user).get().toDTOforBase64();
-        System.out.println("해치웠나?");
-        System.out.println(moimRegistrationDTO);
-        returnMap.put("moimRegistrationDTO", moimRegistrationDTO);
+
+        MoimRegistrationDTO moimRegistrationDTO = moimRegistrationRepository.findByMoimAndUser2(checkMoim.getMoimId(), user.getUserId()).get().toDTOforBase64();
+        returnMap.put("msg", moimRegistrationDTO);
+//        returnMap.put("moimRegistrationDTO", moimRegistrationDTO);
 
         return returnMap;
     }
