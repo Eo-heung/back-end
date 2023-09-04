@@ -210,7 +210,6 @@ public class AppController {
     //약속 모집글 삭제
     //신청자 확인 리스트 >  닉네임, 프로필사진(모임사진 끌어올거니까), 지역
     //(상세는 X)
-
     @GetMapping("/{moimId}/list/{appBoardId}/member-list")
     public ResponseEntity<?> getAppMemberList(@PathVariable(required = false,value ="moimId") int moimId,
                                                               @PathVariable(required = false,value = "appBoardId") int appBoardId,
@@ -246,11 +245,6 @@ public class AppController {
 
 
 
-
-    //내 약속은 봐서 ㅇㅇ
-    //사진첩 뺴자
-
-    //모임장이 모임 내보내기 => 모임가입한 사람들 조회 리스트 필요
 
 
 

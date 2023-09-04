@@ -220,6 +220,8 @@ public class MoimController {
         }
     }
 
+
+
     @PostMapping(value = "/modify-moim/{moimId}")
     public ResponseEntity<?> modifyMoim(@PathVariable int moimId, @RequestBody MoimDTO moimDTO) {
         ResponseDTO<Moim> responseDTO = new ResponseDTO<>();

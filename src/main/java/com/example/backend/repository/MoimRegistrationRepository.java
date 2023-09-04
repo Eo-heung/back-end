@@ -5,7 +5,6 @@ import com.example.backend.entity.MoimRegistration;
 import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Range;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -38,6 +37,16 @@ public interface MoimRegistrationRepository extends JpaRepository<MoimRegistrati
     List<MoimRegistration> findAllByMoim(Moim moim);
 
     MoimRegistration findByMoim_MoimIdAndUser_UserId(int moimId, String userId);
+
+    @Query("SELECT m FROM MoimRegistration m WHERE m.moim.moimId = :moimId " +
+            "AND (m.regStatus = 'LEADER'OR m.regStatus = 'APPROVED') " +
+            " ORDER BY CASE WHEN m.regStatus = 'LEADER' THEN 1 ELSE 2 END, m.subscribeDate DESC")
+    Page<MoimRegistration> findAllMember(@Param("moimId") int moimId, Pageable pageable);
+
+
+
+
+
 
 
 }

@@ -239,6 +239,42 @@ public class MoimRegistrationController {
         }
     }
 
+    //모임인원 불러오기
+    @GetMapping("/member-list/{moimId}")
+    public ResponseEntity<?> memberList(@PathVariable int moimId,
+                                        Pageable pageable,
+                                        @RequestHeader("Authorization") String token,
+                                        @RequestParam(defaultValue = "0") int currentPage) {
+        ResponseDTO<Page<MoimRegistrationDTO>> responseDTO = new ResponseDTO<>();
+
+        String loggedInUsername = jwtTokenProvider.validateAndGetUsername(token);
+        User loginUser = userRepository.findByUserId(loggedInUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        pageable = PageRequest.of(currentPage, 3);
+
+        try {
+            Page<MoimRegistrationDTO> result = moimRegistrationService.memberList(moimId, loginUser, pageable);
+
+            ResponseDTO.PaginationInfo paginationInfo = new ResponseDTO.PaginationInfo();
+            paginationInfo.setTotalPages(result.getTotalPages());
+            paginationInfo.setCurrentPage(result.getNumber());
+            paginationInfo.setTotalElements(result.getTotalElements());
+
+            responseDTO.setItem(result);
+            responseDTO.setPaginationInfo(paginationInfo);
+            responseDTO.setLastPage(result.isLast());
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setErrorMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(responseDTO);
+        }
+    }
+
     //모임 유저 프로필 수정
     @PostMapping("/modify-moim-profile/{moimId}")
     public ResponseEntity<?> modifyMoimProfile(@PathVariable int moimId,
@@ -283,7 +319,6 @@ public class MoimRegistrationController {
 
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
-            System.out.println("---------------============-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
             System.out.println(e.getMessage());
             responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDTO.setErrorMessage(e.getMessage());
