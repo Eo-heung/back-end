@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -264,7 +265,6 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
     @Override
     public Map<String, Object> getApplicantByMoimId(int moimId, String loginUser) {
         Map<String, Object> returnMap = new HashMap<>();
-        System.out.println("요기");
 
         if(moimRepository.findById(moimId).isEmpty() ) {
             returnMap.put("msg", "모임을 찾을 수 없습니다.");
@@ -280,10 +280,6 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         User user = userRepository.findByUserId(loginUser).get();
         Moim checkMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new EntityNotFoundException("모임을 찾을 수 없습니다."));
-        System.out.println("user");
-        System.out.println(user.getUserId());
-        System.out.println("checkmoim");
-        System.out.println(checkMoim.getMoimId());
 
         if(canAccessMoim(user, checkMoim) == false){
             returnMap.put("msg", "이 사용자는 이 게시물을 보는 권한이 없습니다.");
@@ -291,13 +287,8 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             return returnMap;
         }
 
-
-
-//        MoimRegistrationDTO moimRegistrationDTO = moimRegistrationRepository.findByMoimAndUser(checkMoim, user).get().toDTOforBase64();
-
         MoimRegistrationDTO moimRegistrationDTO = moimRegistrationRepository.findByMoimAndUser2(checkMoim.getMoimId(), user.getUserId()).get().toDTOforBase64();
         returnMap.put("msg", moimRegistrationDTO);
-//        returnMap.put("moimRegistrationDTO", moimRegistrationDTO);
 
         return returnMap;
     }
@@ -323,6 +314,29 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return existingRegistration;
     }
 
+    @Override
+    public Page<MoimRegistrationDTO> memberList(int moimId, User user, Pageable pageable) {
+        Moim checkMoim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다."));
+
+        if (!canAccessMoim(user, checkMoim)) {
+            throw new RuntimeException("모임에 가입하지 않은 사람은 접근이 불가능합니다.");
+        }
+
+        Page<MoimRegistration> moimMembers = moimRegistrationRepository.findAllMember(moimId, pageable);
+
+        return moimMembers.map(moimRegistration -> {
+            MoimRegistrationDTO dto = moimRegistration.toDTOforBase64();
+
+            if (moimRegistration.getMoimProfile() != null) {
+                String base64Image = Base64.getEncoder().encodeToString(moimRegistration.getMoimProfile());
+                dto.setMoimProfileBase64(base64Image);
+            }
+
+            return dto;
+        });
+    }
+
 
 
 
@@ -345,7 +359,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         }
 
         MoimRegistration registration = optionalRegistration.get();
-        return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED || registration.getRegStatus() == MoimRegistration.RegStatus.LEADER;
+        return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED;
     }
 
     public boolean verifyLeaderRole(User user, Moim moim) {
@@ -355,8 +369,6 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
 
     //모임 가입여부 확인(모임장, 모임원 구분 없이)
     public boolean canAccessMoim(User user, Moim moim) {
-        System.out.println("-0-----------------------------------------------------------");
-        System.out.println(user);
         Optional<MoimRegistration> registration = moimRegistrationRepository.findByMoimAndUser(moim, user);
 
         if (!registration.isPresent()) {

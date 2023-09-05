@@ -64,6 +64,11 @@ public class Moim {
     private MoimPicture moimPicture;
 
 
+    @PrePersist
+    public void onPrePersist() {
+        this.currentMoimUser = 1;
+    }
+
 
     // 모임 가입자 수 증가
     public void incrementCurrentMoimUser() {

@@ -116,7 +116,7 @@ public class MoimRegistration {
                 .moimProfile(this.moimProfile)
                 .regStatus(this.regStatus)
                 .applicationDate(this.applicationDate)
-                .applicantUserNickname(this.user.getUserNickname())
+                .applicantUserNickname(this.user.getUserName())
                 .applicantUserAddr(this.user.getUserAddr3())
                 .applicantUserId(this.user.getUserId())
                 .build();
@@ -125,12 +125,14 @@ public class MoimRegistration {
     public MoimRegistrationDTO toDTOforBase64() {
         return MoimRegistrationDTO.builder()
                 .moimRegId(this.moimRegId)
+                .moimId(this.moim.getMoimId())
+                .userId(this.user.getUserId())
                 .moimProfileBase64(Base64.getEncoder().encodeToString(this.moimProfile))
                 .regStatus(this.regStatus)
                 .applicationDate(this.applicationDate)
                 .subscribeDate(this.subscribeDate)
                 .regAlarm(this.regAlarm)
-                .applicantUserNickname(this.getUser().getUserNickname())
+                .applicantUserNickname(this.getUser().getUserName())
                 .applicantUserAddr(this.getUser().getUserAddr3())
                 .build();
     }

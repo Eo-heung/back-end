@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -406,6 +407,37 @@ public class MoimServiceImpl implements MoimService {
             return moimRepository.findmyMoimDesc(userId, keyword, pageable);
 
         }
+    }
+
+
+
+    public boolean verifyMemberRole(User user, Moim moim) {
+
+        Optional<MoimRegistration> optionalRegistration = moimRegistrationRepository.findByMoimAndUser(moim, user);
+
+        if (!optionalRegistration.isPresent()) {
+            return false; // 모임에 등록되지 않은 사용자
+        }
+
+        MoimRegistration registration = optionalRegistration.get();
+        return registration.getRegStatus() == MoimRegistration.RegStatus.APPROVED;
+    }
+
+    public boolean verifyLeaderRole(User user, Moim moim) {
+        return user.equals(moim.getUserId());
+    }
+
+
+    //모임 가입여부 확인(모임장, 모임원 구분 없이)
+    public boolean canAccessMoim(User user, Moim moim) {
+        Optional<MoimRegistration> registration = moimRegistrationRepository.findByMoimAndUser(moim, user);
+
+        if (!registration.isPresent()) {
+            return false;
+        }
+
+        MoimRegistration.RegStatus status = registration.get().getRegStatus();
+        return status == MoimRegistration.RegStatus.LEADER || status == MoimRegistration.RegStatus.APPROVED;
     }
 
 

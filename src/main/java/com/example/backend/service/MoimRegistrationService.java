@@ -37,6 +37,8 @@ public interface MoimRegistrationService {
 
     Optional<MoimRegistrationDTO> getMyApplyId(int moimId, String loginUser);
 
+    Page<MoimRegistrationDTO> memberList(int moimId, User user, Pageable pageable);
+
     boolean verifyMemberRole(User user, Moim moim);
     boolean verifyLeaderRole(User user, Moim moim);
 

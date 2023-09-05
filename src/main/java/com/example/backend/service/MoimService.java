@@ -18,6 +18,9 @@ public interface MoimService {
 
     Page<Moim> getMyMoim(String userId, String keyword, String orderBy, Pageable pageable);
 
+    boolean verifyMemberRole(User user, Moim moim);
+    boolean verifyLeaderRole(User user, Moim moim);
 
+    boolean canAccessMoim(User user, Moim moim);
 
 }

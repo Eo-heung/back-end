@@ -41,7 +41,7 @@ public class AppServiceImpl implements AppService {
         Map<String, Object> returnMap = new HashMap<>();
 
         //모임장, 모임원여부 구분
-        if (boardService.verifyMemberRole(loginUser, checkMoim) || boardService.verifyLeaderRole(loginUser, checkMoim)) {
+        if (moimRegistrationService.canAccessMoim(loginUser, checkMoim)) {
             if (hasOverlappingAppointments(loginUser, appBoard.getAppStart(), appBoard.getAppEnd())) {
                 returnMap.put("msg", "이미 해당 시간에 다른 약속이 있거나 신청되어 있습니다.");
                 return returnMap;

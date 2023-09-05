@@ -30,6 +30,8 @@ public class MoimRegistrationDTO {
     private String applicantUserId;
 
     private String moimProfileBase64;
+    private String userId;
+    private int moimId;
 
 
 
@@ -43,7 +45,7 @@ public class MoimRegistrationDTO {
                 .applicationDate(this.applicationDate)
                 .subscribeDate(this.subscribeDate)
                 .regAlarm(this.regAlarm)
-                .applicantUserNickname(this.getUser().getUserNickname())
+                .applicantUserNickname(this.getUser().getUserName())
                 .applicantUserAddr(this.getUser().getUserAddr3())
                 .build();
     }
