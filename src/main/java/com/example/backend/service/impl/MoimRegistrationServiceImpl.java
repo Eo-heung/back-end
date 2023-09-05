@@ -287,13 +287,8 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
             return returnMap;
         }
 
-
-
-//        MoimRegistrationDTO moimRegistrationDTO = moimRegistrationRepository.findByMoimAndUser(checkMoim, user).get().toDTOforBase64();
-
         MoimRegistrationDTO moimRegistrationDTO = moimRegistrationRepository.findByMoimAndUser2(checkMoim.getMoimId(), user.getUserId()).get().toDTOforBase64();
         returnMap.put("msg", moimRegistrationDTO);
-//        returnMap.put("moimRegistrationDTO", moimRegistrationDTO);
 
         return returnMap;
     }
@@ -333,12 +328,11 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         return moimMembers.map(moimRegistration -> {
             MoimRegistrationDTO dto = moimRegistration.toDTOforBase64();
 
-            MoimRegistration moimRegistrationDetail = moimRegistrationRepository.findByMoim_MoimIdAndUser_UserId(moimId, moimRegistration.getUser().getUserId());
-
-            if (moimRegistrationDetail != null && moimRegistrationDetail.getMoimProfile() != null) {
-                String base64Image = Base64.getEncoder().encodeToString(moimRegistrationDetail.getMoimProfile());
+            if (moimRegistration.getMoimProfile() != null) {
+                String base64Image = Base64.getEncoder().encodeToString(moimRegistration.getMoimProfile());
                 dto.setMoimProfileBase64(base64Image);
             }
+
             return dto;
         });
     }
