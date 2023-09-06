@@ -189,13 +189,13 @@ public class BoardServiceImpl implements BoardService {
 
         switch (searchType) {
             case "title":
-                userBoards = boardRepository.findByUserIdAndMoimIdAndBoardTitleContainingOrderByBoardIdDesc(moim, loginUser, keyword, pageable);
+                userBoards = boardRepository.findByUserIdAndMoimIdAndBoardTitleContainingOrderByBoardIdDesc(loginUser, moim, keyword, pageable);
                 break;
             case "content":
-                userBoards = boardRepository.findByUserIdAndMoimIdAndBoardContentContainingOrderByBoardIdDesc(moim, loginUser, keyword, pageable);
+                userBoards = boardRepository.findByUserIdAndMoimIdAndBoardContentContainingOrderByBoardIdDesc(loginUser, moim, keyword, pageable);
                 break;
             default:
-                userBoards = boardRepository.findByUserIdAndMoimIdOrderByBoardIdDesc(moim, loginUser, pageable);
+                userBoards = boardRepository.findByUserIdAndMoimIdOrderByBoardIdDesc(loginUser, moim, pageable);
                 break;
         }
 

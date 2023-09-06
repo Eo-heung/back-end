@@ -53,7 +53,7 @@ public class MoimRegistrationServiceImpl implements MoimRegistrationService {
         if (existingRegistration.isPresent()) {
             MoimRegistration registration = existingRegistration.get();
 
-            if (registration.getRegStatus() == MoimRegistration.RegStatus.CANCELED) {
+            if (registration.getRegStatus() == MoimRegistration.RegStatus.CANCELED || registration.getRegStatus() == MoimRegistration.RegStatus.QUIT) {
                 // CANCELED 상태일 경우, 상태를 Waiting으로 업데이트하고 반환
                 registration.setRegStatus(MoimRegistration.RegStatus.WAITING);
                 registration.setApplicationDate(LocalDateTime.now());

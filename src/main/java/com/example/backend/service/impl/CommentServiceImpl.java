@@ -92,7 +92,7 @@ public class CommentServiceImpl implements CommentService {
         Moim checkMoim = moimRepository.findById(moimId)
                 .orElseThrow(() -> new NoSuchElementException("[Comment Service] 모임을 찾을 수 없습니다."));
 
-        return commentRepository.findByBoardId_BoardIdOrderByCommentRegdateDesc(boardId, pageable);
+        return commentRepository.findByBoardId_BoardIdOrderByCommentRegdateAsc(boardId, pageable);
     }
 
     //모임 내 내가 작성한 댓글 리스트

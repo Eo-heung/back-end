@@ -192,6 +192,7 @@ public class UserController {
                 user.setUserPw(
                         passwordEncoder.encode(userDTO.getUserId()));
                 userService.join(user);
+                user.setTotalGam(0L);
                 String token = jwtTokenProvider.create(user);
 
                 UserDTO loginUserDTO = user.EntityToDTO();
@@ -331,7 +332,9 @@ public class UserController {
             if (userService.newKaKao((String) profile.get("email")) == null) {
                 user.setUserPw(
                         passwordEncoder.encode((String) profile.get("email")));
+                user.setTotalGam(0L);
                 userService.join(user);
+
                 String token1 = jwtTokenProvider.create(user);
 
                 UserDTO loginUserDTO = user.EntityToDTO();
