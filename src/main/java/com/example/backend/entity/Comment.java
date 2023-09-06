@@ -75,7 +75,7 @@ public class Comment {
         commentDTO.setCommentRegdate(this.commentRegdate);
         commentDTO.setCommentUpdate(this.commentUpdate);
         commentDTO.setMoimId(moimId);
-        commentDTO.setUserName(userName);
+        commentDTO.setUserName(this.userId.getUserName());
         return commentDTO;
     }
 
