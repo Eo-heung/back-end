@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
     //게시글 댓글 리스트
-    Page<Comment> findByBoardId_BoardIdOrderByCommentRegdateDesc(int boardId, Pageable pageable);
+    Page<Comment> findByBoardId_BoardIdOrderByCommentRegdateAsc(int boardId, Pageable pageable);
 
     //모임 내 댓글 리스트
     @Query("SELECT c FROM Comment c WHERE c.userId = :user " +
