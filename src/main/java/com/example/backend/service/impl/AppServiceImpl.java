@@ -89,7 +89,7 @@ public class AppServiceImpl implements AppService {
             appTypeValue = AppBoard.AppType.valueOf(onOff.toUpperCase());
         }
 
-        return appBoardRepository.findByUserAndMoimWithConditions(loginUser, moimId, appTypeValue, searchType, keyword, pageable);
+        return appBoardRepository.findByUserAndMoimWithConditions(moimId, appTypeValue, searchType, keyword, pageable);
     }
 
     //약속글 상세보기
